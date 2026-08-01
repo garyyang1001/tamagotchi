@@ -91,8 +91,13 @@ def classify(c, split):
 
 def main():
     ap = argparse.ArgumentParser(description="自動產生語意重映射對照表")
-    ap.add_argument("inputs", type=Path, nargs="+",
+    ap.add_argument("inputs", type=Path, nargs="*",
                     help="對齊後的來源圖（cutstrip.py 的產出）")
+    ap.add_argument("--from-clusters", type=Path, nargs="+",
+                    help="改讀 pixelate.py --dump-clusters 產生的色群檔。"
+                         "**這是正確的用法**：分類的對象必須是降採樣『之後』的色群，"
+                         "從來源圖讀到的是降採樣『之前』的，兩者不保證相同——"
+                         "實測會在影格邊緣留下調色盤外的雜色。")
     ap.add_argument("--palette", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--bg", default="FF00FF")
@@ -106,11 +111,19 @@ def main():
 
     # 取全部影格的色群聯集——單一影格可能缺某個色，聯集才涵蓋得完整
     seen = set()
-    for f in args.inputs:
-        a = np.array(Image.open(f).convert("RGB"))
-        d = np.sqrt(((a.astype(np.int16) - np.array(bg, dtype=np.int16))
-                     .astype(np.float32) ** 2).sum(axis=-1))
-        seen |= {tuple(int(v) for v in c) for c in a[d > args.tol]}
+    if args.from_clusters:
+        for f in args.from_clusters:
+            for k in json.loads(f.read_text()):
+                if k.startswith("#"):
+                    seen.add(tuple(int(k[i:i + 2], 16) for i in (1, 3, 5)))
+    else:
+        for f in args.inputs:
+            a = np.array(Image.open(f).convert("RGB"))
+            d = np.sqrt(((a.astype(np.int16) - np.array(bg, dtype=np.int16))
+                         .astype(np.float32) ** 2).sum(axis=-1))
+            seen |= {tuple(int(v) for v in c) for c in a[d > args.tol]}
+    if not seen:
+        sys.exit("沒有讀到任何色群，檢查 inputs 或 --from-clusters")
 
     split = bright_split(seen)
     table, rows = {}, []

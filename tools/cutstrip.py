@@ -92,8 +92,10 @@ def main() -> None:
     ap.add_argument("--order", default="rows", choices=["rows", "cols"],
                     help="讀取順序：rows = 由左至右再往下（預設）")
     ap.add_argument("--tol", type=float, default=120.0)
-    ap.add_argument("--colors", type=int, default=12,
-                    help="**切開之前**先對整張來源圖量化到這麼多色（預設 12）。"
+    ap.add_argument("--colors", type=int, default=16,
+                    help="**切開之前**先對整張來源圖量化到這麼多色（預設 16）。"
+                         "12 太少：實測 eat_happy / pet_react 的吻部與腳掌會被合併成"
+                         "同一個色群，automap 就分不出灰白與淺褐。16 剛好分得開。"
                          "這是關鍵：若讓每一格各自量化，色群值會不一樣，"
                          "同一份 remap 對照表只會中第一格，其餘全部落到 fallback。"
                          "見 docs/05 鐵律 1。")

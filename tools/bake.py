@@ -565,6 +565,11 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
             raise BakeError("%s 是 frames 型但沒有 frames_dir" % where)
         fdir = pathlib.Path(src)
         files = sorted(fdir.glob("*_f*_64px.png"))
+        if anim.get("reverse"):
+            # 反向播放：stand_up 就是倒著播的 sit_down。
+            # Digimon V-Pet 用 12 張 sprite 撐出 8 種行為就是靠這招——
+            # 省一次生成，而且保證兩個方向完全對稱。
+            files = list(reversed(files))
         if len(files) != frames:
             raise BakeError("%s 宣告 %d 格，但 %s 只有 %d 個影格檔"
                             % (where, frames, src, len(files)))

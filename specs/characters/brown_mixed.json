@@ -1,7 +1,7 @@
 {
   "character_id": "brown_mixed",
   "display_name_zh": "棕色憨厚米克斯",
-  "spec_version": 2,
+  "spec_version": 3,
   "status": "APPROVED",
   "reference_photos": [
     "art/reference/brown_mixed/upright_photo_01_sit_front.jpg",
@@ -154,11 +154,20 @@
     }
   ],
   "open_questions": [
-    "側面站姿照片（非阻塞：已用 v4 當側面基準，補到照片後若有出入，部件圖要重做）"
+    "側面站姿照片（非阻塞：已用 v4 當側面基準）",
+    "3 歲測試（1× 縮放、手臂距離、只看 1 秒）尚未進行——需要真人"
   ],
   "cuteness_direction": {
     "resolved": "v3 的成犬體型比例 + 頭部放大約 10% + 眼睛明顯放大",
     "rationale": "體型辨識度是專案的全部意義，不能讓步；眼睛大小幾乎不影響體型辨識，卻直接決定 3 歲小孩的情感連結。該讓步的是眼睛不是身體。",
     "note": "已寫進 specs/style_lock.md 區塊 2b，四個角色統一適用。"
+  },
+  "animation_status": {
+    "count": 21,
+    "frames": 83,
+    "all_implemented": true,
+    "pipeline": "AI 一次生成含全部影格的圖 → cutstrip → automap → pixelate → bake",
+    "rebuild": "art/approved/brown_mixed/REBUILD_ANIM.sh",
+    "note": "stand_up 與 wake_up 是反向播放 sit_down / lie_down，不另外生成。"
   }
 }

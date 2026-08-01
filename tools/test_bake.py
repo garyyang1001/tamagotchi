@@ -712,9 +712,8 @@ def test_七層零位移合成等於原姿勢(tmp):
 def test_真實動畫定義跑得過(tmp):
     """用真檔案跑一次完整的階段 B。
 
-    部件旋轉路線移除後，21 個動畫剩 5 個可烘（4 transform + 1 frames），
-    其餘 16 個標為 PENDING_REGEN 應該被**跳過而不是報錯**——
-    半完成的專案要能繼續建置。
+    21 個動畫全部走 frames 或 transform 路線，應該全部烘得出來、
+    零跳過、零失敗。若有 PENDING_REGEN 殘留代表接線沒做完。
     """
     real_anim = ROOT / "specs/animations/brown_mixed.anim.json"
     master = ROOT / "art/approved/brown_mixed/master_stand_r_64px.png"
@@ -729,18 +728,19 @@ def test_真實動畫定義跑得過(tmp):
 
     n_skip = len(r.get("skipped", []))
     n_bake = r["index"]["animation_count"]
-    assert n_bake + n_skip == 21, "烘 %d + 跳過 %d != 21" % (n_bake, n_skip)
-    assert n_skip > 0, "應該有動畫被跳過（PENDING_REGEN）卻一個都沒有"
+    assert n_bake == 21, "應該烘出 21 個，實際 %d（跳過 %d）" % (n_bake, n_skip)
+    assert n_skip == 0, "還有 %d 個動畫被跳過：%s" % (
+        n_skip, ", ".join(x["id"] for x in r["skipped"]))
+    clipped = [(e["id"], e["clipped_px"]) for e in r["index"]["animations"]
+               if e["clipped_px"]]
+    assert not clipped, "有動畫被畫布切邊：%s" % clipped
 
     types = {}
     for e in r["index"]["animations"]:
         types[e.get("type")] = types.get(e.get("type"), 0) + 1
-    clipped = [(e["id"], e["clipped_px"]) for e in r["index"]["animations"]
-               if e["clipped_px"]]
-    return "烘 %d（%s）%d 格，跳過 %d；越界：%s" % (
-        n_bake, "+".join("%s×%d" % kv for kv in sorted(types.items())),
-        r["index"]["total_frames"], n_skip,
-        ", ".join("%s=%dpx" % c for c in clipped) or "無")
+    return "21 個動畫（%s）共 %d 格，零跳過、零切邊" % (
+        "+".join("%s×%d" % kv for kv in sorted(types.items())),
+        r["index"]["total_frames"])
 
 
 # --------------------------------------------------------------------------

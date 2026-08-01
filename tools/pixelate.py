@@ -88,7 +88,7 @@ def prequantize(rgb: np.ndarray, mask: np.ndarray, n: int = 48) -> np.ndarray:
     """
     work = rgb.copy()
     work[~mask] = 0
-    img = Image.fromarray(work, "RGB").quantize(
+    img = Image.fromarray(work).quantize(
         colors=n, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE
     )
     return np.array(img.convert("RGB"))
@@ -248,7 +248,8 @@ def final_quantize(rgba: np.ndarray, n_colors: int,
     missing = []
     fallback = fixed_palette
 
-    # 先自適應量化成穩定的少數色群，remap 的對照表才有固定的鍵可以指
+    # 先自適應量化成穩定的少數色群，remap 的對照表才有固定的鍵可以指。
+    #
     distinct = len(set(map(tuple, rgb[opaque])))
     if distinct > n_colors and not fixed_palette:
         flat = rgb.copy()
