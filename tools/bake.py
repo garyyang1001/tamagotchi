@@ -64,6 +64,7 @@ bake.py — 階段 B：像素領域的決定性烘焙
 import argparse
 import hashlib
 import json
+import pathlib
 import sys
 from pathlib import Path
 
@@ -103,6 +104,10 @@ FALLBACK_LAYER_ORDER = ["tail", "core", "ear_far", "jaw", "head", "eyelid", "ear
 MASTER_LAYER = "__master__"
 
 TRACK_IGNORED_KEYS = ("f", "desc", "note", "_comment")
+
+
+class SkipAnimation(Exception):
+    """這個動畫該被跳過，不是錯誤。"""
 
 
 class BakeError(Exception):
@@ -511,9 +516,14 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
         raise BakeError("有動畫沒有 id")
     where = "動畫 %s" % aid
 
+    if anim.get("status") == "PENDING_REGEN":
+        # 這些動畫的來源（部件旋轉路線）已刪除，等用 frames 路線重生。
+        # 跳過而不是報錯——半完成的專案要能繼續建置。
+        raise SkipAnimation("待重生（來源已隨部件旋轉路線移除）")
+
     atype = anim.get("type", defaults.get("type", "transform"))
-    if atype not in ("transform", "rig"):
-        raise BakeError("%s 的 type='%s' 不認得（只有 transform / rig）" % (where, atype))
+    if atype not in ("transform", "rig", "frames"):
+        raise BakeError("%s 的 type='%s' 不認得（transform / rig / frames）" % (where, atype))
 
     frames = as_positive_int(anim.get("frames"), "%s 的 frames" % where)
     base_ms = resolve_base_ms(anim, defaults, where)
@@ -538,7 +548,33 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
                           "%s 的 screen_offset" % where) if anim.get("screen_offset") else None
 
     # ---- 每格要畫哪些圖層 -------------------------------------------------
-    if atype == "transform":
+    if atype == "frames":
+        # 影格已經是完成品：AI 一次生成一張含全部影格的圖，
+        # 由 cutstrip.py 切開對齊、pixelate.py 降採樣，這裡只負責串成 spritesheet。
+        #
+        # 這條路線取代了 rig 型。實測部件旋轉做走路會讓腳掌畫弧離開地面
+        # （整條腿繞肩關節轉，真實的腿是在膝肘彎曲、腳掌貼地推進），
+        # 而 AI 一次畫四格的結果腳掌是貼地的。見 docs/05。
+        misplaced = [k for k in ("layers", "pose", "pose_track", "track") if k in anim]
+        if misplaced:
+            raise BakeError(
+                "%s 是 frames 型卻有 %s。影格已經是完成品，這些欄位不會有作用"
+                % (where, "、".join(misplaced)))
+        src = anim.get("frames_dir")
+        if not src:
+            raise BakeError("%s 是 frames 型但沒有 frames_dir" % where)
+        fdir = pathlib.Path(src)
+        files = sorted(fdir.glob("*_f*_64px.png"))
+        if len(files) != frames:
+            raise BakeError("%s 宣告 %d 格，但 %s 只有 %d 個影格檔"
+                            % (where, frames, src, len(files)))
+        per_frame_layers = []
+        for f in files:
+            im = np.array(Image.open(f).convert("RGBA"))
+            per_frame_layers.append([(f.stem, im, 0, 0)])
+        poses = []
+        layer_names = [f.stem for f in files]
+    elif atype == "transform":
         misplaced = [k for k in ("layers", "pose", "pose_track") if k in anim]
         if misplaced:
             raise BakeError(
@@ -714,7 +750,9 @@ def run(character, parts_dir, anim_path, out_dir,
     """烘焙全部（或指定的）動畫。回傳摘要字典。ok=False 代表有動畫失敗。"""
     log = (lambda *_a: None) if quiet else (lambda m: print(m))
 
-    parts_dir = Path(parts_dir)
+    # 部件旋轉路線移除後，parts_dir 只有 rig 型會用到，而 rig 型已經沒有了。
+    # 允許 None：frames 型自帶影格、transform 型用 master。
+    parts_dir = Path(parts_dir) if parts_dir else Path("build/pixparts")
     anim_path = Path(anim_path)
     out_dir = Path(out_dir)
     palette_path = Path(palette_path) if palette_path else \
@@ -768,7 +806,7 @@ def run(character, parts_dir, anim_path, out_dir,
                        allow_missing=allow_missing_layers)
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    entries, failures, total_frames = [], [], 0
+    entries, failures, skipped, total_frames = [], [], [], 0
 
     for anim in anims:
         aid = anim.get("id", "<無 id>")
@@ -820,6 +858,9 @@ def run(character, parts_dir, anim_path, out_dir,
             log("  [OK] %-16s %s  %d 格 x %dms  %d 色%s"
                 % (aid, meta["type"], meta["frame_count"], meta["frame_ms"],
                    meta["colors"], flag))
+        except SkipAnimation as e:
+            skipped.append({"id": aid, "reason": str(e)})
+            log("  [跳過] %-16s %s" % (aid, e))
         except BakeError as e:
             # 不在第一個錯誤就死掉：一次把所有問題列出來，改一輪就好。
             # 但結束時一定是非零離開碼，而且預設不寫索引。
@@ -847,6 +888,7 @@ def run(character, parts_dir, anim_path, out_dir,
         "total_frames": total_frames,
         "animations": entries,
         "failed": failures,
+        "skipped": skipped,
         "missing_layers": ["%s/%s" % (p, g) for p, g in cache.missing],
     }
 
@@ -873,6 +915,7 @@ def run(character, parts_dir, anim_path, out_dir,
         "index_path": index_path if (ok or keep_going) else None,
         "out_dir": out_dir,
         "failures": failures,
+        "skipped": skipped,
         "total_frames": total_frames,
     }
 

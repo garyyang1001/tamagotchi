@@ -712,33 +712,34 @@ def test_七層零位移合成等於原姿勢(tmp):
 def test_真實動畫定義跑得過(tmp):
     """用真檔案跑一次完整的階段 B。
 
-    這裡的每一項輸入都是版控裡的真東西，不是造出來的假素材：
-    specs/animations/brown_mixed.anim.json（5 個 transform + 16 個 rig）、
-    build/pixparts 的 21 張像素領域圖層、真的 master、真的調色盤、真的 rig。
-
-    **parts_dir 一定要指向真的 build/pixparts。** 其他測試共用的 tmp/pixparts
-    是 build_parts() 造的假圖層，檔名前綴是 CHAR（"testdog"），character 一旦
-    傳 "brown_mixed" 就一張都對不上。16 個動畫改成 rig 型之前這個錯誤看不出來，
-    因為全是 transform 型、根本不讀圖層。
+    部件旋轉路線移除後，21 個動畫剩 5 個可烘（4 transform + 1 frames），
+    其餘 16 個標為 PENDING_REGEN 應該被**跳過而不是報錯**——
+    半完成的專案要能繼續建置。
     """
     real_anim = ROOT / "specs/animations/brown_mixed.anim.json"
     master = ROOT / "art/approved/brown_mixed/master_stand_r_64px.png"
-    parts = ROOT / "build/pixparts"
     if not real_anim.exists() or not master.exists():
         return "跳過（找不到真實資產）"
-    if not list(parts.glob("brown_mixed_*.png")):
-        return "跳過（build/pixparts 是空的，先跑 assemble.py + pixelate.py）"
-    r = bake.run(character="brown_mixed", parts_dir=parts,
+
+    r = bake.run(character="brown_mixed", parts_dir=None,
                  anim_path=real_anim, out_dir=tmp / "real",
-                 palette_path=PALETTE, master_path=master, rig_path=RIG,
-                 frame_w=FW, frame_h=FH, scale=0, quiet=True)
+                 palette_path=PALETTE, master_path=master, rig_path=None,
+                 frame_w=FW, frame_h=FH, scale=0, quiet=True, keep_going=True)
     assert r["ok"], "真實動畫定義烘焙失敗：%s" % r["failures"]
-    assert r["index"]["animation_count"] == 21
-    rig_n = sum(1 for e in r["index"]["animations"] if e.get("type") == "rig")
+
+    n_skip = len(r.get("skipped", []))
+    n_bake = r["index"]["animation_count"]
+    assert n_bake + n_skip == 21, "烘 %d + 跳過 %d != 21" % (n_bake, n_skip)
+    assert n_skip > 0, "應該有動畫被跳過（PENDING_REGEN）卻一個都沒有"
+
+    types = {}
+    for e in r["index"]["animations"]:
+        types[e.get("type")] = types.get(e.get("type"), 0) + 1
     clipped = [(e["id"], e["clipped_px"]) for e in r["index"]["animations"]
                if e["clipped_px"]]
-    return "21 個動畫（rig %d）%d 格；越界：%s" % (
-        rig_n, r["index"]["total_frames"],
+    return "烘 %d（%s）%d 格，跳過 %d；越界：%s" % (
+        n_bake, "+".join("%s×%d" % kv for kv in sorted(types.items())),
+        r["index"]["total_frames"], n_skip,
         ", ".join("%s=%dpx" % c for c in clipped) or "無")
 
 

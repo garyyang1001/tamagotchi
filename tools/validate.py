@@ -53,7 +53,7 @@ TIER0_FILES = [
     "art/approved/{id}/REBUILD.sh",
 ]
 
-TIER1_FILES = ["art/rigs/{id}/rig.json"]
+TIER1_FILES = []   # 部件旋轉路線已移除，動畫改走 frames 型
 
 
 class Report:
@@ -174,6 +174,7 @@ def check_animations(cid, r):
 
     tier_counts = {0: 0, 1: 0, 2: 0}
     total_frames = 0
+    pending = []
 
     for name, a in anims.items():
         budget = FRAME_BUDGET.get(name)
@@ -199,34 +200,17 @@ def check_animations(cid, r):
             if f is None or not (0 <= f < frames):
                 r.err(f"{name} 有關鍵影格 f={f} 落在 0..{frames-1} 之外")
 
-        if a.get("tier", 0) > 0 and not a.get("rig_parts"):
-            r.warn(f"{name} 標為 tier {a['tier']} 但沒宣告 rig_parts")
+        st = a.get("status")
+        if st == "PENDING_REGEN":
+            pending.append(name)
+        elif a.get("type") == "frames" and not a.get("frames_dir"):
+            r.err(f"{name} 是 frames 型但沒有 frames_dir")
 
-    r.note(f"動畫 {len(anims)}/{len(REQUIRED_ANIMS)} 個，共 {total_frames} 格"
-           f"（tier0={tier_counts.get(0,0)}）")
+    r.note(f"動畫 {len(anims)}/{len(REQUIRED_ANIMS)} 個，共 {total_frames} 格")
+    if pending:
+        r.warn(f"{len(pending)} 個動畫待重生（部件旋轉路線已移除）："
+               f"{', '.join(pending[:6])}{' …' if len(pending) > 6 else ''}")
     return total_frames
-
-
-def check_rig(cid, r):
-    p = ROOT / f"art/rigs/{cid}/rig.json"
-    if not p.exists():
-        return
-    d = json.loads(p.read_text())
-    parts = d.get("parts", {})
-
-    for name, meta in parts.items():
-        f = ROOT / f"art/rigs/{cid}" / meta["file"]
-        if not f.exists():
-            r.err(f"rig 部件檔不存在：{meta['file']}")
-        parent = meta.get("parent")
-        if parent and parent not in parts:
-            r.err(f"部件 {name} 的 parent {parent!r} 不存在")
-
-    unknown = [n for n in parts if n.startswith("unknown_")]
-    if unknown:
-        r.err(f"rig 有 {len(unknown)} 個未命名部件（切分失敗）：{', '.join(unknown)}")
-
-    r.note(f"rig 有 {len(parts)} 個部件")
 
 
 def check_reproducible(cid, r, do_rebuild):
@@ -262,7 +246,6 @@ def validate(cid, do_rebuild):
     palette = check_palette(cid, r)
     check_sprite(cid, r, palette)
     check_animations(cid, r)
-    check_rig(cid, r)
     check_reproducible(cid, r, do_rebuild)
 
     tier = -1

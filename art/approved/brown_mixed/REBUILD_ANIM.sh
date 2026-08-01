@@ -1,37 +1,29 @@
 #!/bin/sh
-# 從部件重建全部動畫。任何一步的參數改了都要重跑這個。
+# 從 AI 生成的連續影格圖重建動畫。
 #
-# 階段 A（允許重新採樣，只跑一次，人工核可）
-#   assemble → pixelate(--no-crop) → pixedit(5px 以下的細節)
-# 階段 B（純整數運算，逐位元決定性）
-#   bake → preview
+#   AI 一次生成一張含全部影格的圖（2x2 或 4x1）
+#     → cutstrip.py  切開、對齊、共用縮放（切開前先量化前景）
+#     → pixelate.py  降採樣 + 語意重映射
+#     → pixedit.py   補 5px 以下的細節（眼睛）
+#     → bake.py      串成 spritesheet
+#     → preview.py   GIF + 接觸表 + 實機模擬
+#
+# 部件旋轉路線已移除。實測整條腿繞肩關節轉會讓腳掌畫弧離開地面，
+# 而 AI 一次畫四格的結果腳掌是貼地的。見 docs/05。
 set -e
 cd "$(dirname "$0")/../../.."
 PY=.venv/bin/python
 C=brown_mixed
 
-echo "── 階段 A：組姿勢 ──"
-$PY tools/assemble.py --rig art/rigs/$C/rig.json \
-    --poses specs/poses/$C.poses.json --out-dir build/poses
-
-echo "── 階段 A：降採樣（每個姿勢只做一次）──"
-$PY tools/pixelate.py build/poses/*.png --width 64 --height 56 --no-crop \
-    --colors 12 --palette specs/palettes/$C.json \
-    --remap art/rigs/$C/remap.json --remap-fallback \
-    --out-dir build/pixparts
-
-echo "── 階段 A：手工修補眼睛與眉點 ──"
-# 眼睛在 64px 上只有 3 個像素，remap 會把虹膜吸成暗色、高光吸成灰色。
-# 依 CLAUDE.md 規則 2，5 像素以下的細節一律手工畫。
-for P in stand sit lie; do
-  $PY tools/pixedit.py build/pixparts/${C}_${P}_head_64px.png \
-      --patch art/rigs/$C/eyes_${P}.patch.json \
-      --palette specs/palettes/$C.json \
-      --out build/pixparts/${C}_${P}_head_64px.png --scale 0
+for A in walk; do
+  SHEET=art/generated/B4_${C}_${A}cycle.png
+  [ -f "$SHEET" ] || { echo "跳過 $A（缺 $SHEET）"; continue; }
+  echo "── $A ──"
+  $PY tools/cutstrip.py "$SHEET" --grid 2x2 --out-dir build/strip/$A --name ${C}_${A}
+  $PY tools/pixelate.py build/strip/$A/*.png --width 64 --height 56 --no-crop \
+      --colors 12 --palette specs/palettes/$C.json \
+      --remap "${SHEET%.png}.remap.json" --out-dir build/strip/${A}_px
 done
 
-echo "── 階段 B：烘焙（絕不重新採樣）──"
-$PY tools/bake.py --character $C
-
-echo "── 預覽 ──"
+$PY tools/bake.py --character $C --keep-going
 $PY tools/preview.py --character $C

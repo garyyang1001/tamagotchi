@@ -35,27 +35,41 @@
 | 網格對齊、降採樣 | 眾數降採樣 | `tools/pixelate.py` |
 | 材質的精確顏色 | 語意重映射 | `pixelate.py --remap` |
 | 5 像素以下的細節（眼睛、鼻子） | 手工逐像素 | `tools/pixedit.py` |
-| 部件切分 | 連通區域標記 | `tools/cutparts.py` |
+| 切開連續影格並對齊 | 投影切格 + 共用縮放 | `tools/cutstrip.py` |
 
 **不要用重生圖去解決顏色不準或眼睛太小。** 那兩件事模型控制不了，在下游修。
 
-### 3. 一個角色只生一個姿勢
+### 3. 動畫：一次生成一張含全部影格的圖
 
-實測：以已核可的 master 為參考圖、明確要求「同一角色的不同姿勢、不要重新設計」，
-生成坐姿／趴姿／正面三張——**三張全部朝同一方向漂移**（更圓更幼、灰白吻部退回暖褐），
-正面那張是徹底的重新設計。系統性的，再迭代也是擲骰子。
+**分開多次生成會漂移**——實測分三次生坐姿／趴姿／正面，三張全部朝同一方向漂移
+（更圓更幼、灰白吻部退回暖褐）。這條教訓仍然成立。
 
-**只生站姿的部件分解圖，其餘姿態全部由部件推導。**
+**但一張圖裡的多個元素不會漂移**，因為那是單次推理。所以動畫的正解是：
+請模型**一次畫出一張含全部影格的圖**（2×2 或 4×1），再切開。
 
-### 4. Tier 0 只允許整數像素位移與水平翻轉
+管線：
+```
+AI 一次生成含全部影格的圖
+  → cutstrip.py   切開、對齊、共用縮放
+  → pixelate.py   降採樣 + 語意重映射
+  → pixedit.py    補 5px 以下的細節（眼睛）
+  → bake.py       串成 spritesheet（type: "frames"）
+  → preview.py    GIF + 實機模擬
+```
 
-**不可以用旋轉。** 旋轉像素藝術會破壞像素網格，64px 上轉 4 度只會產生歪斜鋸齒。
+**切開之前一定要先量化前景。** 若讓每一格各自量化，色群值會不一樣，
+一份 remap 對照表只會中第一格。而且要遮掉背景只量前景——
+整張一起量化的話洋紅底會吃掉大部分配額。
 
-**不可以用非等比縮放。** 實測把 `sit_down` 寫成 `scale_y: 86%`，
-讀起來是狗被壓扁，不是狗坐下。**坐姿是不同的剪影，不是同一個剪影變矮。**
+### 4. 已刪除的路線：部件切分 + 旋轉
 
-只有 5 個動畫符合 Tier 0：`idle_breathe` `walk` `turn` `happy` `sad_wait`。
-其餘 16 個標為 `PLACEHOLDER_NEEDS_RIG`，等 `bake.py` 從部件合成真影格。
+`assemble.py` / `cutparts.py` / `specs/poses/` / `art/rigs/` 已於 2026-08-01 移除。
+
+失敗原因：整條腿繞肩關節旋轉會讓**腳掌畫弧離開地面**。真實的腿在膝肘彎曲、
+腳掌貼地推進，單段式部件做不到。實測 `walk` 與 `idle_breathe` 產出完全相同的影格——
+狗不是在走路，是在飄。
+
+還原點在 git commit `04f5ed2`。**不要再走回去。**
 
 ### 5. 角色是真實存在的狗
 
@@ -122,13 +136,12 @@ python tools/validate.py --character <id> --rebuild
 ├── specs/
 │   ├── style_lock.md          生成提示詞的固定區塊，一字不改
 │   ├── characters/*.json      身份特徵、比例、狀態
-│   ├── palettes/*.json        16 色，手工制定
-│   └── animations/*.anim.json 動畫定義，純資料
+│   └── palettes/*.json        16 色，手工制定
+│       animations/*.anim.json 動畫定義
 ├── art/
 │   ├── reference/             使用者提供的真實照片，不進版控
 │   ├── generated/             AI 原始輸出
-│   ├── approved/<id>/         通過 QA 的素材 + REBUILD.sh
-│   └── rigs/<id>/             切好的部件 + rig.json
+│   └── approved/<id>/         通過 QA 的素材 + REBUILD.sh
 ├── tools/                     Python 資產管線
 ├── firmware/                  ESP-IDF 專案（save / game 已完成並測試）
 └── data/                      燒進 LittleFS 的資產包
@@ -154,10 +167,10 @@ python tools/validate.py --character brown_mixed --rebuild
 python tools/pixelate.py art/generated/foo.png --width 64 --colors 12 --palette specs/palettes/brown_mixed.json --remap art/generated/foo.remap.json
 ```
 
-切分部件分解圖：
+切開連續影格圖並對齊：
 
 ```bash
-python tools/cutparts.py art/generated/B3_brown_mixed_parts_stand.png --character brown_mixed --out-dir art/rigs/brown_mixed --tol 120
+python tools/cutstrip.py art/generated/B4_brown_mixed_walkcycle.png --grid 2x2 --out-dir build/strip/walk --name brown_mixed_walk
 ```
 
 手工修補 5 像素以下的細節：
