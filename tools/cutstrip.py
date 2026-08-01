@@ -97,9 +97,10 @@ def main() -> None:
                          "這是關鍵：若讓每一格各自量化，色群值會不一樣，"
                          "同一份 remap 對照表只會中第一格，其餘全部落到 fallback。"
                          "見 docs/05 鐵律 1。")
-    ap.add_argument("--target-height", type=int, default=54,
-                    help="角色在最終 sprite 上的高度（目標像素，預設 54，對齊 master）。"
-                         "全部影格共用同一個縮放倍率，相對大小才不會變")
+    ap.add_argument("--target-area", type=int, default=1800,
+                    help="角色在最終 sprite 上的不透明像素數（預設 1800，對齊 master 的 1809）。"
+                         "**用面積不用高度**：趴著的狗很矮，用高度正規化會把它橫向拉爆畫布。"
+                         "面積比高度、寬度都更不受姿勢影響。")
     ap.add_argument("--torso-band", default="0.10,0.55",
                     help="軀幹取樣的高度區間（相對內容高度），用來算水平對齊基準")
     args = ap.parse_args()
@@ -155,10 +156,16 @@ def main() -> None:
         raise SystemExit("整張圖都沒有前景，檢查 --grid 與 --tol")
 
     # 全部影格共用同一個倍率，相對大小才不會在播放時變動。
-    # 以最高的那一格為準——伸腿的影格比較寬但高度相近。
-    tallest = max(y1 - y0 for _, _, _, _, y0, _, y1 in scan)
-    scale = (args.target_height * GRID) / tallest
-    print(f"  共用縮放 {scale:.3f}×（最高內容 {tallest}px → 目標 {args.target_height} 個像素）\n")
+    #
+    # 以**面積**為準，不是高度。實測：sleep_breathe 的狗是趴著的，
+    # 內容高度只有站姿的一半，用「最高的那格 = 54px」正規化會把它放大兩倍，
+    # 橫向直接爆出 64px 的畫布。面積在不同姿勢之間穩定得多
+    # （躺著和站著的剪影面積接近）。
+    areas = [int(m[y0:y1, x0:x1].sum()) for _, _, m, x0, y0, x1, y1 in scan]
+    mean_area = sum(areas) / len(areas)
+    scale = ((args.target_area * GRID * GRID) / mean_area) ** 0.5
+    print(f"  共用縮放 {scale:.3f}×（平均內容面積 {mean_area:.0f}px² "
+          f"→ 目標 {args.target_area} 個像素）\n")
 
     report = []
     for i, tile, m, x0, y0, x1, y1 in scan:
