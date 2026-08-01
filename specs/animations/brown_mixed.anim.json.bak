@@ -1,0 +1,688 @@
+{
+  "character_id": "brown_mixed",
+  "format_version": 2,
+  "note": "Tier 0 只允許整數像素位移與水平翻轉。旋轉會破壞像素網格（見 docs/05），非等比縮放讀起來是角色被壓扁而不是換姿勢——實測 sit_down 用 scale_y 86% 看起來像狗被壓扁，不像坐下。只有 5 個動畫是真正的整體位移，其餘 16 個標為 PLACEHOLDER_NEEDS_RIG，目前用中性呼吸佔位，等 bake.py 從部件合成真正的影格。",
+  "defaults": {
+    "fps": 6,
+    "loop": false,
+    "type": "transform"
+  },
+  "transform_fields": {
+    "x": "水平位移，整數像素",
+    "y": "垂直位移，整數像素，負值向上",
+    "flip": "1 = 水平翻轉",
+    "_removed": "rot 與 scale 已從 Tier 0 移除。旋轉破壞像素網格，非等比縮放讀起來是壓扁不是換姿勢。"
+  },
+  "animations": [
+    {
+      "id": "idle_breathe",
+      "tier": 0,
+      "loop": true,
+      "fps": 1.33,
+      "frames": 4,
+      "desc": "呼吸。這隻狗節奏慢，起伏比吉娃娃明顯但頻率低。",
+      "track": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "IMPLEMENTED",
+      "frame_ms": 750,
+      "_timing": "4 格 × 750ms = 3.0 秒/循環 = 20 次/分。中大型犬的休息呼吸速率。"
+    },
+    {
+      "id": "idle_blink",
+      "tier": 1,
+      "upgrade_to": 1,
+      "fps": 10,
+      "frames": 3,
+      "desc": "眨眼。眼瞼下滑蓋住眼睛。需要 eyelid 部件。",
+      "rig_parts": [
+        "eyelid"
+      ],
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG"
+    },
+    {
+      "id": "idle_look",
+      "tier": 1,
+      "upgrade_to": 1,
+      "fps": 4,
+      "frames": 4,
+      "desc": "左右張望。只有頭部轉動，身體不動。需要 head 部件。",
+      "rig_parts": [
+        "head"
+      ],
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG"
+    },
+    {
+      "id": "idle_ear_twitch",
+      "tier": 1,
+      "upgrade_to": 1,
+      "fps": 8,
+      "frames": 4,
+      "desc": "抖耳朵。只有耳朵旋轉。需要 ear 部件。",
+      "rig_parts": [
+        "ear_near",
+        "ear_far"
+      ],
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG"
+    },
+    {
+      "id": "tail_wag",
+      "tier": 1,
+      "upgrade_to": 1,
+      "loop": true,
+      "fps": 8,
+      "frames": 4,
+      "desc": "搖尾。大擺幅慢速，和吉娃娃的高頻小擺幅要有明顯區別。",
+      "rig_parts": [
+        "tail"
+      ],
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG"
+    },
+    {
+      "id": "sit_down",
+      "tier": 2,
+      "upgrade_to": 2,
+      "fps": 8,
+      "frames": 4,
+      "desc": "坐下。後腿收摺、身體後傾——這是不同的剪影，不是同一個剪影變矮。需要部件重新擺姿。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "torso",
+        "leg_hind_near",
+        "leg_hind_far",
+        "leg_fore_near",
+        "leg_fore_far",
+        "head"
+      ]
+    },
+    {
+      "id": "stand_up",
+      "tier": 2,
+      "upgrade_to": 2,
+      "fps": 8,
+      "frames": 4,
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "desc": "站起。sit_down 的反向。需要部件重新擺姿。",
+      "rig_parts": [
+        "torso",
+        "leg_hind_near",
+        "leg_hind_far",
+        "leg_fore_near",
+        "leg_fore_far",
+        "head"
+      ]
+    },
+    {
+      "id": "lie_down",
+      "tier": 2,
+      "upgrade_to": 2,
+      "fps": 8,
+      "frames": 4,
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "desc": "趴下。腹部貼地、前腿前伸。需要部件重新擺姿。",
+      "rig_parts": [
+        "torso",
+        "leg_hind_near",
+        "leg_hind_far",
+        "leg_fore_near",
+        "leg_fore_far",
+        "head"
+      ]
+    },
+    {
+      "id": "wake_up",
+      "tier": 2,
+      "upgrade_to": 2,
+      "fps": 6,
+      "frames": 4,
+      "desc": "醒來。先伸展再回到坐姿。需要部件重新擺姿。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "torso",
+        "leg_hind_near",
+        "leg_hind_far",
+        "leg_fore_near",
+        "leg_fore_far",
+        "head"
+      ]
+    },
+    {
+      "id": "walk",
+      "tier": 0,
+      "loop": true,
+      "fps": 8,
+      "frames": 4,
+      "desc": "走路。整體上下起伏加水平位移。移動由遊戲層控制，這裡只做原地的步伐感。",
+      "track": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": 0
+        },
+        {
+          "f": 3,
+          "y": -1
+        }
+      ],
+      "status": "IMPLEMENTED"
+    },
+    {
+      "id": "turn",
+      "tier": 0,
+      "fps": 8,
+      "frames": 2,
+      "desc": "轉身。純水平翻轉，不做壓縮——把 sprite 壓到 40% 寬看起來是狗被壓扁，不是轉身。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1,
+          "flip": 1
+        }
+      ],
+      "status": "IMPLEMENTED"
+    },
+    {
+      "id": "eat",
+      "tier": 1,
+      "loop": true,
+      "fps": 6,
+      "frames": 4,
+      "desc": "吃東西。低頭啄食——動的是頭和下顎，不是整隻狗下沉。需要 head + jaw 部件。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "head",
+        "jaw",
+        "muzzle"
+      ]
+    },
+    {
+      "id": "eat_happy",
+      "tier": 1,
+      "fps": 8,
+      "frames": 6,
+      "desc": "吃飽開心。彈跳加左右微搖。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        },
+        {
+          "f": 4,
+          "y": -1
+        },
+        {
+          "f": 5,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "head",
+        "jaw",
+        "tail"
+      ]
+    },
+    {
+      "id": "sleep_breathe",
+      "tier": 1,
+      "loop": true,
+      "fps": 1.14,
+      "frames": 4,
+      "desc": "睡覺。趴姿加極緩起伏。需要趴姿的部件擺位。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "torso",
+        "leg_fore_near",
+        "leg_fore_far",
+        "head",
+        "eyelid"
+      ],
+      "frame_ms": 875,
+      "_timing": "4 格 × 875ms = 3.5 秒/循環 = 17 次/分。睡眠時比清醒更慢。"
+    },
+    {
+      "id": "yawn",
+      "tier": 1,
+      "fps": 5,
+      "frames": 4,
+      "desc": "打呵欠。下顎大開。需要 jaw 部件。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "head",
+        "jaw",
+        "tongue"
+      ]
+    },
+    {
+      "id": "play_bow",
+      "tier": 1,
+      "upgrade_to": 1,
+      "fps": 8,
+      "frames": 4,
+      "desc": "作揖邀玩。前腿下伏、臀部上抬。需要前腿與軀幹部件。",
+      "rig_parts": [
+        "torso",
+        "leg_fore_near",
+        "leg_fore_far"
+      ],
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG"
+    },
+    {
+      "id": "chase_ball",
+      "tier": 1,
+      "loop": true,
+      "fps": 12,
+      "frames": 4,
+      "desc": "追球。四腿快速交替。需要腿部部件。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "leg_fore_near",
+        "leg_fore_far",
+        "leg_hind_near",
+        "leg_hind_far",
+        "torso"
+      ]
+    },
+    {
+      "id": "happy",
+      "tier": 0,
+      "fps": 10,
+      "frames": 6,
+      "desc": "開心。彈跳加微幅擠壓——落地時壓扁是彈跳有重量感的關鍵。",
+      "track": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -5
+        },
+        {
+          "f": 2,
+          "y": -7
+        },
+        {
+          "f": 3,
+          "y": -3
+        },
+        {
+          "f": 4,
+          "y": 0
+        },
+        {
+          "f": 5,
+          "y": 0
+        }
+      ],
+      "status": "IMPLEMENTED"
+    },
+    {
+      "id": "sad_wait",
+      "tier": 0,
+      "loop": true,
+      "fps": 2.0,
+      "frames": 4,
+      "desc": "等待關心。整體下沉、節奏更慢。表現上限就是這樣——不做哭泣、不做發抖、不做蜷縮躲藏。見 docs/02。",
+      "track": [
+        {
+          "f": 0,
+          "y": 1
+        },
+        {
+          "f": 1,
+          "y": 2
+        },
+        {
+          "f": 2,
+          "y": 2
+        },
+        {
+          "f": 3,
+          "y": 1
+        }
+      ],
+      "status": "IMPLEMENTED",
+      "frame_ms": 500,
+      "_timing": "4 格 × 500ms = 2.0 秒。比正常呼吸快一點，但動作幅度更小。"
+    },
+    {
+      "id": "pet_react",
+      "tier": 1,
+      "loop": true,
+      "fps": 6,
+      "frames": 4,
+      "desc": "被摸的反應。頭部蹭向撫摸方向、眼睛瞇起。需要 head + eyelid 部件。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "head",
+        "eyelid",
+        "ear_near"
+      ]
+    },
+    {
+      "id": "toilet",
+      "tier": 1,
+      "fps": 5,
+      "frames": 4,
+      "desc": "上廁所。後腿下蹲的姿勢，只用姿勢暗示，不畫排泄物。需要部件重新擺姿。",
+      "track": [
+        {
+          "f": 0,
+          "y": -1
+        },
+        {
+          "f": 1,
+          "y": 0
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ],
+      "status": "PLACEHOLDER_NEEDS_RIG",
+      "rig_parts": [
+        "torso",
+        "leg_hind_near",
+        "leg_hind_far",
+        "head"
+      ]
+    }
+  ],
+  "tier0_whitelist": [
+    "happy",
+    "idle_breathe",
+    "sad_wait",
+    "turn",
+    "walk"
+  ],
+  "timing_note": "frame_ms 是權威欄位，fps 僅供參考。原因：真實犬隻休息呼吸 10–30 次/分，4 格的呼吸循環要 2–6 秒，換算 fps 是 0.67–2.0 的小數，整數 fps 表達不了。體型越大呼吸越慢，這同時免費換到角色個性差異。"
+}

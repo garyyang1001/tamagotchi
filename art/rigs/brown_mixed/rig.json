@@ -1,0 +1,376 @@
+{
+  "character_id": "brown_mixed",
+  "format_version": 1,
+  "source_sheet": "art/generated/B3_brown_mixed_parts_stand.png",
+  "note": "pivot 由部件類型的慣例自動推算，是起點不是定案。跑 preview.py 看動起來哪裡不對，直接改這個檔的 pivot，不必重切。offset 是部件相對父階層 pivot 的位置，切分後全為 0，要靠 assemble 步驟或手動對位填入。",
+  "parts": {
+    "torso": {
+      "file": "brown_mixed_stand_torso_r.png",
+      "size": [
+        589,
+        351
+      ],
+      "pivot": [
+        294,
+        175
+      ],
+      "parent": null,
+      "z": 30,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        104,
+        66,
+        693,
+        417
+      ]
+    },
+    "tail": {
+      "file": "brown_mixed_stand_tail_r.png",
+      "size": [
+        150,
+        209
+      ],
+      "pivot": [
+        148,
+        207
+      ],
+      "parent": "torso",
+      "z": 10,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        691,
+        168,
+        841,
+        377
+      ]
+    },
+    "leg_fore_near": {
+      "file": "brown_mixed_stand_leg_fore_near_r.png",
+      "size": [
+        140,
+        352
+      ],
+      "pivot": [
+        70,
+        1
+      ],
+      "parent": "torso",
+      "z": 41,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        902,
+        89,
+        1042,
+        441
+      ]
+    },
+    "leg_fore_far": {
+      "file": "brown_mixed_stand_leg_fore_far_r.png",
+      "size": [
+        129,
+        351
+      ],
+      "pivot": [
+        64,
+        1
+      ],
+      "parent": "torso",
+      "z": 21,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        1110,
+        90,
+        1239,
+        441
+      ]
+    },
+    "leg_hind_near": {
+      "file": "brown_mixed_stand_leg_hind_near_r.png",
+      "size": [
+        181,
+        317
+      ],
+      "pivot": [
+        90,
+        1
+      ],
+      "parent": "torso",
+      "z": 40,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        97,
+        458,
+        278,
+        775
+      ]
+    },
+    "leg_hind_far": {
+      "file": "brown_mixed_stand_leg_hind_far_r.png",
+      "size": [
+        141,
+        317
+      ],
+      "pivot": [
+        70,
+        1
+      ],
+      "parent": "torso",
+      "z": 20,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        337,
+        458,
+        478,
+        775
+      ]
+    },
+    "head": {
+      "file": "brown_mixed_stand_head_r.png",
+      "size": [
+        317,
+        236
+      ],
+      "pivot": [
+        158,
+        235
+      ],
+      "parent": "torso",
+      "z": 50,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        545,
+        495,
+        862,
+        731
+      ]
+    },
+    "ear_near": {
+      "file": "brown_mixed_stand_ear_near_r.png",
+      "size": [
+        134,
+        279
+      ],
+      "pivot": [
+        67,
+        1
+      ],
+      "parent": "head",
+      "z": 70,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        921,
+        483,
+        1055,
+        762
+      ]
+    },
+    "ear_far": {
+      "file": "brown_mixed_stand_ear_far_r.png",
+      "size": [
+        136,
+        272
+      ],
+      "pivot": [
+        68,
+        1
+      ],
+      "parent": "head",
+      "z": 45,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        1110,
+        490,
+        1246,
+        762
+      ]
+    },
+    "muzzle": {
+      "file": "brown_mixed_stand_muzzle_r.png",
+      "size": [
+        218,
+        170
+      ],
+      "pivot": [
+        109,
+        85
+      ],
+      "parent": "head",
+      "z": 60,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        125,
+        807,
+        343,
+        977
+      ]
+    },
+    "jaw": {
+      "file": "brown_mixed_stand_jaw_r.png",
+      "size": [
+        175,
+        95
+      ],
+      "pivot": [
+        87,
+        1
+      ],
+      "parent": "head",
+      "z": 58,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        435,
+        861,
+        610,
+        956
+      ]
+    },
+    "tongue": {
+      "file": "brown_mixed_stand_tongue_r.png",
+      "size": [
+        76,
+        86
+      ],
+      "pivot": [
+        38,
+        43
+      ],
+      "parent": "jaw",
+      "z": 57,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        692,
+        856,
+        768,
+        942
+      ]
+    },
+    "eye_near": {
+      "file": "brown_mixed_stand_eye_near_r.png",
+      "size": [
+        116,
+        137
+      ],
+      "pivot": [
+        58,
+        68
+      ],
+      "parent": "head",
+      "z": 62,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        878,
+        820,
+        994,
+        957
+      ]
+    },
+    "eye_far": {
+      "file": "brown_mixed_stand_eye_far_r.png",
+      "size": [
+        76,
+        101
+      ],
+      "pivot": [
+        38,
+        50
+      ],
+      "parent": "head",
+      "z": 61,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        1113,
+        834,
+        1189,
+        935
+      ]
+    },
+    "eyelid": {
+      "file": "brown_mixed_stand_eyelid_r.png",
+      "size": [
+        201,
+        74
+      ],
+      "pivot": [
+        100,
+        1
+      ],
+      "parent": "head",
+      "z": 63,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        169,
+        1025,
+        370,
+        1099
+      ]
+    },
+    "shadow": {
+      "file": "brown_mixed_stand_shadow_r.png",
+      "size": [
+        209,
+        69
+      ],
+      "pivot": [
+        104,
+        34
+      ],
+      "parent": null,
+      "z": 0,
+      "offset": [
+        0,
+        0
+      ],
+      "_sheet_bbox": [
+        516,
+        1035,
+        725,
+        1104
+      ]
+    }
+  }
+}

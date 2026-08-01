@@ -1,0 +1,98 @@
+{
+  "character_id": "brown_mixed",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "index 0 固定透明。手工制定，不是從生成圖自適應量化來的——自適應量化會把中棕的 5 個相近色階各佔一格，同時把眼睛高光、肝棕鼻、灰白吻部合併掉，因為它不知道哪些色階在語意上重要。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#1E1410",
+      "note": "不用純黑。純黑描邊在小尺寸會顯得死板，用極深的暖棕保留毛色的溫度"
+    },
+    {
+      "index": 2,
+      "role": "coat_dark",
+      "hex": "#2E1F16"
+    },
+    {
+      "index": 3,
+      "role": "coat_mid",
+      "hex": "#4A3225",
+      "note": "主體色，佔畫面最大面積"
+    },
+    {
+      "index": 4,
+      "role": "coat_light",
+      "hex": "#66452F"
+    },
+    {
+      "index": 5,
+      "role": "tan_dark",
+      "hex": "#8A5F3A",
+      "note": "眉點、胸口條紋、小腿的淺褐標記"
+    },
+    {
+      "index": 6,
+      "role": "tan_mid",
+      "hex": "#B08050"
+    },
+    {
+      "index": 7,
+      "role": "muzzle_grey_dark",
+      "hex": "#8C7F72",
+      "note": "老犬的灰白吻部。刻意去飽和，才不會和 tan 混在一起——這是這隻狗最有辨識度的特徵"
+    },
+    {
+      "index": 8,
+      "role": "muzzle_grey_light",
+      "hex": "#C4B8AA"
+    },
+    {
+      "index": 9,
+      "role": "nose_liver",
+      "hex": "#4A2E22",
+      "note": "肝棕色。巧克力毛色的狗不會有黑鼻，畫成黑色是常見錯誤"
+    },
+    {
+      "index": 10,
+      "role": "eye_iris",
+      "hex": "#A87A3C",
+      "note": "琥珀色"
+    },
+    {
+      "index": 11,
+      "role": "eye_dark",
+      "hex": "#2A1A10"
+    },
+    {
+      "index": 12,
+      "role": "eye_highlight",
+      "hex": "#F2EDE4",
+      "note": "每隻眼睛只有 1 個像素。這 1 個像素決定角色有沒有生命感"
+    },
+    {
+      "index": 13,
+      "role": "tongue_pink",
+      "hex": "#C06A6A"
+    },
+    {
+      "index": 14,
+      "role": "contact_shadow",
+      "hex": "#241A14",
+      "note": "接地陰影，獨立部件"
+    },
+    {
+      "index": 15,
+      "role": "collar_accent",
+      "hex": "#3C7FC4",
+      "note": "角色識別色。三隻狗用紅/藍/黃三原色——最基本、最好命名（3 歲多半只知道一種顏色），彼此色相與明度都拉開，且避開紅綠色盲。這隻是藍：色相離棕色最遠。chihuahua=紅 #C4342E（深色壓在最亮的身體上），brindle_guard=黃 #F0C43C（高明度壓在最暗的身體上）。"
+    }
+  ]
+}

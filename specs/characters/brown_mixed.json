@@ -1,0 +1,164 @@
+{
+  "character_id": "brown_mixed",
+  "display_name_zh": "棕色憨厚米克斯",
+  "spec_version": 2,
+  "status": "APPROVED",
+  "reference_photos": [
+    "art/reference/brown_mixed/upright_photo_01_sit_front.jpg",
+    "art/reference/brown_mixed/upright_photo_02_sit_front.jpg"
+  ],
+  "reference_coverage": {
+    "front_sit": "OK",
+    "side_profile": "MISSING",
+    "standing": "MISSING",
+    "note": "目前兩張都是正面坐姿。要畫 3/4 側面站姿的部件分解圖，還缺一張側面站姿的照片。缺的話側面體型只能靠推測，會像第一次生成那樣把腿畫太短。"
+  },
+  "proportions": {
+    "note": "以 512 母版座標系測量，站立姿態。公主全高 = 420 為 100% 基準。",
+    "total_height": 250,
+    "ratio_to_princess": 0.595,
+    "body_length": 300,
+    "shoulder_height": 195,
+    "head_to_body": 3.5,
+    "eye_width_ratio_of_head": 0.15,
+    "belly_clearance_note": "腹部離地的空隙高度，大約等於軀幹本身的厚度。這條規則是為了防止生成時變成臘腸犬比例——實測發生過。",
+    "body_length_to_shoulder_height": 1.5
+  },
+  "identity_features": {
+    "build": {
+      "value": "中大型成犬，體格厚實壯碩，胸口寬深，坐姿有明顯重量感。略微豐滿但底下是結實的，不是瘦也不是肥胖。",
+      "confirmed": true,
+      "source": "photo",
+      "note": "第一次判讀時因為照片是橫的而誤判為精實體型。轉正後確認是厚實體型，原始規劃寫的『略胖』是對的。"
+    },
+    "coat_color": {
+      "value": "深巧克力棕，短毛，單色為主",
+      "confirmed": true,
+      "source": "photo"
+    },
+    "tan_points": {
+      "value": "眼睛上方兩個明顯的淺褐色眉點；兩頰淺褐；下巴延伸到胸口中央一整道淺褐；四肢下段淺褐",
+      "confirmed": true,
+      "source": "photo",
+      "note": "典型的巧克力+棕褐（chocolate and tan）標記模式"
+    },
+    "grizzled_muzzle": {
+      "value": "鼻梁到嘴周有明顯的灰白色老犬白毛，去飽和，接近銀灰",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "note": "這是這隻狗最有辨識度的特徵。實測 AI 會把它畫成金黃褐色，必須在提示詞裡強調 desaturated / almost silver-grey，並在 remap 階段指到 muzzle_grey_light 校正。"
+    },
+    "nose": {
+      "value": "肝棕色（暖調深紅棕），不是黑色",
+      "confirmed": true,
+      "source": "photo",
+      "note": "巧克力毛色的狗不會有黑鼻。實測 AI 預設會畫成黑色，需明確排除。"
+    },
+    "eyes": {
+      "value": "琥珀／淺棕色，眼角略下垂，眼神溫和；眼周有淺色眼圈",
+      "confirmed": true,
+      "source": "photo"
+    },
+    "ears": {
+      "value": "自然下垂，中等長度，貼在頭側，耳尖圓",
+      "confirmed": true,
+      "source": "photo"
+    },
+    "head": {
+      "value": "顱頂寬圓，吻部中等長度、厚實，不尖",
+      "confirmed": true,
+      "source": "photo"
+    },
+    "legs": {
+      "value": "粗壯，前腳掌大，指甲深色",
+      "confirmed": true,
+      "source": "photo"
+    },
+    "chest_white": {
+      "value": "無獨立白斑。胸口中央的標記是淺褐色（tan），從下巴延伸下來，不是白色。",
+      "confirmed": true,
+      "source": "photo",
+      "note": "原先誤以為可能另有白斑，轉正照片後確認胸口只有 tan 標記。"
+    },
+    "collar": {
+      "value": "藍 #3C7FC4，細項圈",
+      "confirmed": true,
+      "source": "design_decision",
+      "note": "三隻狗用紅/藍/黃三原色，這隻是藍。理由見 docs/09 第四節：3 歲多半只知道一種顏色，要用最基本最好命名的色；避開紅綠色盲；且每個都要和自己那隻狗的身體有對比。"
+    }
+  },
+  "personality": {
+    "traits": [
+      "慢熟",
+      "愛吃",
+      "溫和",
+      "有點憨"
+    ],
+    "motion_tempo": "slow",
+    "note": "動作節奏比吉娃娃慢，起身與坐下要有重量感的停頓"
+  },
+  "signature_behaviors": [
+    {
+      "id": "hungry_stare",
+      "desc": "飢餓時定定看著你不動"
+    },
+    {
+      "id": "comfort_princess",
+      "desc": "公主難過時自己靠過去"
+    },
+    {
+      "id": "belly_rub",
+      "desc": "被摸時翻肚子"
+    },
+    {
+      "id": "dream_eating",
+      "desc": "睡覺時嘴巴會動，像在夢裡吃東西"
+    }
+  ],
+  "palette": "specs/palettes/brown_mixed.json",
+  "mirror_policy": {
+    "default": "mirror_safe",
+    "note": "單色無不對稱斑紋，全部件可水平鏡射。三隻狗裡工作量最小的一隻。左右方向不需要各畫一套。",
+    "exceptions": []
+  },
+  "render": {
+    "sprite_cell": [
+      64,
+      64
+    ],
+    "note": "實測 64px 寬的 sprite，狗身約佔 64×53，1,785 個不透明像素，讀得出所有辨識特徵。"
+  },
+  "prototype_history": [
+    {
+      "file": "art/generated/B0_brown_mixed_modelsheet_01.png",
+      "verdict": "REJECTED",
+      "reason": "寫實素描套像素化濾鏡，等效解析度 768×512（狗約 150×160 真像素），細節糊成一團。三視角比例互相漂移。無幼兒向可愛化。"
+    },
+    {
+      "file": "art/generated/B0_brown_mixed_sprite_raw_02.png",
+      "verdict": "STYLE_OK_PROPORTIONS_REJECTED",
+      "reason": "風格正確（平塗、乾淨描邊、可愛度合適）。但體型漂移成臘腸／小獵犬幼犬，身體太長腿太短頭太大。灰白吻部變金黃褐，鼻子變黑。"
+    },
+    {
+      "file": "art/generated/B0_brown_mixed_sprite_raw_03.png",
+      "verdict": "PENDING_USER_DECISION",
+      "reason": "比例修正到成犬體型，灰白吻部與肝棕鼻回來了。但臉與眼睛變小，可愛度下降。可愛 vs 準確的取捨待使用者決定。",
+      "remap": "art/generated/B0_brown_mixed_sprite_raw_03.remap.json"
+    },
+    {
+      "file": "art/approved/brown_mixed/master_stand_r_64px.png",
+      "verdict": "APPROVED",
+      "reason": "v4。成犬體型 + 頭放大 + 區域限定 remap 修正灰白吻部（腳保持淺褐）+ pixedit 手工畫眼睛（琥珀虹膜 + 白色高光）。64×54、9 色、1809 個不透明像素。REBUILD.sh 可逐位元重現。",
+      "source": "art/approved/brown_mixed/master_stand_r_source.png"
+    }
+  ],
+  "open_questions": [
+    "側面站姿照片（非阻塞：已用 v4 當側面基準，補到照片後若有出入，部件圖要重做）"
+  ],
+  "cuteness_direction": {
+    "resolved": "v3 的成犬體型比例 + 頭部放大約 10% + 眼睛明顯放大",
+    "rationale": "體型辨識度是專案的全部意義，不能讓步；眼睛大小幾乎不影響體型辨識，卻直接決定 3 歲小孩的情感連結。該讓步的是眼睛不是身體。",
+    "note": "已寫進 specs/style_lock.md 區塊 2b，四個角色統一適用。"
+  }
+}

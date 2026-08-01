@@ -1,0 +1,24 @@
+{
+  "_note": "v4 的語意對照表。bbox 用 64px sprite 座標 [x0,y0,x1,y1]，右下界不含。",
+
+  "#000000": "outline",
+  "#000002": "outline",
+  "#0A000A": "outline",
+  "#170F09": "outline",
+
+  "#392517": "coat_dark",
+  "#452E1E": "coat_dark",
+
+  "#553A26": "coat_mid",
+  "#563B27": "coat_mid",
+  "#573B27": "coat_mid",
+  "#553B27": "coat_mid",
+
+  "#704C2C": "coat_light",
+
+  "_D0A980_note": "AI 在吻部和四肢用了同一個色值。吻部要去飽和的灰白（老犬特徵，這隻狗最有辨識度的地方），四肢要暖淺褐。靠 bbox 分開。",
+  "#D0A980": [
+    { "role": "muzzle_grey_light", "bbox": [45, 10, 60, 23] },
+    { "role": "tan_mid" }
+  ]
+}

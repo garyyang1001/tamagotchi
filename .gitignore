@@ -1,0 +1,9 @@
+build/
+data/*.bin
+firmware/.pio/
+firmware/build/
+.venv/
+__pycache__/
+*.pyc
+art/reference/
+.DS_Store

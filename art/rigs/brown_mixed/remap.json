@@ -1,0 +1,258 @@
+{
+  "_note": "階段 A 姿勢圖層群的語意重映射表。鍵是 pixelate.py 每檔自適應量化後的色群（--dump-clusters 產生），值是 specs/palettes/brown_mixed.json 的語意角色。不可以改用純數值吸附：實測會把中棕的腿與肚子吸成 muzzle_grey_light（見 docs/05 第二節）。",
+  "#000000": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#020002": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#020101": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#030002": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#030101": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#030202": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#040203": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#060005": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#060203": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#060302": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#070304": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#070403": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#090008": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#090305": [
+    {
+      "role": "contact_shadow",
+      "bbox": [
+        0,
+        52,
+        64,
+        56
+      ]
+    },
+    {
+      "role": "outline"
+    }
+  ],
+  "#140C08": "coat_dark",
+  "#180F0A": "coat_dark",
+  "#1F130B": "coat_dark",
+  "#2C1D11": "coat_dark",
+  "#2C1D12": "coat_dark",
+  "#2D1C12": "coat_dark",
+  "#2E1F12": "coat_dark",
+  "#362516": "coat_dark",
+  "#392617": "coat_dark",
+  "#392717": "coat_dark",
+  "#3A2718": "coat_dark",
+  "#3B2818": "coat_dark",
+  "#3C2718": "coat_dark",
+  "#3C2818": "coat_dark",
+  "#3D2918": "coat_dark",
+  "#3E291A": "coat_dark",
+  "#3F2A1A": "coat_dark",
+  "#422C1B": "coat_dark",
+  "#4C3420": "coat_mid",
+  "#4D3421": "coat_mid",
+  "#523623": "coat_mid",
+  "#523723": "coat_mid",
+  "#543924": "coat_mid",
+  "#553A24": "coat_mid",
+  "#553A25": "coat_mid",
+  "#553A26": "coat_mid",
+  "#563A26": "coat_mid",
+  "#563B26": "coat_mid",
+  "#573B26": "coat_mid",
+  "#573C26": "coat_mid",
+  "#583B26": "coat_mid",
+  "#583C27": "coat_mid",
+  "#583D27": "coat_mid",
+  "#583D28": "coat_mid",
+  "#593D27": "coat_mid",
+  "#593E28": "coat_mid",
+  "#5A3D27": "coat_mid",
+  "#5A3D28": "coat_mid",
+  "#5A3E27": "coat_mid",
+  "#5A3E28": "coat_mid",
+  "#5B3F29": "coat_light",
+  "#5C3E28": "coat_light",
+  "#5D4129": "coat_light",
+  "#5F4129": "coat_light",
+  "#A1611D": "eye_iris",
+  "#BEB5B3": "muzzle_grey_light",
+  "#BFB8B5": "muzzle_grey_light",
+  "#C15758": "tongue_pink",
+  "#C1884A": "tan_mid",
+  "#C1B8B5": "muzzle_grey_light",
+  "#C1B9B6": "muzzle_grey_light",
+  "#C1BAB8": "muzzle_grey_light",
+  "#C2BAB7": "muzzle_grey_light",
+  "#C3BCB9": "muzzle_grey_light",
+  "#C58847": "tan_mid",
+  "#C5BEBA": "muzzle_grey_light",
+  "#C88C4B": "tan_mid",
+  "#D79C61": "tan_mid",
+  "#E27174": "tongue_pink"
+}

@@ -1,0 +1,19 @@
+{
+  "_note": "走路循環圖的語意對照表。cutstrip.py 在切開之前先量化過前景，所以四格共用同一組 12 色，一份對照表即可涵蓋全部影格。吻部(#D2B18E 飽和度68)與腳掌(#BE8246 飽和度120)自然分離，不需要 bbox。眼睛太小沒有獨立色群，用 pixedit 補。",
+
+  "#060005": "outline",
+  "#0C0407": "outline",
+
+  "#392619": "coat_dark",
+  "#442A20": "coat_dark",
+
+  "#583D29": "coat_mid",
+  "#5C402B": "coat_mid",
+  "#5D412C": "coat_mid",
+  "#5E412C": "coat_mid",
+  "#5D422D": "coat_mid",
+  "#60432D": "coat_light",
+
+  "#BE8246": "tan_mid",
+  "#D2B18E": "muzzle_grey_light"
+}

@@ -1,0 +1,34 @@
+{
+  "_note": "v4 的手工修補。AI 生出來的眼睛是 3x2 的純暗色塊，沒有虹膜也沒有高光，所以角色沒有生命感。座標是 64px sprite 的像素座標。",
+
+  "key": {
+    "O": "eye_dark",
+    "I": "eye_iris",
+    "H": "eye_highlight",
+    "N": "nose_liver",
+    ".": null
+  },
+
+  "patches": [
+    {
+      "name": "eye_near",
+      "_desc": "近側眼。4x3，虹膜偏右讓視線朝向行進方向，高光在內上角。",
+      "x": 46, "y": 9,
+      "rows": [
+        "OOOO",
+        "OHII",
+        "OOOO"
+      ]
+    },
+    {
+      "name": "eye_far",
+      "_desc": "遠側眼。3/4 視角下被前縮，比近側小一格。",
+      "x": 55, "y": 9,
+      "rows": [
+        "OOO",
+        "OHI",
+        "OOO"
+      ]
+    }
+  ]
+}

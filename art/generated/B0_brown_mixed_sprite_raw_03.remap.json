@@ -1,0 +1,17 @@
+{
+  "#000000": "outline",
+  "#0B000A": "outline",
+  "#150E09": "outline",
+
+  "#382519": "coat_dark",
+
+  "#543A28": "coat_mid",
+  "#553A28": "coat_mid",
+  "#553B29": "coat_mid",
+  "#563A28": "coat_mid",
+  "#563B29": "coat_mid",
+
+  "#A37245": "tan_mid",
+
+  "#CDA987": "muzzle_grey_light"
+}

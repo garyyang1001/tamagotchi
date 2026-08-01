@@ -1,0 +1,14 @@
+# ICEPET 分區表 — 16 MB flash（ESP32-S3-WROOM-1-N16R8）
+#
+# savegame 是自管的 A/B 雙槽存檔區，不走 NVS。
+# 理由見 docs/04_資料結構與存檔設計.md：NVS 的磨損平衡對我們是黑箱，
+# 而這台機器會被 3 歲小孩隨手拔電，掉電安全性必須可稽核。
+#
+# Name       Type   SubType   Offset     Size       說明
+nvs,         data,  nvs,      0x9000,    0x6000,    # 24K  只放亮度/音量等可丟設定
+phy_init,    data,  phy,      0xf000,    0x1000,    # 4K
+savegame,    data,  0x40,     0x10000,   0x2000,    # 8K   A/B 雙槽，各 4K
+factory,     app,   factory,  0x12000,   0x300000,  # 3M   韌體
+ota_0,       app,   ota_0,    0x312000,  0x300000,  # 3M   OTA 備援
+assets,      data,  0x41,     0x612000,  0x600000,  # 6M   資產包，spi_flash_mmap 唯讀
+logfs,       data,  spiffs,   0xC12000,  0x3EE000,  # ~4M  LittleFS：事件記錄 + 音效
