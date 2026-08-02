@@ -1,0 +1,23 @@
+{
+  "_note": "由 tools/automap.py 自動分類，來源 0 個影格的色群聯集。規則：亮度分色階、飽和度分「淺褐標記 vs 去飽和灰白」（分界 90，依本批亮色的飽和度分佈自適應）。這不是最近距離吸附——那個實測會把肚子吸成灰白。分類結果請人眼看過再用。",
+  "#1A0013": "outline",
+  "#231209": "outline",
+  "#2C1A0B": "outline",
+  "#2C1B0B": "coat_dark",
+  "#35220D": "coat_dark",
+  "#37240E": "coat_dark",
+  "#543516": "coat_mid",
+  "#563616": "coat_mid",
+  "#573716": "coat_mid",
+  "#563918": "coat_mid",
+  "#583917": "coat_mid",
+  "#8E5D2A": "coat_light",
+  "#915F2B": "coat_light",
+  "#94612C": "tan_dark",
+  "#DC9834": "tan_mid",
+  "#DC9835": "tan_mid",
+  "#DD9A37": "tan_mid",
+  "#F8D170": "tan_light",
+  "#FBEEC8": "white_shade",
+  "#FDFBF0": "white_pure"
+}

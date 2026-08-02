@@ -1,0 +1,146 @@
+{
+  "character_id": "chihuahua",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "手工制定。這隻的處境和另外兩隻不同：**毛色和 brown_mixed 分不開**（實測巧克力 #5E432E 落在對方 coat_mid 與 coat_light 中間，色相只差 2-5°）。所以配額的分配也不同——不去堆巧克力的階數，改把兩格給白色（純白＋陰影白），一格給飾毛的奶油色。灰階測試下三隻的排序是：brown_mixed 最暗、brindle_guard 中間（金褐底＋近黑鞍背）、這隻最亮（大面積白）。",
+  "automap_bands": {
+    "_note": "automap.py 的分界。這隻同時有很暗的巧克力和大面積純白，跨距是三隻裡最大的。\n亮部改用 bright_bands 這條明確的亮度階梯，不用預設的「一刀飽和度」——實測全部 282 個色群裡，亮部自然分成 111-149 / 153-180 / 189-211 / 217-238 / 246-251 五群，中間都有斷層，用亮度就分得乾淨；一刀切不開五階。\n**而且必須繞過 eye_highlight 那條特例**：automap 預設把「亮度>220 且飽和<30」判成眼睛高光，那假設它只有幾個像素。這隻胸前有一大片同樣亮的白圍脖，實測整片白被判成 eye_highlight，白色標記在畫面上整個消失——而白色正是這隻唯一還有效的辨識頻道。\ncoat_light 從 118 降到 105：111-116 的色群飽和度都在 108 以上，那是金褐不是淺巧克力。",
+    "outline": 30,
+    "coat_dark": 56,
+    "coat_mid": 82,
+    "coat_light": 105,
+    "bright_bands": [
+      [
+        150,
+        "tan_dark"
+      ],
+      [
+        185,
+        "tan_mid"
+      ],
+      [
+        215,
+        "tan_light"
+      ],
+      [
+        242,
+        "white_shade"
+      ],
+      [
+        999,
+        "white_pure"
+      ]
+    ]
+  },
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#20150E",
+      "note": "不用純黑。長毛的外緣是鋸齒狀，描邊太黑會讓剪影看起來髒"
+    },
+    {
+      "index": 2,
+      "role": "coat_dark",
+      "hex": "#3A2618",
+      "note": "陰影側的巧克力"
+    },
+    {
+      "index": 3,
+      "role": "coat_mid",
+      "hex": "#5E4330",
+      "note": "主要巧克力。實測值，直接用——這隻的毛色和 brown_mixed 的 coat_mid/coat_light 幾乎重合，改也改不開，不如照實畫，靠白色與體型去分"
+    },
+    {
+      "index": 4,
+      "role": "coat_light",
+      "hex": "#7A5A40",
+      "note": "受光的巧克力"
+    },
+    {
+      "index": 5,
+      "role": "tan_dark",
+      "hex": "#A9834F",
+      "note": "金褐的暗部"
+    },
+    {
+      "index": 6,
+      "role": "tan_mid",
+      "hex": "#C79F6E",
+      "note": "眼上金褐斑、後腿金褐。實測值。**這是眼睛能被讀到的原因**——虹膜是深褐，靠這圈亮色襯出來"
+    },
+    {
+      "index": 7,
+      "role": "tan_light",
+      "hex": "#DFC098",
+      "note": "耳朵與尾巴飾毛的奶油色尖端。長毛犬的邊緣就是靠這一階看起來蓬鬆"
+    },
+    {
+      "index": 8,
+      "role": "white_shade",
+      "hex": "#E6D8C0",
+      "note": "白色的陰影側，同時也是**尾巴羽毛與耳朵飾毛的奶油色**。一格兩用是 16 色的必然。實測 master 的色群亮度是 112/156/180/204/242 五階，三格 tan 接不住，把這一格拉暖拉亮（原本 #CFC4B6 太灰）之後剛好接成單調遞增。"
+    },
+    {
+      "index": 9,
+      "role": "white_pure",
+      "hex": "#F6F1E9",
+      "note": "額斑、圍脖、吻部、四腳白襪。**整個專案裡唯一的大面積白**——另外兩隻身上一點白都沒有，這是這隻的一句話身分"
+    },
+    {
+      "index": 10,
+      "role": "nose_liver",
+      "hex": "#6B4436",
+      "note": "肝色偏粉。比 brown_mixed 的 #4A2E22 亮，也是分辨點之一"
+    },
+    {
+      "index": 11,
+      "role": "eye_dark",
+      "hex": "#211710",
+      "note": "眼眶與瞳孔"
+    },
+    {
+      "index": 12,
+      "role": "eye_iris",
+      "hex": "#4A3122",
+      "note": "深褐近黑的虹膜。三隻狗：琥珀（亮）／淡藍（亮）／深褐（暗）"
+    },
+    {
+      "index": 13,
+      "role": "eye_highlight",
+      "hex": "#F8F5EF",
+      "note": "**這隻的高光比另外兩隻重要**：虹膜是暗色，沒有高光的話眼睛在深色臉上讀不出來"
+    },
+    {
+      "index": 14,
+      "role": "contact_shadow",
+      "hex": "#2A1E15"
+    },
+    {
+      "index": 15,
+      "role": "collar_accent",
+      "hex": "#E8C33A",
+      "note": "芥末黃項圈。藍（brown_mixed）／粉（brindle_guard）／黃，三個色相在色環上最分得開。這隻是**設計指定**不是照片實據——照片裡沒有戴項圈"
+    }
+  ],
+  "protect": [
+    {
+      "_note": "量化會吃掉的極小特徵。做法與 brindle_guard 相同，見 docs/08 第 2.9 節。"
+    },
+    {
+      "role": "collar_accent",
+      "src_hex": "#E6A308",
+      "tol": 30,
+      "coverage": 0.25,
+      "min_thickness": 1,
+      "why": "黃項圈在 44px 上只有 1 px 高、6 px 寬，量化一定吃掉——實測 master 降採樣後整條消失。實測 tol 30 命中 908 px 且全部集中在 x899-988 y631-660（就是項圈本身）；tol 45 開始外漏到 x305-1126，所以停在 30。**min_thickness 必須是 1**：這條帶子本來就只有一個像素厚，套 brindle_guard 那個 2 會整條消失。"
+    }
+  ],
+  "_protect_note": "鼻子與眼睛高光**沒有**用 protect，這是量過之後的決定：\n· 鼻子 #7C2F1C（色相 12°）和巧克力毛 #5C371A（色相 26°）太近，tol 25 就已經誤傷 18,997 px，整身毛都會被染成鼻子色。改成在 master 用 patch.json 手工畫，動畫則接受它降採樣成「白吻部上的一個深色點」——那本來就是鼻子在 44px 上該有的樣子。\n· 眼睛高光是白色，和白圍脖同色，色相上不可分離。但實測**它自己活下來了**：高光夠亮，在量化時拿得到 white_pure 那一群。44px 的眼睛是「暗眼 + 白高光 + 金褐眼圈」，讀得出來。"
+}

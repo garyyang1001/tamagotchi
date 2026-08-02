@@ -3,7 +3,7 @@
   "#080008": "outline",
   "#352517": "coat_dark",
   "#362617": "coat_dark",
-  "#382619": "coat_dark",
+  "#372619": "coat_dark",
   "#392719": "coat_dark",
   "#3C2A1B": "coat_dark",
   "#3E2B1C": "coat_dark",
@@ -18,8 +18,9 @@
   "#583F29": "coat_mid",
   "#593F29": "coat_mid",
   "#594029": "coat_mid",
+  "#5B4029": "coat_mid",
   "#5C412A": "coat_mid",
   "#BC8448": "tan_mid",
-  "#C29260": "tan_mid",
+  "#C29361": "tan_mid",
   "#CEB193": "muzzle_grey_light"
 }

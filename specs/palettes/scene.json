@@ -1,0 +1,105 @@
+{
+  "palette_id": "scene",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "房間與物件共用的 16 色。角色各有自己的調色盤，這一組只給場景。\n**日夜共用同一張點陣圖，只換調色盤**——同一個檔案兩套顏色，省 flash 而且保證日夜完全對齊（做不出「夜間版的窗戶少了一格」這種錯）。\n這和公主的服裝置換是同一招（specs/palettes/ice_princess.json 的 outfit_slots）。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#3A3229",
+      "note": "物件的描邊。暖深灰，比四個角色的描邊淺一階——物件不該比角色搶眼"
+    },
+    {
+      "index": 2,
+      "role": "wall_light",
+      "hex": "#ECE4D6",
+      "note": "牆面主色。**刻意用淺色**：深色背景會讓深棕色的狗看起來比實際上更清楚，淺牆才是誠實的測試（同 preview.py 的實機模擬）"
+    },
+    {
+      "index": 3,
+      "role": "wall_shade",
+      "hex": "#DED3C0",
+      "note": "牆面的踢腳線與陰影"
+    },
+    {
+      "index": 4,
+      "role": "floor_light",
+      "hex": "#CDBAA1",
+      "note": "地板"
+    },
+    {
+      "index": 5,
+      "role": "floor_shade",
+      "hex": "#B6A085",
+      "note": "地板的接縫與地毯下的陰影"
+    },
+    {
+      "index": 6,
+      "role": "rug_light",
+      "hex": "#D3A896",
+      "note": "地毯。它的作用是把四個角色框成一組（docs/09 說體型是最強的辨識頻道，地毯給體型一個共同的比較基準）"
+    },
+    {
+      "index": 7,
+      "role": "rug_shade",
+      "hex": "#BC8E7E",
+      "note": "地毯的邊緣與紋樣"
+    },
+    {
+      "index": 8,
+      "role": "wood_dark",
+      "hex": "#8A6A4A",
+      "note": "窗框、畫框、層架"
+    },
+    {
+      "index": 9,
+      "role": "wood_light",
+      "hex": "#B08D66",
+      "note": "木頭受光面"
+    },
+    {
+      "index": 10,
+      "role": "sky_blue",
+      "hex": "#C2D8E6",
+      "note": "窗外"
+    },
+    {
+      "index": 11,
+      "role": "metal_light",
+      "hex": "#B4ACA0",
+      "note": "飯碗的口緣"
+    },
+    {
+      "index": 12,
+      "role": "metal_dark",
+      "hex": "#8A8378",
+      "note": "飯碗的碗身"
+    },
+    {
+      "index": 13,
+      "role": "ball_red",
+      "hex": "#C6584C",
+      "note": "球。**刻意不用任何角色的配件色**——藍項圈／粉背帶／黃項圈／莓紅圍巾都已經佔掉了，球要一眼看得出「這不是誰身上的東西」"
+    },
+    {
+      "index": 14,
+      "role": "bed_blue",
+      "hex": "#93AEBF",
+      "note": "睡墊"
+    },
+    {
+      "index": 15,
+      "role": "bed_light",
+      "hex": "#B3CBD9",
+      "note": "睡墊的受光面"
+    }
+  ],
+  "night_palette": "specs/palettes/scene_night.json"
+}

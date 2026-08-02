@@ -4,7 +4,7 @@
  * 掉電安全的 A/B 雙槽存檔。設計理由見 docs/04_資料結構與存檔設計.md。
  *
  * 核心保證：任何時間點斷電，最多損失自上次存檔以來的進度，
- * 絕不會出現「存檔毀損、養成進度歸零」。這台機器會被 3 歲小孩隨手拔電。
+ * 絕不會出現「存檔毀損、養成進度歸零」。這台機器會被小孩隨手拔電。
  */
 #pragma once
 
@@ -34,16 +34,24 @@ typedef struct __attribute__((packed)) {
     uint8_t energy;   /* 精力 */
     uint8_t mood;     /* 心情 */
     uint8_t bladder;  /* 如廁，僅狗使用 */
-    uint8_t tidy;     /* 整潔，僅公主使用 */
+    uint8_t tidy;     /* 整潔。2026-08-02 加了洗澡之後四個角色都用 */
 } needs_t;
 
 typedef struct __attribute__((packed)) {
     needs_t  needs;
     uint16_t affection;        /* 只增不減。這是「我們相處了多久」，不是分數 */
-    uint8_t  outfit_id;        /* 僅公主 */
-    uint8_t  unlocked_outfits; /* bitmask */
+    uint8_t  outfit_id;        /* 僅公主。id = unlocked_outfits 的 bit 位置 */
+    uint8_t  unlocked_outfits; /* bitmask，bit 0 = 一開始就有的預設服裝 */
     uint8_t  reserved[4];
 } character_save_t;
+
+/* character_save_t.reserved[] 的欄位配置。
+   契約與 save_blob_t.reserved[] 一樣：**每一格的 0 都必須是合理的預設**，
+   舊存檔沒寫過這些 byte，新韌體一律讀到 0。 */
+
+/* reserved[0] — 配件 bitmask。0 = 沒有配件，正好是「還沒挑過」的預設。
+   配件清單尚未定案，韌體只留 API 掛鉤（game_accessory_mask）。 */
+#define CHAR_RSV_ACCESSORY 0
 
 /* ------------------------------------------------------------------ */
 /* 存檔                                                                */
@@ -73,11 +81,32 @@ typedef struct __attribute__((packed)) {
     uint8_t  night_end_hour;    /* 預設 7  */
 
     /* 加新欄位時從這裡切，不必遞增 SAVE_VERSION：
-       舊韌體讀新檔會忽略，新韌體讀舊檔會得到 0。雙向相容。 */
+       舊韌體讀新檔會忽略，新韌體讀舊檔會得到 0。雙向相容。
+
+       用法見下方 SAVE_RSV_*。**每一格的 0 都必須代表「舊韌體的行為」**，
+       這是 reserved 免遷移的唯一前提。 */
     uint8_t  reserved[32];
 
     uint32_t crc32;             /* 涵蓋本結構前面所有位元組 */
 } save_blob_t;
+
+/* ------------------------------------------------------------------ */
+/* reserved[] 的欄位配置                                                */
+/* ------------------------------------------------------------------ */
+
+/* reserved[0] — 電燈開關。**存的是 light_off，不是 light_on。**
+ *
+ * 這個方向不是風格問題，是相容性問題。reserved 的契約是
+ * 「新韌體讀舊檔會得到 0」，所以 0 必須代表舊韌體的行為，
+ * 而舊韌體沒有電燈這個概念、螢幕永遠是亮的 = 燈開著。
+ *
+ * 如果存成 light_on，既有機器升級之後讀到 0 就是「燈關」，
+ * 小孩一開機看到的是全黑的房間，而且她不知道那是可以按回來的。
+ * 存成 light_off 就沒有這個問題，**因此也不需要遞增 SAVE_VERSION**——
+ * 舊檔在新韌體下的語意是正確的，不是「被容忍的」。
+ *
+ * 值：0 = 燈開（預設）、1 = 燈關。 */
+#define SAVE_RSV_LIGHT_OFF 0
 
 /* ------------------------------------------------------------------ */
 /* 離線衰減                                                            */

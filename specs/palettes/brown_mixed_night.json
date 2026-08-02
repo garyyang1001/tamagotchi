@@ -1,0 +1,100 @@
+{
+  "palette_id": "brown_mixed_night",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "derived_from": "specs/palettes/brown_mixed.json",
+  "generator": "tools/nightpal.py",
+  "transform": {
+    "formula": "out = day * k + tint * (1 - k)",
+    "k": 0.45,
+    "tint": [
+      28,
+      36,
+      70
+    ]
+  },
+  "note": "夜間置換。**角色編號逐一對應日間調色盤**，換調色盤就換夜間，不換圖。\n用仿射變換而不是手挑：它保序，所以 docs/09 的明度分離在夜間仍然成立（任意兩色的亮度差被壓縮同一個比例）。\n改「夜要多暗」只要改 tools/nightpal.py 的 K 再重跑，四個角色一起變。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#1D1D2E"
+    },
+    {
+      "index": 2,
+      "role": "coat_dark",
+      "hex": "#242230"
+    },
+    {
+      "index": 3,
+      "role": "coat_mid",
+      "hex": "#312A37"
+    },
+    {
+      "index": 4,
+      "role": "coat_light",
+      "hex": "#3D333C"
+    },
+    {
+      "index": 5,
+      "role": "tan_dark",
+      "hex": "#4E3F41"
+    },
+    {
+      "index": 6,
+      "role": "tan_mid",
+      "hex": "#5F4D4A"
+    },
+    {
+      "index": 7,
+      "role": "muzzle_grey_dark",
+      "hex": "#4E4D5A"
+    },
+    {
+      "index": 8,
+      "role": "muzzle_grey_light",
+      "hex": "#686773"
+    },
+    {
+      "index": 9,
+      "role": "nose_liver",
+      "hex": "#312836"
+    },
+    {
+      "index": 10,
+      "role": "eye_iris",
+      "hex": "#5B4B42"
+    },
+    {
+      "index": 11,
+      "role": "eye_dark",
+      "hex": "#22202E"
+    },
+    {
+      "index": 12,
+      "role": "eye_highlight",
+      "hex": "#7C7E8D"
+    },
+    {
+      "index": 13,
+      "role": "tongue_pink",
+      "hex": "#664456"
+    },
+    {
+      "index": 14,
+      "role": "contact_shadow",
+      "hex": "#202030"
+    },
+    {
+      "index": 15,
+      "role": "collar_accent",
+      "hex": "#2A4D7F"
+    }
+  ]
+}

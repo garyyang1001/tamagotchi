@@ -1,0 +1,1582 @@
+{
+  "scene_id": "room",
+  "format_version": 1,
+  "palette": "specs/palettes/scene.json",
+  "night_palette": "specs/palettes/scene_night.json",
+  "_note": "房間底圖與物件的定義。由 tools/scene.py 算成 PNG——**沒有任何一步是手工在影像編輯器裡做的**，改這個 JSON 重跑就好，和角色資產同一個可重現契約。\n為什麼不用 AI 生：房間是大片平塗的幾何（牆、地板、地毯、窗框），AI 在這裡沒有加分，只會多一輪 28,000 色的重映射。CLAUDE.md 規則 2 的分工是「造型與剪影給 AI、精確顏色與網格給工具」，房間全部落在後者。",
+  "size": [
+    320,
+    176
+  ],
+  "_size_why": "螢幕是 320×240，底部 64 px 是圖示列，由 UI 層畫。底圖只做看得到的那 176 列。",
+  "layout": {
+    "_ref": "版面 F（地毯 + 前後錯開），四個版面比對之後選的。",
+    "floor_y": 132,
+    "ground_y": 150,
+    "_ground_why": "角色腳底的基準線。地毯從 124 開始、延伸到角色身後，所以角色站在 150 時看起來是站在毯上而不是毯前——這是不做 z 排序就得到深度的方法。",
+    "ui_bar_y": 176,
+    "ui_bar_h": 64,
+    "_ui_why": "圖示下限 48 px（docs/02 第三節）。**理由不是手指精度**——本專案用實體按鍵不用觸控——而是 3 歲要在一公尺外認得出圖示。64 給圖示留了餘裕，而且 320/3 = 106 px 寬。",
+    "ui": {
+      "_note": "動作選單的三個圖示格。**選取框是幾何不是 sprite**——四個 fill_rect 比存一張 64×64 的 4bpp 圖（2 KB）便宜，而且改粗細不用重烘焙。",
+      "icon_cell_w": 106,
+      "icon_size": 48,
+      "icon_x": [
+        29,
+        135,
+        241
+      ],
+      "_icon_x_why": "格寬 320/3 = 106（第三格 108）。圖示置中：x = 格左緣 + (106−48)/2 = 29 / 135 / 241。",
+      "icon_y": 184,
+      "select_box": {
+        "pad": 6,
+        "thickness": 3,
+        "color": "ball_red",
+        "_why": "圖示外擴 6 px 畫一圈 3 px 的框（60×60）。和角色游標同一個顏色，小孩才會把兩層選單認成同一件事。"
+      }
+    }
+  },
+  "background": [
+    {
+      "op": "fill",
+      "role": "wall_light"
+    },
+    {
+      "op": "rect",
+      "role": "wall_shade",
+      "box": [
+        0,
+        126,
+        320,
+        132
+      ],
+      "_": "踢腳線"
+    },
+    {
+      "op": "rect",
+      "role": "floor_light",
+      "box": [
+        0,
+        132,
+        320,
+        176
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "floor_shade",
+      "box": [
+        0,
+        132,
+        320,
+        134
+      ],
+      "_": "牆與地板的交界陰影"
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        6,
+        46,
+        46,
+        132
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_light",
+      "box": [
+        9,
+        49,
+        43,
+        132
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        13,
+        55,
+        39,
+        86
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        13,
+        92,
+        39,
+        126
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "metal_light",
+      "box": [
+        36,
+        88,
+        40,
+        92
+      ],
+      "_c": "門把"
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        132,
+        18,
+        190,
+        60
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "sky_blue",
+      "box": [
+        135,
+        21,
+        187,
+        57
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        159,
+        21,
+        161,
+        57
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        135,
+        37,
+        187,
+        39
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_light",
+      "box": [
+        128,
+        60,
+        194,
+        63
+      ],
+      "_c": "窗台"
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        262,
+        50,
+        314,
+        132
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_light",
+      "box": [
+        265,
+        53,
+        311,
+        132
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        287,
+        53,
+        289,
+        132
+      ],
+      "_c": "兩扇門的接縫"
+    },
+    {
+      "op": "rect",
+      "role": "metal_light",
+      "box": [
+        283,
+        88,
+        286,
+        94
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "metal_light",
+      "box": [
+        290,
+        88,
+        293,
+        94
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        258,
+        46,
+        318,
+        50
+      ],
+      "_c": "櫃頂"
+    },
+    {
+      "op": "rect",
+      "role": "wood_dark",
+      "box": [
+        80,
+        24,
+        110,
+        46
+      ]
+    },
+    {
+      "op": "rect",
+      "role": "wall_shade",
+      "box": [
+        83,
+        27,
+        107,
+        43
+      ]
+    },
+    {
+      "op": "ellipse",
+      "role": "rug_shade",
+      "box": [
+        88,
+        31,
+        102,
+        40
+      ]
+    },
+    {
+      "op": "ellipse",
+      "role": "rug_shade",
+      "box": [
+        18,
+        122,
+        302,
+        172
+      ],
+      "_": "地毯外圈"
+    },
+    {
+      "op": "ellipse",
+      "role": "rug_light",
+      "box": [
+        24,
+        126,
+        296,
+        168
+      ],
+      "_": "地毯內圈"
+    }
+  ],
+  "characters": {
+    "_note": "站位。x 是角色影格左緣在螢幕上的位置，dy 是往上錯開的量（做深度）。2026-08-02 從「四隻並排」改成「公主常駐 + 最多一隻狗」。",
+    "_order_why": "**每個角色站在自己會用到的東西旁邊。** 狗從門進出（門在 x6-46），所以狗位靠左；公主用衣櫃（x262-318），但她**不能站到衣櫃前面**——她 96 高，站過去會把牆上的電燈開關（x210-226, y70-86）整個蓋掉，那一格游標就選不到了。所以她排在中間 x120-184，右緣離開關還有 26 px。",
+    "slots": [
+      {
+        "id": "dog",
+        "x": 40,
+        "dy": 4,
+        "_who": "在場的那一隻狗，由韌體的 game_t.present 決定畫誰。三隻共用這一格。",
+        "_why": "靠門（x6-46），呼叫進來就是從這裡走進畫面，離場也從這裡走出去。"
+      },
+      {
+        "id": "ice_princess",
+        "x": 120,
+        "dy": 0,
+        "_why": "常駐。dy 0 代表她在最前面——她是主角，狗 dy 4 略後。"
+      }
+    ],
+    "_free_floor": "空出來的地板：x0-40（門前）與 x184-320（右半）。四隻並排的版本一塊空地都沒有，這也是當初電燈開關只能上牆的原因。現在右半留給閒置訪客（小松鼠、小鳥）跑動。"
+  },
+  "objects": {
+    "_note": "**物件只在需要時出現**，平時房間是空的。320 px 的寬度扣掉角色的 226 就只剩 94，同時放下碗／球／床會擠爆，而且畫面越乾淨三歲小孩越容易鎖定角色。",
+    "bowl": {
+      "size": [
+        15,
+        9
+      ],
+      "_when": "ACT_FEED 期間。畫在正在吃的那個角色腳下。",
+      "_princess": "公主沒有錨點——她的碗是**捧在手上**的，跟著手動，所以留在影格裡。人不會趴在地上從碗裡吃。",
+      "art": [
+        "...#########...",
+        "..#=========#..",
+        ".#===========#.",
+        "#=+++++++++++=#",
+        "#=+---------+=#",
+        ".#+---------+#.",
+        "..#+-------+#..",
+        "...#+-----+#...",
+        "....#######...."
+      ],
+      "key": {
+        "#": "outline",
+        "=": "metal_light",
+        "+": "metal_dark",
+        "-": "metal_dark",
+        ".": null
+      },
+      "anchor_x": {
+        "brown_mixed": 50,
+        "brindle_guard": 47,
+        "chihuahua": 42,
+        "_note": "碗的左緣相對於角色影格。實測 eat 動畫裡三隻狗的吻部 x 相差 10 px，所以逐角色記。"
+      },
+      "base_row": 8,
+      "mode": "ground"
+    },
+    "ball": {
+      "size": [
+        10,
+        9
+      ],
+      "_when": "ACT_PLAY 期間。公主投出之後由渲染層做拋物線，狗追它——所以**不能烘進影格**，它必須自己動。",
+      "art": [
+        "...####...",
+        "..#oooo#..",
+        ".#oo@@oo#.",
+        "#ooo@@ooo#",
+        "#oooooooo#",
+        "#oooooooo#",
+        ".#oooooo#.",
+        "..#oooo#..",
+        "...####..."
+      ],
+      "key": {
+        "#": "outline",
+        "o": "ball_red",
+        "@": "wall_light",
+        ".": null
+      },
+      "_placement": "球不用錨點——它會飛。渲染層自己算拋物線，這正是把它拆出影格的理由。",
+      "track": {
+        "_note": "球的螢幕座標軌跡，相對房間左上角。公主在最左邊投出，球往右飛過地毯，落地之後彈兩下停在狗的前面。\n**這是場景層的動畫，不屬於任何角色**——所以它不能烘進影格，也不能用角色的 anim.json 表達。逐格給座標最直接。",
+        "_timing": "和 chase_ball 的 frame_ms 無關：球飛的時間由這張表決定，共 12 格 × 80ms = 0.96 秒，剛好蓋住 ACT_PLAY 序列裡 chase_ball 循環兩次的長度。",
+        "frame_ms": 80,
+        "frames": [
+          {
+            "f": 0,
+            "x": 78,
+            "y": 108
+          },
+          {
+            "f": 1,
+            "x": 102,
+            "y": 96
+          },
+          {
+            "f": 2,
+            "x": 126,
+            "y": 92
+          },
+          {
+            "f": 3,
+            "x": 150,
+            "y": 96
+          },
+          {
+            "f": 4,
+            "x": 172,
+            "y": 108
+          },
+          {
+            "f": 5,
+            "x": 192,
+            "y": 126
+          },
+          {
+            "f": 6,
+            "x": 208,
+            "y": 141
+          },
+          {
+            "f": 7,
+            "x": 222,
+            "y": 132
+          },
+          {
+            "f": 8,
+            "x": 234,
+            "y": 141
+          },
+          {
+            "f": 9,
+            "x": 244,
+            "y": 137
+          },
+          {
+            "f": 10,
+            "x": 252,
+            "y": 141
+          },
+          {
+            "f": 11,
+            "x": 256,
+            "y": 141
+          }
+        ]
+      },
+      "base_row": 8,
+      "mode": "track"
+    },
+    "bed": {
+      "size": [
+        66,
+        22
+      ],
+      "_when": "ACT_SLEEP 期間。畫在角色腳下，角色趴在上面。",
+      "art": [
+        "..................................................................",
+        "....................#oooooooooooooooooooooooo#....................",
+        "..............#oooooooooooooooooooooooooooooooooooo#..............",
+        "...........#ooo++++++++++++++++++++++++++++++++++++ooo#...........",
+        "........#ooo++++++++++++++++++++++++++++++++++++++++++ooo#........",
+        "......#ooo++++++++++++++++++++++++++++++++++++++++++++++ooo#......",
+        "....#ooo++++++++++++++++++++++++++++++++++++++++++++++++++ooo#....",
+        "...#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#...",
+        "..#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#..",
+        ".#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#.",
+        ".#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#.",
+        ".#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#.",
+        ".#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#.",
+        "..#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#..",
+        "...#ooo++++++++++++++++++++++++++++++++++++++++++++++++++++ooo#...",
+        "....#ooo++++++++++++++++++++++++++++++++++++++++++++++++++ooo#....",
+        "......#ooo++++++++++++++++++++++++++++++++++++++++++++++ooo#......",
+        "........#ooo++++++++++++++++++++++++++++++++++++++++++ooo#........",
+        "...........#ooo++++++++++++++++++++++++++++++++++++ooo#...........",
+        "..............#oooooooooooooooooooooooooooooooooooo#..............",
+        "....................#oooooooooooooooooooooooo#....................",
+        ".................................................................."
+      ],
+      "key": {
+        "#": "outline",
+        "o": "bed_blue",
+        "+": "bed_light",
+        ".": null,
+        " ": null
+      },
+      "anchor_x": {
+        "all": -1,
+        "_note": "置中於 64 寬的影格：(64 − 66) / 2 = −1。墊子比影格寬 2 px 是刻意的——趴著的狗最寬到 64，墊子不比它寬就完全看不到。"
+      },
+      "base_row": 13,
+      "_base_why": "base_row 13 表示墊子的第 13 列踩在地面線上，底下還有 8 列。那 8 列是墊子的**近側邊緣**，露在角色前面——這是唯一能讓墊子被看見的方法：角色趴下時最低的一列也在地面線上，兩者底緣對齊的話墊子會被完全蓋住。",
+      "mode": "ground"
+    },
+    "_placement": "物件有四種擺放模式，由 `mode` 決定：\n\n  ground（預設）  貼在角色腳邊。x = slot.x + anchor_x，y = ground_y − slot.dy − base_row\n                  `base_row` 是物件自己宣告哪一列踩在地面線上（預設最底列）。\n  float           浮在角色身上。x,y 都相對**角色影格的左上角**。\n                  這一類 y 由人填是對的——它不接地，沒有可以推算的基準。\n  fixed           固定在螢幕的絕對座標（例如窗外的雪）。不跟任何角色。\n  track           逐格給絕對座標（球）。\n\n為什麼要分四種：**y 該不該由人填，取決於物件有沒有接地。**\n接地的東西 y 是推算得出來的，讓人填就會出錯——實測記 [x,y] 的版本對狗成立、對公主差 40 px。不接地的東西沒有基準，硬要推算反而是假的。",
+    "heart": {
+      "mode": "float",
+      "size": [
+        10,
+        8
+      ],
+      "frame_count": 4,
+      "frame_ms": 180,
+      "_when": "ACT_PET 期間。浮在被摸的角色頭上。",
+      "_why": "docs/02 第 9.2 節：3-6 歲按下去可以長達 5.1 秒，而且**要在按下的當下註冊輸入、按住超過 1-2 秒要給回饋讓小孩知道可以放開**（行為觀察沿用自 Vatavu et al. 2015 / Sesame Workshop 2012 的觸控研究；毫秒數字是在觸控螢幕上量的，不直接套用到按鍵）。\nACT_PET 只播 pet_react 這個角色動畫，沒有任何『我收到你這一下了』的訊號。愛心是最直接的補法，而且四個角色共用同一個。",
+      "anchor": {
+        "_note": "相對角色影格左上角。實測 pet_react 的頭頂列與頭部水平中心算出來的：x = 頭中心 − 5（愛心寬 10），y = 頭頂 − 11（愛心高 8，頭上留 3 px）。四個角色的頭頂高度差很多（狗的影格 56、公主 96），所以逐角色記。",
+        "brown_mixed": [
+          39,
+          -11
+        ],
+        "brindle_guard": [
+          39,
+          -11
+        ],
+        "chihuahua": [
+          33,
+          5
+        ],
+        "ice_princess": [
+          24,
+          -5
+        ]
+      },
+      "frames": [
+        [
+          "..........",
+          "..........",
+          "..######..",
+          "..######..",
+          "..######..",
+          "..######..",
+          "...####...",
+          ".........."
+        ],
+        [
+          "..##..##..",
+          ".#@@#####.",
+          "##@@######",
+          "##########",
+          ".########.",
+          "..######..",
+          "...####...",
+          "....##...."
+        ],
+        [
+          "..##..##..",
+          ".#@@#####.",
+          "##@@######",
+          "##########",
+          ".########.",
+          "..######..",
+          "...####...",
+          "....##...."
+        ],
+        [
+          "..##..##..",
+          ".########.",
+          "##########",
+          "##########",
+          ".########.",
+          "..######..",
+          "...####...",
+          "....##...."
+        ]
+      ],
+      "key": {
+        "#": "ball_red",
+        "@": "wall_light",
+        ".": null
+      },
+      "_frames_why": "四格：小 → 大（帶高光）→ 大 → 大（高光消失）。**不做淡出**——4bpp 索引色沒有半透明，alpha 混合會產生調色盤外的中間色。要表現消失只能靠縮小或直接停止繪製。"
+    },
+    "snow": {
+      "mode": "fixed",
+      "at": [
+        135,
+        21
+      ],
+      "size": [
+        52,
+        36
+      ],
+      "frame_count": 3,
+      "frame_ms": 420,
+      "_when": "永遠在。這是氛圍不是互動——不綁任何動畫，渲染層一開機就畫。",
+      "_why": "窗戶原本是一塊死掉的淺藍。加三格飄雪之後它是房間裡唯一會動的背景，而且強化冰雪主題（公主的設計被迫原創化之後，主題的線索少了很多，這裡補回來一點）。\n只有三格、420ms 一格——慢到不會搶角色的注意力。",
+      "frames": [
+        [
+          "....................................................",
+          "..................................**................",
+          "....**............................**................",
+          "....**..............................................",
+          "....................................................",
+          "...........................................**.......",
+          "...........................................**.......",
+          "....................................................",
+          ".....................**.............................",
+          ".....................**.............................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "......................................**............",
+          "......................................**............",
+          "....................................................",
+          "....................................................",
+          ".........................**.........................",
+          ".........................**.........................",
+          ".............**.....................................",
+          ".............**.....................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "..............................................**....",
+          "..............................................**....",
+          "....................................................",
+          "....................................................",
+          "..............................**....................",
+          "..............................**....................",
+          "....................................................",
+          ".........**.........................................",
+          ".........**.........................................",
+          "....................................................",
+          "....................................................",
+          "...................................................."
+        ],
+        [
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "..................................**................",
+          "....**............................**................",
+          "....**..............................................",
+          "....................................................",
+          "...........................................**.......",
+          "...........................................**.......",
+          "....................................................",
+          ".....................**.............................",
+          ".....................**.............................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "......................................**............",
+          "......................................**............",
+          "....................................................",
+          "....................................................",
+          ".........................**.........................",
+          ".........................**.........................",
+          ".............**.....................................",
+          ".............**.....................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "..............................................**....",
+          "..............................................**....",
+          "....................................................",
+          "....................................................",
+          "..............................**....................",
+          "..............................**....................",
+          "....................................................",
+          ".........**........................................."
+        ],
+        [
+          "..............................**....................",
+          "..............................**....................",
+          "....................................................",
+          ".........**.........................................",
+          ".........**.........................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "..................................**................",
+          "....**............................**................",
+          "....**..............................................",
+          "....................................................",
+          "...........................................**.......",
+          "...........................................**.......",
+          "....................................................",
+          ".....................**.............................",
+          ".....................**.............................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "......................................**............",
+          "......................................**............",
+          "....................................................",
+          "....................................................",
+          ".........................**.........................",
+          ".........................**.........................",
+          ".............**.....................................",
+          ".............**.....................................",
+          "....................................................",
+          "....................................................",
+          "....................................................",
+          "..............................................**....",
+          "..............................................**....",
+          "....................................................",
+          "...................................................."
+        ]
+      ],
+      "key": {
+        "*": "wall_light",
+        ".": null
+      }
+    },
+    "bed_princess": {
+      "mode": "ground",
+      "size": [
+        70,
+        30
+      ],
+      "base_row": 22,
+      "anchor_x": {
+        "ice_princess": -3,
+        "_note": "她躺下時佔滿整個 64 寬的影格，床要比她寬才看得到：(64 − 70) / 2 = −3。"
+      },
+      "_when": "ACT_SLEEP 期間，只給公主。",
+      "_why": "**人睡床，不睡地墊。** 原本她和三隻狗共用同一張 66×22 的睡墊，而她的 lie_down / sleep_breathe 又是照狗的段落生的（臉朝下趴在地上），兩個錯誤剛好互相掩護，看起來沒那麼怪。\n現在她側躺蓋被子——**被子與枕頭留在影格裡**（它們跟著身體），床架是獨立物件（它不動）。判準和飯碗一樣：會不會離開角色的身體。",
+      "art": [
+        "..............................................................########",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..............................................................#HHHHHH#",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#HHHHHH#",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#HHHHHH#",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "..#mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm#..",
+        "...################################################################..."
+      ],
+      "key": {
+        "#": "outline",
+        "H": "wood_dark",
+        "M": "bed_light",
+        "m": "bed_blue",
+        ".": null
+      }
+    },
+    "shower": {
+      "mode": "ground",
+      "size": [
+        46,
+        102
+      ],
+      "base_row": 101,
+      "frame_count": 3,
+      "frame_ms": 260,
+      "anchor_x": {
+        "ice_princess": 9,
+        "_note": "置中於 64 寬的影格：(64 − 46) / 2 = 9。"
+      },
+      "_when": "ACT_BATH 期間，只給公主。畫在她**之上**，把她整個擋住。",
+      "_why": "淋浴間關起來——使用者的原話是「只要有水龍頭的剪影」。\n**這是刻意的設計選擇不是偷懶**：她被擋住就不需要任何洗澡的角色動畫，而且一個 3-5 歲女兒的裝置上，人物洗澡本來就該是關起來的。會動的只有水線，三格 260ms。",
+      "frames": [
+        [
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          "##################mmmmmmmmmmm#################",
+          "##################mmmmmmmmmmm#################",
+          "##gggggggggggggggggggggggggggggggggggggggggg##",
+          "##gggggggggggggggggggggggggggggggggggggggggg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##############################################",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##############################################"
+        ],
+        [
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          "##################mmmmmmmmmmm#################",
+          "##################mmmmmmmmmmm#################",
+          "##gggggggggggggggggggggggggggggggggggggggggg##",
+          "##gggggggggggggggggggggggggggggggggggggggggg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##############################################",
+          "##tttttttttttttttttttttttttttwtttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##############################################"
+        ],
+        [
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          "......................mm......................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          ".................MMMMMMMMMMMMM................",
+          "##################mmmmmmmmmmm#################",
+          "##################mmmmmmmmmmm#################",
+          "##gggggggggggggggggggggggggggggggggggggggggg##",
+          "##gggggggggggggggggggggggggggggggggggggggggg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGwGGGGGGGGGwGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGwGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##ggGGGGGGGGGGGGGGGwGGGGGGGGGGGGGGGGGGGGGGgg##",
+          "##############################################",
+          "##tttttttttttttttttttttttttttwtttttttttttttt##",
+          "##ttttttttttttwtttttttttwttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##tttttttttttttttttttttttttttttttttttttttttt##",
+          "##############################################"
+        ]
+      ],
+      "key": {
+        "#": "outline",
+        "g": "sky_blue",
+        "G": "bed_light",
+        "t": "metal_dark",
+        "m": "metal_dark",
+        "M": "metal_light",
+        "w": "wall_light",
+        ".": null
+      }
+    },
+    "tub": {
+      "mode": "ground",
+      "size": [
+        56,
+        24
+      ],
+      "base_row": 23,
+      "frame_count": 3,
+      "frame_ms": 300,
+      "anchor_x": {
+        "all": 4,
+        "_note": "置中於 64 寬的影格：(64 − 56) / 2 = 4。"
+      },
+      "_when": "ACT_BATH 期間，只給三隻狗。畫在牠們**之上**，蓋住下半身。",
+      "_why": "狗洗澡不用關起來——牠站在盆子裡、上半身露出來，那是可愛的畫面。而且**不需要新的角色動畫**：牠播 idle_breathe 就好，盆子蓋住腿。",
+      "frames": [
+        [
+          "........................................................",
+          "........................................................",
+          "...............ww....................ww.................",
+          "....................ww..................................",
+          "..........................................ww............",
+          "..........ww............................................",
+          "##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTwwTTTTTTTTTTTTTTTTTTTTT##",
+          ".#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.",
+          ".#TTwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwTT#.",
+          ".##TWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWT##.",
+          "..#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#..",
+          "..#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#..",
+          "..##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##..",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##...",
+          "....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#....",
+          "....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#....",
+          "....##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##....",
+          ".....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.....",
+          ".....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.....",
+          ".....##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##.....",
+          ".....##############################################....."
+        ],
+        [
+          "........................................................",
+          "...............ww....................ww.................",
+          "....................ww..................................",
+          "..........................................ww............",
+          "..........ww............................................",
+          "...............................ww.......................",
+          "##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##",
+          ".#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.",
+          ".#TTwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwTT#.",
+          ".##TWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWT##.",
+          "..#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#..",
+          "..#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#..",
+          "..##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##..",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##...",
+          "....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#....",
+          "....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#....",
+          "....##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##....",
+          ".....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.....",
+          ".....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.....",
+          ".....##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##.....",
+          ".....##############################################....."
+        ],
+        [
+          "........................................................",
+          "....................ww..................................",
+          "..........................................ww............",
+          "..........ww............................................",
+          "...............................ww.......................",
+          "........................................................",
+          "##TTTTTTTTTTTTTwwTTTTTTTTTTTTTTTTTTTTwwTTTTTTTTTTTTTTT##",
+          ".#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.",
+          ".#TTwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwTT#.",
+          ".##TWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWT##.",
+          "..#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#..",
+          "..#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#..",
+          "..##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##..",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#...",
+          "...##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##...",
+          "....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#....",
+          "....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#....",
+          "....##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##....",
+          ".....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.....",
+          ".....#TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT#.....",
+          ".....##TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT##.....",
+          ".....##############################################....."
+        ]
+      ],
+      "key": {
+        "#": "outline",
+        "T": "bed_blue",
+        "w": "wall_light",
+        "W": "bed_light",
+        ".": null
+      }
+    },
+    "cursor": {
+      "mode": "ground",
+      "size": [
+        32,
+        13
+      ],
+      "base_row": 0,
+      "_when": "主畫面永遠顯示，指著目前選到的角色。**不是 cue 驅動的**——它不屬於任何動畫，渲染層每一格都畫。",
+      "_why": "按鍵介面必須回答『我現在選到誰』。docs/02 第 9.4 節：這個年齡讀不懂任何『這個可以選』的提示，所以選取狀態要用**位置**表達——左右鍵按下去，這個箭頭會移動，因果是直接的。這也是選按鍵而不選觸控的主要理由（docs/01）。",
+      "_static_why": "刻意只有一格、不閃不脈動。docs/02 第 9.4 節的結論是發光／脈動對 2–5 歲無效，而且會被誤讀成『這裡要按』。游標的訊號是它在哪裡，不是它在閃。",
+      "anchor_x": {
+        "all": 16,
+        "_note": "影格一律 64 寬，游標 32 寬，(64−32)/2 = 16 置中。四個角色共用。"
+      },
+      "_base_row_why": "base_row 0 代表第 0 列壓在地面線上。**前兩列是空的**——箭頭尖端因此離腳底 2 px，不會看起來像在戳角色。留白寫在圖裡而不是用負的 base_row，base_row 的語意才不會壞掉。整個箭頭掛在腳底下方的地板上（y 150→160，UI 條在 176，不會撞到）。放腳下而不是頭上：頭頂高度四個角色差 40 px，腳底是唯一共用的基準。",
+      "art": [
+        "................................",
+        "................................",
+        "...............oo...............",
+        "..............o##o..............",
+        ".............o####o.............",
+        "............o######o............",
+        "...........o########o...........",
+        "..........o##########o..........",
+        ".........o############o.........",
+        "........o##############o........",
+        ".......o################o.......",
+        "......o##################o......",
+        "......oooooooooooooooooooo......"
+      ],
+      "key": {
+        "#": "ball_red",
+        "o": "outline",
+        ".": null
+      },
+      "_size_why": "24 寬的版本貼進房間看過，紅色壓在粉色地毯上不夠跳。放大到 32（影格的一半寬）是最便宜的可讀性補法——不用加顏色（scene 調色盤 16 格已經用滿），也不用加影格。32 寬仍然不會撞到隔壁：四個游標分別在 x 44/110/174/242，間距 66 > 32。"
+    },
+    "lamp_switch": {
+      "mode": "fixed",
+      "at": [
+        210,
+        70
+      ],
+      "size": [
+        16,
+        16
+      ],
+      "frame_count": 2,
+      "frame_ms": 0,
+      "_when": "永遠在。第 0 格是燈關、第 1 格是燈開，由 save 的 light_off 決定畫哪一格。",
+      "_why": "主畫面的游標從 4 個位置變 5 個，第 5 個是這個開關。**真實世界的電燈開關就在牆上**，3 歲在自己家看過，這是能拿到最強的對應。「我按一下，天就黑了，狗就睡了」——這是整個裝置裡因果最直接的一件事，比餵食還直接。",
+      "_where_why": "x210-226, y70-86。這是房間裡唯一一塊四個角色都遮不到的空牆：窗在 x132-190、衣櫃在 x262-318，中間 x194-262 空著；公主 96 高（頂在 y55）、狗 56 高（頂在 y94），y63-94 這一帶沒有人擋。地板全被角色佔滿（x28-289），所以它只能上牆。",
+      "_marker_why": "游標走到它時畫的是**紅框**不是地板箭頭。判準沿用 _placement 已經在用的那一條：**接地的東西才有地板基準**。開關在牆上，沒有接地，硬要給它地板箭頭就是假的。紅框和動作選單的選取框是同一個幾何、同一個顏色，小孩看到的是同一件事。",
+      "frames": [
+        [
+          "................",
+          "...oooooooooo...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...oooooooooo...",
+          "................"
+        ],
+        [
+          "................",
+          "...oooooooooo...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o@@@@@@@@o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...o--------o...",
+          "...oooooooooo...",
+          "................"
+        ]
+      ],
+      "key": {
+        "@": "wall_light",
+        "-": "metal_dark",
+        "o": "outline",
+        ".": null
+      },
+      "_art_why": "第一版畫成「框裡一個方塊」，貼進房間看根本看不出是開關。改成**暗底板 + 大面積亮撥桿**：撥桿佔內部一半高度，上／下的位置差就是全部的訊號，不必看細節。底板用 metal_dark、撥桿用 wall_light（調色盤裡最亮的），16 px 下對比才夠。"
+    },
+    "battery": {
+      "mode": "fixed",
+      "at": [
+        298,
+        6
+      ],
+      "size": [
+        16,
+        10
+      ],
+      "frame_count": 3,
+      "frame_ms": 0,
+      "_when": "只有充電中或電量 ≤20% 時才畫。滿電且沒插電時完全不出現。",
+      "_why": "全圖示介面不能用文字講「快沒電了」。三格分別是：充電中（閃電）、低電量、極低。",
+      "_rule1_why": "**低電量不影響任何遊戲狀態。** 不讓角色難過、不生病、不倒數、不警告。它就只是右上角一個圖示。規則 1 沒有失敗狀態，電池也不例外——沒電是大人的問題，不是小孩把寵物養壞了。",
+      "frames": [
+        [
+          "ooooooooooooo...",
+          "o...........o...",
+          "o.....@.....o...",
+          "o....@......ooo.",
+          "o...@@@@....ooo.",
+          "o..@@@@.....ooo.",
+          "o....@......o...",
+          "o...@.......o...",
+          "ooooooooooooo...",
+          "................"
+        ],
+        [
+          "ooooooooooooo...",
+          "o...........o...",
+          "o.###.......o...",
+          "o.###.......ooo.",
+          "o.###.......ooo.",
+          "o.###.......ooo.",
+          "o.###.......o...",
+          "o...........o...",
+          "ooooooooooooo...",
+          "................"
+        ],
+        [
+          "ooooooooooooo...",
+          "o...........o...",
+          "o...........o...",
+          "o...........ooo.",
+          "o...........ooo.",
+          "o...........ooo.",
+          "o...........o...",
+          "o...........o...",
+          "ooooooooooooo...",
+          "................"
+        ]
+      ],
+      "key": {
+        "#": "ball_red",
+        "@": "bed_light",
+        "o": "outline",
+        ".": null
+      },
+      "_art_why": "三格：充電中（閃電）、低電量（剩一格）、極低（空）。第一版的低／極低只差 1 px 寬，16 px 下根本看不出來；而且三格各畫各的外框，正極端子還黏在殼上。現在三格由同一個產生器畫，只有內容不同。**這個圖示的讀者是大人不是小孩**，所以電量刻度是合理的；小孩那一側完全不受影響（見 _rule1_why）。"
+    },
+    "star": {
+      "mode": "float",
+      "size": [
+        10,
+        10
+      ],
+      "frame_count": 4,
+      "frame_ms": 150,
+      "_when": "UI_CELEBRATE 期間（3 秒），浮在解鎖的角色頭上。",
+      "_why": "check_milestones 一直在填 unlocked_mask，但**沒有任何畫面接它**——解鎖一套衣服到目前為止是完全無聲的。星星和愛心一樣是 float 型，共用同一組錨點。",
+      "anchor": {
+        "_note": "和 heart 同一組錨點，只是星星 10x10 比愛心高 2 px，y 再往上 2。",
+        "brown_mixed": [
+          39,
+          -13
+        ],
+        "brindle_guard": [
+          39,
+          -13
+        ],
+        "chihuahua": [
+          33,
+          3
+        ],
+        "ice_princess": [
+          24,
+          -7
+        ]
+      },
+      "frames": [
+        [
+          "..........",
+          "..........",
+          "....##....",
+          "....##....",
+          "..######..",
+          "..######..",
+          "....##....",
+          "....##....",
+          "..........",
+          ".........."
+        ],
+        [
+          "....##....",
+          "....##....",
+          "....##....",
+          "...####...",
+          "##########",
+          "##########",
+          "...####...",
+          "....##....",
+          "....##....",
+          "....##...."
+        ],
+        [
+          "....##....",
+          "....##....",
+          "....@@....",
+          "...@@@#...",
+          "##########",
+          "##########",
+          "...####...",
+          "....##....",
+          "....##....",
+          "....##...."
+        ],
+        [
+          "..........",
+          "....##....",
+          "....##....",
+          "....##....",
+          ".########.",
+          ".########.",
+          "....##....",
+          "....##....",
+          "....##....",
+          ".........."
+        ]
+      ],
+      "key": {
+        "#": "bed_light",
+        "@": "wall_light",
+        ".": null
+      },
+      "_art_why": "四格是 小 → 大 → 大＋高光 → 中，**閃一下**。第一版四格幾乎一樣，等於沒有動畫。和 heart 一樣不做淡出——4bpp 索引色沒有半透明，alpha 混合會生出調色盤外的顏色。"
+    }
+  },
+  "object_cues": {
+    "_note": "哪個動畫要出現哪個物件、畫在角色前面還是後面。渲染層讀這一段，不必在程式裡寫死動畫名稱。\n`z` 只有兩個值：`under`（先畫物件再畫角色，角色壓在上面）與 `over`（角色先畫）。沒有真正的深度排序——四個角色站同一條線不互相遮擋，只有角色和它腳邊的物件需要決定先後。",
+    "eat": {
+      "object": "bowl",
+      "z": "over",
+      "_": "碗在吻部前方，畫在角色之上才看得到碗口。公主沒有錨點（她捧在手上）。"
+    },
+    "eat_happy": {
+      "object": "bowl",
+      "z": "over"
+    },
+    "lie_down": {
+      "object": "bed",
+      "z": "under",
+      "per_character": {
+        "ice_princess": "bed_princess"
+      },
+      "_": "三隻狗用睡墊，公主用床。per_character 覆寫預設物件。"
+    },
+    "sleep_breathe": {
+      "object": "bed",
+      "z": "under",
+      "per_character": {
+        "ice_princess": "bed_princess"
+      },
+      "_": "三隻狗用睡墊，公主用床。per_character 覆寫預設物件。"
+    },
+    "wake_up": {
+      "object": "bed",
+      "z": "under",
+      "per_character": {
+        "ice_princess": "bed_princess"
+      },
+      "_": "三隻狗用睡墊，公主用床。per_character 覆寫預設物件。"
+    },
+    "chase_ball": {
+      "object": "ball",
+      "z": "over",
+      "mode": "track",
+      "_": "球不跟著角色，走自己的軌跡。這是把它拆出影格的唯一理由。"
+    },
+    "pet_react": {
+      "object": "heart",
+      "z": "over",
+      "_": "愛心畫在角色之上，而且它浮在頭頂不會擋到臉。"
+    },
+    "_per_character_note": "`per_character` 讓同一個動畫在不同角色身上用不同物件。現在只有睡覺用到：狗睡地墊、人睡床。",
+    "bath": {
+      "object": "tub",
+      "z": "over",
+      "per_character": {
+        "ice_princess": "shower"
+      },
+      "_": "狗站在洗澡盆裡（蓋住下半身），公主在關起來的淋浴間裡（整個擋住）。**兩者都不需要新的角色動畫**——播 idle_breathe，物件負責敘事。"
+    }
+  },
+  "_wall_note": "牆面配置：門（左，ACT_TOILET 的目的地）→ 掛畫 → 窗（中）→ 衣櫃（右，ACT_DRESS）。\n四個角色佔掉 x22-290，320 的寬度只剩左 22、右 30 沒有角色——**門和衣櫃一定會被角色擋到一部分，那是對的**：人站在牆前面。不做 z 排序也沒問題，因為牆面家具永遠在角色後面。",
+  "screens": {
+    "_note": "渲染層要畫哪六個畫面。韌體的狀態機在 firmware/include/game.h 的 ui_screen_t，這裡只講**每個狀態畫什麼**。六個畫面加起來新增的美術資產是 3 個物件、602 B——其餘全部靠既有的動畫、調色盤置換與繪製時偏移。",
+    "_zero_asset_why": "CLAUDE.md 規則 2：先問「這個畫面能不能用既有的東西敘事」，再決定要不要生圖。開機和關機都完全沒有新資產：開機是房間 + 既有 idle + 放大的 heart，關機是夜間調色盤 + 既有 sleep_breathe。",
+    "boot": {
+      "draws": [
+        "room_day",
+        "四個角色的 idle_breathe 第 0 格",
+        "heart（4× 放大置中，循環 4 格）"
+      ],
+      "hides": [
+        "ui_bar",
+        "cursor"
+      ],
+      "_why": "存檔還沒載入完，所以不知道角色的狀態，只能畫第 0 格。不用純色 splash 是因為 3 歲等不了空白畫面——直接看到房間和四隻，等於「它醒過來了」。heart 放大 4 倍（10×8 → 40×32）是整數倍縮放，像素風不會糊。",
+      "min_ms": 1200
+    },
+    "main": {
+      "draws": [
+        "room（依 light 決定日/夜）",
+        "公主（常駐）+ 在場的狗（0 或 1 隻）",
+        "lamp_switch（依燈的狀態換格）",
+        "cursor 或紅框（依游標停在哪）",
+        "選到的角色的進度條",
+        "ui_bar 三格（不亮）",
+        "battery（僅充電或低電量時）",
+        "配件（依 accessory_mask，掛在逐格頭部錨點上）"
+      ],
+      "_cursor": "最多 5 格：門 / 衣櫃 / 電燈開關 / 公主 / 狗。沒狗在場時只有 4 格。標記兩種：接地的（公主、狗）給地板箭頭，牆上的（門、衣櫃、開關）給紅框。"
+    },
+    "menu": {
+      "draws": [
+        "main 的全部",
+        "ui_bar 三格點亮 + 選中那格的紅框"
+      ],
+      "_note": "游標語意換層：主畫面的游標指角色，選單的游標指圖示。同一顆鍵、同一個紅色。"
+    },
+    "celebrate": {
+      "draws": [
+        "main 的全部",
+        "解鎖的角色播 happy",
+        "star 浮在該角色頭上"
+      ],
+      "hides": [
+        "cursor",
+        "ui_bar 的紅框"
+      ],
+      "ms": 3000
+    },
+    "poweroff": {
+      "draws": [
+        "room_night",
+        "四個角色的 sleep_breathe"
+      ],
+      "hides": [
+        "ui_bar",
+        "cursor",
+        "battery"
+      ],
+      "_why": "規則 1：關機不可以看起來像壞掉或消失。畫成「大家睡著了」，而且過程中按任何操作鍵都取消——3 歲很容易誤觸電源鍵，必須救得回來。",
+      "ms": 2000
+    },
+    "standby": {
+      "_note": "不是畫面，是背光狀態。畫的內容和 main 完全一樣，動畫繼續跑。",
+      "backlight": [
+        {
+          "after_ms": 0,
+          "level": 100
+        },
+        {
+          "after_ms": 60000,
+          "level": 50
+        },
+        {
+          "after_ms": 600000,
+          "level": 0
+        }
+      ],
+      "_why": "docs/01 原本是 30 秒降 30%、3 分鐘 light sleep，那是觸控時代寫的——當時「沒人碰」等於「沒人在用」。現在小孩最主要的玩法就是**坐著看狗**，三分鐘不按鍵就把螢幕關掉，等於在她看得最專心的時候關掉她。60 秒只降到 50%（動畫繼續），10 分鐘才真的睡。"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_note": "ice_princess master 的語意對照表。\n斗篷四階 86/129/144/164 對到 cloak_dark / cloak_mid / cloak_mid / cloak_light，221 是帽緣與袖口的絨毛滾邊，給 trim_pale。\n頭髮三階 137/181/218 直接對到 hair_dark / mid / light。\n**#F8F0E4 同時是臉和白洋裝**——同一個色兩種語意，用 bbox 分開：臉在頭部框內給 skin，其餘給 white_snow。這是 brindle_guard 的眼睛／背帶問題重演，bbox 區域限定就是為這個做的。",
+  "#1F395B": "outline",
+  "#255FA6": "cloak_dark",
+  "#458FD9": "cloak_mid",
+  "#579EE0": "cloak_mid",
+  "#6DB1EF": "cloak_light",
+  "#C2E5FC": "trim_pale",
+  "#D2DBE4": "trim_pale",
+  "#7D8AA3": "hair_dark",
+  "#B3B3C1": "hair_mid",
+  "#D7DBDF": "hair_light",
+  "#DFDDDB": "skin_shade",
+  "#802444": "accent_red",
+  "#F8F0E4": [
+    {
+      "role": "skin",
+      "bbox": [
+        22,
+        8,
+        37,
+        34
+      ]
+    },
+    {
+      "role": "trim_pale"
+    }
+  ]
+}

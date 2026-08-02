@@ -1,7 +1,8 @@
 # ICEPET — 女兒的電子雞
 
 軟硬體整合的桌上型電子寵物。角色為一位冰雪公主與三隻依照真實照片設計的狗。
-目標使用者：**3–5 歲兒童**。第一版**純單機**，不連網、不需要帳號。
+目標使用者：**四歲半、快五歲**（2026-08-02 由使用者更新，原本寫 3 歲）。
+第一版**純單機**，不連網、不需要帳號。
 
 進度與已驗證的結論見 `docs/08_進度總表.md`。角色辨識設計見 `docs/09_角色辨識設計.md`。
 
@@ -18,7 +19,25 @@
 - 離線衰減有下限 30。小孩隔一週回來，不可以看到全部歸零的角色。
 - 難過的表現上限是「耳朵下垂 + 眼神向下 + 動作變慢」。不做哭泣、發抖、蜷縮躲藏。
 - 需求歸零時**不可以整天只播難過動畫**。上限六成，其餘仍播正常閒置動作。
-- UI 全圖示，同一畫面最多 3 個可點選項，觸控目標 ≥48px。
+- UI 全圖示，圖示 ≥48px。**互動選單固定 5 個**（公主 4 個，她沒有 bladder）。
+  「最多 3 個可選項」是三歲的版本，2026-08-02 依實際年齡放寬——
+  但**放寬的只有認知負荷，「沒有失敗狀態」不跟著放寬**。
+  進度條可以出現，但低的時候不變紅、不閃、不倒數。
+- **低電量、關機、待機都不是失敗狀態。** 電量圖示不影響任何遊戲數值；
+  關機畫成「大家睡著了」而且按任何鍵都取消得掉（3 歲很容易誤觸電源鍵）；
+  關燈只是變暗 + 動畫放慢，不扣分、可逆。
+  `test_game.c` 用 `memcmp` 逐 byte 守著這三件事，不是靠註解。
+- **輸入是三顆實體按鍵**（上一個／確認／下一個），不是觸控。
+  按下的當下註冊、一次按壓只呼叫一次、**不做長按自動重複**——
+  3–6 歲按住可以到 5.1 秒，對她那只是按了一下，自動重複會讓游標飛過去。
+  沒有取消鍵：選單 8 秒沒動作自己回主畫面，3 歲不該被要求學會「返回」。
+- **主畫面是公主常駐 + 最多一隻被呼叫出來的狗**，不是四隻並排。
+  游標停在「房間裡真的看得見的實體」上：門／衣櫃／電燈開關／公主／狗（狗那格只在有狗時存在）。
+  **換狗不必先送回去**——直接呼叫新的，舊的自己走回門裡，而且播 `walk` 不是 `sad_wait`。
+  不在場的狗需求繼續走但速率減半，下限一樣 30：牠們在別的房間過生活，不是不存在。
+- **「休息」不是動作，就是關燈。** 牆上那個開關即是。
+  標記分兩種，判準沿用 `_placement` 的那一條——**接地的東西才有地板基準**：
+  角色站在地上 → 地板箭頭；門／衣櫃／開關在牆上 → 紅框（和動作選單同一個幾何、同一個顏色）。
 
 `firmware/test/test_game.c` 有一組「放置一個月」的測試在守這些規則，不要繞過它。
 
@@ -34,10 +53,91 @@
 | 造型、體型、剪影、大面積配色 | AI 影像模型 | codex `image_gen` |
 | 網格對齊、降採樣 | 眾數降採樣 | `tools/pixelate.py` |
 | 材質的精確顏色 | 語意重映射 | `pixelate.py --remap` |
-| 5 像素以下的細節（眼睛、鼻子） | 手工逐像素 | `tools/pixedit.py` |
+| 5 像素以下的細節（靜態 master 的眼睛） | 手工逐像素 | `tools/pixedit.py` |
+| 5 像素以下的細節（動畫的每一格） | 保護色 | 調色盤的 `protect` 段 |
 | 切開連續影格並對齊 | 投影切格 + 共用縮放 | `tools/cutstrip.py` |
+| 生成提示詞 | 骨架 + 角色填充 + 動作段落 | `tools/mkprompt.py` |
+| 影格尺寸 | 每角色一組，單一真相來源 | `tools/cell.py` |
+| 房間底圖與物件 | 幾何 + 逐像素 art，**不用 AI** | `tools/scene.py` |
+| 夜間版 | 同一張圖換調色盤，仿射變換保序 | `tools/nightpal.py` |
 
 **不要用重生圖去解決顏色不準或眼睛太小。** 那兩件事模型控制不了，在下游修。
+
+**量化會吃掉小特徵，要在量化前保護。** k-means 照面積分色群，
+眼睛在原圖只佔 0.06%，永遠拿不到自己的一群。`brown_mixed` 的 master 有眼睛
+（手工補的），**15 個動畫全部沒有**——狗一走路就沒眼睛，而且一直沒被發現。
+新角色的調色盤一律要寫 `protect` 段，而且保護要在 `cutstrip.py` 就生效：
+它在切開前會先量化到 16 色，色相在那一步就死了。見 docs/08 第 2.9 節。
+
+**提示詞改不動的，就改管線。** 背帶那條明確禁止過「thin straps／繞腹／碰到腿」，
+仍有一半的圖會沿腿畫 1px 粉線（64px 下是「狗穿粉襪」）。
+最後靠 `protect.min_thickness` 擋掉。提示詞負責大方向，管線負責保證下限。
+
+**房間與物件不要用 AI 生。** 那些是大片平塗的幾何（牆、地板、地毯、窗框）
+與 15 px 以下的小物（碗、球、睡墊），AI 在這裡沒有加分，只會多一輪
+28,000 色的重映射，而且窗框會歪、地板接縫會抖。
+規則 2 的分工照樣成立，只是這一類**整個落在工具那一側**。
+定義在 `specs/scene.json`，由 `tools/scene.py` 算成 PNG。
+
+**配件靠逐格錨點，不靠手填。** 公主的調色盤把頭髮獨立成三格，所以
+`tools/anchors.py` 能從髮色像素的最上緣算出 83 格的頭部座標——
+帽子因此可以真的戴在頭上跟著動畫走，`lie_down` 頭降 32 px 配件也跟得住。
+原本評估說「沒有那份資料、成本太高」是錯的：**能量出來的東西不要讓人填**，
+和 `base_row` 同一條。
+
+**配件不可以用淺色，而且描邊之後的寬度才是最終寬度。** 兩個實測的坑：
+`trim_light #E4F4FF` 畫在銀髮 `hair_light #D7DBDF` 上整個消失（差 20 階）；
+1 px 的細臂加 1 px 描邊變成 3 px，星星在 11 px 下怎麼調都讀成醫療十字。
+主色只能用 `accent_red` 或 `cloak_dark`，小面積特徵要靠輪廓不要靠細節。
+這和「眼睛被量化吃掉」是同一類問題。
+
+**分工：顏色走調色盤（`outfit_slots` 五格），剪影走配件，兩者不重疊。**
+重畫一套衣服 = 再做一次公主（15 張生成圖 → 83 格）；疊一件配件 = 一張小圖 + 一組偏移。
+
+**一個新畫面通常不需要新美術。** 六個畫面（開機／關機／待機／燈／電量／里程碑）
+總共只新增三個物件、602 B。開機是房間 + 既有 `idle_breathe` + 放大 4 倍的既有 heart；
+關機是夜間調色盤 + 既有 `sleep_breathe`；待機根本不是畫面，是背光的三段值。
+**先問「這個畫面能不能用既有的東西敘事」，再決定要不要生圖。**
+
+**夜間不是把角色調暗，是換一份調色盤。** 同一張點陣圖 + 16 色 JSON（32 B），零張新圖。
+換算用 `out = day × 0.45 + 夜色 × 0.55`——**選它是因為它保序**：任意兩色的亮度差
+被壓縮同一個比例，所以 docs/09 的四角色明度分離（61/96/121/162）在夜間仍然成立。
+房間的夜間色反而是手挑的（窗戶要從最亮反轉成最暗），那是設計決定不是打光運算。
+
+**一個新動作不一定需要新的角色動畫。** 洗澡（`ACT_BATH`）零張新的角色圖：
+公主在關起來的淋浴間裡（只留蓮蓬頭剪影）、狗站在洗澡盆裡露出上半身，
+兩者都播待機，物件畫在它們之上。資產成本是兩個物件而不是 4 角色 × 4 格。
+**先問「這個動作能不能用物件敘事」，再決定要不要生圖。**
+
+**物件分四種擺放模式，判準是「有沒有接地」。** `ground`（碗、睡墊）、
+`float`（愛心，浮在頭上）、`fixed`（窗外的雪）、`track`（球）。
+接地的 y 推算得出來，讓人填就會出錯；不接地的沒有基準，硬要推算反而是假的。
+
+**接地物件的 y 座標永遠不由人填。** 物件宣告 `base_row`（自己哪一列踩在地面線上），
+渲染層算 `y = ground_y − dy − base_row`。原本記 `[x, y]` 的版本對狗成立、對公主差 40 px；
+改成「底緣貼地面線」又會讓睡墊被趴著的角色完全蓋住。
+`base_row` 是物件的**內在屬性**，換角色不會填錯。
+
+**物件只拆放在地上的。** 飯碗放地上 → 拆成共用 sprite，由渲染層畫在吻部下方
+（錨點逐角色記在 `specs/scene.json`，實測三隻狗差 10 px）。
+球要飛 → 一定要拆。但**公主捧在手上的碗不拆**——它跟著手動，只能留在影格裡。
+判準是「它會不會離開角色的身體」，不是「它是不是物件」。
+
+**保護色不是每次都做得到，要先量。** 三隻狗各不相同：
+`brindle_guard` 的淡藍眼一量就分開（B 主導）；
+`brown_mixed` 的琥珀眼只靠**藍通道**分得開（R 差 7、G 差 20、B 差 66），
+`src_hex` 因此刻意把 B 壓到 `0x05` 而不是用眼睛的實際中位色；
+`chihuahua` 的鼻子和巧克力毛色相只差 14°，tol 25 就誤傷近兩萬像素——
+那一項只能在 master 手工畫，動畫接受它變成「白吻部上的一個深色點」。
+**先做 tol 掃描表（命中 vs 誤傷），不要直接寫規則。**
+
+**新增不同物種的角色時，要逐一檢查全部 15 個共用段落。**
+`specs/anim_prompt/_frames.json` 的動作段落預設對象是狗
+（「站在四條腿上」「趴在肚子上、下巴靠在腳掌上」「舌頭露出來」）。
+**沒有覆寫就等於預設她是狗。** 公主的 `eat` 曾經是低頭吃地上的碗、
+`lie_down` 與 `sleep_breathe` 是臉朝下趴在地上——而且她還和狗共用同一張地墊，
+兩個錯誤互相掩護，看起來沒那麼怪。
+不要只挑「看起來不對」的那幾個覆寫，要全部讀過一遍。
 
 ### 3. 動畫：一次生成一張含全部影格的圖
 
@@ -51,8 +151,8 @@
 ```
 AI 一次生成含全部影格的圖
   → cutstrip.py   切開、對齊、共用縮放
-  → pixelate.py   降採樣 + 語意重映射
-  → pixedit.py    補 5px 以下的細節（眼睛）
+  → pixelate.py   降採樣 + 語意重映射 + 保護色
+  → pixedit.py    補 5px 以下的細節（只有靜態 master 需要）
   → bake.py       串成 spritesheet（type: "frames"）
   → preview.py    GIF + 實機模擬
 ```
@@ -88,15 +188,27 @@ AI 一次生成含全部影格的圖
 只能當 GUI 編輯器；Pixelorama 無 CLI）。
 
 新增任何工具之前，先問：這件事有沒有人做過了？
-特別是 `pack.py` **不要自己寫**，先評估 `lv_img_conv`。
+`pack.py` 已經評估過 `lv_img_conv`（docs/10 第四節），**結論是整包自己寫**：
+npm 版沒有 `--palette`、無條件重新量化（index 0 會變不透明色，我們的 RLE 整個垮），
+Python 版（lvgl repo 的 `LVGLImage.py`）能吃我們的調色盤但只覆蓋六步裡的第二步，
+而且它的 RLE 比我們的差 2.02 倍。兩者都沒有動畫／圖集的概念。
 
 手動修圖用已安裝的 `/Applications/libresprite.app`。
 
-### 7. 冰雪公主的 IP 界線
+### 7. 冰雪公主的 IP 界線 —— **已經被工具強制執行了**
 
-設計靈感來自商業動畫角色。本專案為**自用單件**，這樣沒有問題。
-若日後有販售、公開展示、開源發布的打算，必須先改成原創設計。
-程式碼、檔名、提示詞中不得出現任何商業作品的角色名稱或專有名詞。
+原始設計是「及地冰藍禮服 + 單側白金長辮 + 半透明披肩 + 頭冠」。
+影像模型的輸出審核**連續四次拒絕**（`moderation_blocked` / `category: other` /
+`stage: output`）。診斷過程：只換頭髮→仍被擋；拿掉全部身體輪廓語彙→仍被擋；
+改成成人比例→仍被擋；把冰雪主題整組換成森林→**一次通過**。
+結論：擋的是那一整組指向某商業角色的組合。
+
+現行設計在剪影層就走開：**雙丸子頭銀髮、及膝連帽斗篷加靴子、莓紅圍巾與手套**。
+規則原本說的「日後對外發表前必須改成原創設計」因此已經做掉了。
+
+程式碼、檔名、提示詞中仍然不得出現任何商業作品的角色名稱或專有名詞。
+`specs/anim_prompt/ice_princess.json` 的 `_design_note` 記了完整診斷，
+**不要把設計改回去**——改回去就生不出來。
 
 ---
 
@@ -132,19 +244,24 @@ python tools/validate.py --character <id> --rebuild
 │   ├── 05_資產管線.md           多數規則是實測踩出來的
 │   ├── 06_開發路線圖.md
 │   ├── 07_角色定義契約.md       ← 角色何時算做完
-│   └── 08_進度總表.md           ← 目前狀態與已驗證的結論
+│   ├── 08_進度總表.md           ← 目前狀態與已驗證的結論
+│   ├── 09_角色辨識設計.md       ← 四個角色怎麼分開，附實測數據
+│   ├── 10_開源工具評估.md
+│   └── 11_動畫格式.md
 ├── specs/
 │   ├── style_lock.md          生成提示詞的固定區塊，一字不改
-│   ├── characters/*.json      身份特徵、比例、狀態
-│   └── palettes/*.json        16 色，手工制定
-│       animations/*.anim.json 動畫定義
+│   ├── anim_prompt/           提示詞的骨架 + 角色填充 + 動作段落
+│   ├── characters/*.json      身份特徵、比例、render.sprite_cell
+│   ├── palettes/*.json        16 色手工制定，含 protect 與 automap 設定
+│   └── animations/*.anim.json 動畫定義
 ├── art/
 │   ├── reference/             使用者提供的真實照片，不進版控
 │   ├── generated/             AI 原始輸出
-│   └── approved/<id>/         通過 QA 的素材 + REBUILD.sh
+│   ├── approved/<id>/         通過 QA 的素材 + REBUILD.sh
+│   └── approved/_scene/       房間底圖（日／夜）+ 物件 sprite
 ├── tools/                     Python 資產管線
 ├── firmware/                  ESP-IDF 專案（save / game 已完成並測試）
-└── data/                      燒進 LittleFS 的資產包
+└── data/                      assets.bin（燒進 assets 分區，spi_flash_mmap 直接映射）
 ```
 
 ---
@@ -158,85 +275,87 @@ python3 -m venv .venv && source .venv/bin/activate && pip install -r tools/requi
 驗證角色是否符合契約（改完 `specs/` 或 `art/approved/` 都要跑）：
 
 ```bash
-python tools/validate.py --character brown_mixed --rebuild
+.venv/bin/python tools/validate.py --all --rebuild
 ```
 
-把 AI 產出轉成真像素資產：
+### 做一個新角色（順序固定）
+
+**1. 規格檔與調色盤。** `specs/characters/<id>.json` 的 `render.sprite_cell`
+是影格尺寸的真相來源；調色盤 16 色手工制定，色相／明度要避開已有的角色
+（見 docs/09 附錄的四角色實測表）。
+
+**2. 產生提示詞。** 骨架 + 角色填充 + 動作段落三份資料檔組出來，不要手抄：
 
 ```bash
-python tools/pixelate.py art/generated/foo.png --width 64 --colors 12 --palette specs/palettes/brown_mixed.json --remap art/generated/foo.remap.json
+.venv/bin/python tools/mkprompt.py -c <id> --all --out-dir build/prompt
 ```
 
-切開連續影格圖並對齊：
+**3. master sprite。** 用 `build/prompt/<id>_master.txt` 生一張，
+然後降採樣、寫語意對照表、手工補 5px 以下的細節，最後歸檔成
+`art/approved/<id>/REBUILD.sh`。掃寬度找出合適的面積（四角色是 1809 / 1253 / 986 / 2298）：
 
 ```bash
-python tools/cutstrip.py art/generated/B4_brown_mixed_walkcycle.png --grid 2x2 --out-dir build/strip/walk --name brown_mixed_walk
+.venv/bin/python tools/pixelate.py art/generated/B0_<id>_master.png \
+    --width 44 --colors 14 --palette specs/palettes/<id>.json --dump-clusters --out-dir /tmp/c
+.venv/bin/python tools/pixedit.py sprite.png --patch eyes.json --palette specs/palettes/<id>.json --out fixed.png
 ```
 
-手工修補 5 像素以下的細節：
+**4. 15 張動畫影格圖。** 一個動畫一張圖（2×2 四格），生完之後：
 
 ```bash
-python tools/pixedit.py sprite.png --patch eyes.json --palette specs/palettes/brown_mixed.json --out fixed.png
+sh tools/procanim.sh <id> walk       # cutstrip → pixelate → automap → pixelate
 ```
 
-### 兩階段烘焙（docs/05 第三節）
+`procanim.sh` 會自動帶上 `--character`（影格尺寸）與 `--match-area`
+（面積對齊 master），不必手動算。
 
-**階段 A** — 高解析部件組成姿勢，人眼核可，只跑一次。改了 `specs/poses/` 才要重跑：
-
-```bash
-python tools/assemble.py --rig art/rigs/brown_mixed/rig.json \
-    --poses specs/poses/brown_mixed.poses.json --out-dir build/poses --preview \
-    --report build/poses/_assemble_report.json
-
-python tools/pixelate.py build/poses/brown_mixed_stand_*.png \
-    build/poses/brown_mixed_sit_*.png build/poses/brown_mixed_lie_*.png \
-    --width 64 --height 56 --no-crop --scale 6 \
-    --palette specs/palettes/brown_mixed.json \
-    --remap art/rigs/brown_mixed/remap.json --out-dir build/pixparts
-```
-
-> `--no-crop` 與 `--height 56` 缺一不可。逐格裁切會讓降採樣的格線漂移，播放時整隻角色抖動（鐵律 2）。
-
-**階段 B** — 像素領域烘焙，全自動、逐位元決定性。改了 `specs/animations/` 只要跑這兩行：
+**5. 烘焙與預覽。** 改了 `specs/animations/` 只要跑這兩行：
 
 ```bash
-python tools/bake.py --character brown_mixed --parts-dir build/pixparts \
-    --anim specs/animations/brown_mixed.anim.json --out-dir build/sheets
-
-python tools/preview.py --character brown_mixed --sheets-dir build/sheets \
-    --out-dir build/preview --scale 6
+.venv/bin/python tools/bake.py --character <id>
+.venv/bin/python tools/preview.py --character <id>
 ```
 
 驗收：`--check` 只印健檢表（呼吸次數、重複影格、影格預算）不產圖；
 `--anim-file` 可以只預覽自己的動畫片段，不必動到共用的 anim.json：
 
 ```bash
-python tools/preview.py --character brown_mixed --check
-python tools/preview.py --character brown_mixed --anim-file build/anim_frag/idle.json
+.venv/bin/python tools/preview.py --character <id> --check
+.venv/bin/python tools/preview.py --character <id> --anim-file build/anim_frag/idle.json
 ```
 
-### 測試
-
-三支管線工具各有自我測試，改了工具一定要跑（`test_bake.py` 會用真的
-`build/pixparts` 跑一次完整烘焙，所以要先跑過階段 A）：
+**6. 全套重建。** 每個角色都有兩支腳本，改完任何上游都跑它們：
 
 ```bash
-python tools/test_assemble.py && python tools/test_bake.py && python tools/test_preview.py
+sh art/approved/<id>/REBUILD.sh        # master，必須逐位元相同
+sh art/approved/<id>/REBUILD_ANIM.sh   # 15 張影格圖 → 21 個動畫 → 預覽
 ```
 
-韌體測試（主機端，不需要硬體）：
+**7. 打包。** 全部烘焙完之後打成一個燒進 flash 的檔（也必須逐位元相同）：
 
 ```bash
-cd firmware && cc -std=c11 -I include -I test/stubs -o /tmp/t src/save.c src/game.c test/test_game.c && /tmp/t
+.venv/bin/python tools/pack.py
+.venv/bin/python tools/test_pack.py    # 全部 blob 解回來逐像素比對，不抽樣
 ```
 
----
+**blob 的單位是「每格影格」，不是每張 spritesheet。** 每張 sheet 的原始 RLE 確實小
+5.3%，但**去重把那個差距吃掉還多賺 20%**——`transform` 型動畫把位移記在 `screen_dy`
+而不是像素裡，同一個動畫的每一格是逐位元相同的點陣圖（351 格只有 266 格是唯一的），
+而**只有 blob 等於一格時才去重得掉**。再加上 per-sheet 為了畫一格要多解 3.93 倍的
+像素、佔 3.93 倍的 PSRAM。兩個軸都輸。
 
 ## 工作慣例
 
 - **文件與註解用繁體中文**，程式碼識別字用英文。
 - 角色 id 固定為 `ice_princess` / `chihuahua` / `brown_mixed` / `brindle_guard`，
   不可縮寫改名——這些字串同時是檔名、JSON key 和韌體 enum。
+- **影格尺寸從 `specs/characters/<id>.json` 的 `render.sprite_cell` 讀**，
+  由 `tools/cell.py` 供給 cutstrip / bake / procanim。狗是 64×56、公主是 64×96。
+  不要在任何工具裡寫死——`brown_mixed` 的規格檔曾經寫錯成 [64,64] 很久沒被發現，
+  就是因為那時候沒有任何程式讀它。
+- **`automap.py` 有兩種分類模式**：亮度階梯（狗，全身單一色系）和
+  色相族群 `automap_families`（公主，四個色系亮度互相重疊）。
+  新角色若有兩個以上色系，直接用色相族群，不要硬調亮度分界。
 - 改動 `specs/` 之後一定要跑 `validate.py`。
 - **不要修改 `art/reference/`**，那是使用者提供的原始照片。
 - 存檔結構 `save_blob_t` 改欄位時必須遞增 `SAVE_VERSION` 並寫遷移函式，

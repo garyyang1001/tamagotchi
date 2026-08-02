@@ -1,0 +1,25 @@
+{
+  "_note": "brindle_guard master 的語意對照表。以 automap 的草稿為基礎，人工修正兩處：(1) #FBC5B7 同時涵蓋眼睛與粉色胸背帶，用 bbox 分開——眼睛要淡藍、背帶要粉。這正是為 brown_mixed 的吻部/腳掌問題建的區域限定功能。(2) 虎斑條紋與鞍背要落在 coat_dark，不能被歸成描邊，否則圖案會糊掉。",
+
+  "#17150F": "outline",
+  "#1D1812": "outline",
+  "#000000": "outline",
+
+  "#2B2A26": "coat_dark",
+  "#27211F": "coat_dark",
+  "#352F27": "coat_dark",
+
+  "#785C30": "tan_dark",
+  "#926D31": "coat_light",
+  "#AC823F": "coat_light",
+
+  "#CDA153": "tan_mid",
+  "#CFA355": "tan_mid",
+  "#D8AD5F": "tan_mid",
+  "#F0C67B": "tan_mid",
+
+  "#FBC5B7": [
+    { "role": "eye_iris",      "bbox": [34, 9, 49, 15] },
+    { "role": "collar_accent" }
+  ]
+}

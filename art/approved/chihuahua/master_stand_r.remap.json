@@ -1,0 +1,16 @@
+{
+  "_note": "chihuahua master 的語意對照表。巧克力被切成 e/a 兩群（幾乎同值）併回 coat_mid；tan 的四階 149/157/172/200 對到 tan_dark / tan_mid / tan_mid / tan_light（157 與 172 只差 15，合併掉一階不影響讀圖）；226 是奶油色的尾巴羽毛與耳朵飾毛，給 white_shade；249 才是純白的額斑與圍脖。#FBCE3C 是黃項圈——把提示詞裡的「small」改成「WIDE / THICK / 蓋在圍脖上」之後，它終於大到拿得到自己的色群（16 px），不必再完全依賴 protect。",
+  "#271609": "outline",
+  "#321D0C": "outline",
+  "#39220F": "coat_dark",
+  "#543318": "coat_mid",
+  "#553419": "coat_mid",
+  "#845125": "coat_light",
+  "#CC8C35": "tan_dark",
+  "#D69531": "tan_mid",
+  "#DFA646": "tan_mid",
+  "#F5C26E": "tan_light",
+  "#F6E1B2": "white_shade",
+  "#FDFAE9": "white_pure",
+  "#FBCE3C": "collar_accent"
+}

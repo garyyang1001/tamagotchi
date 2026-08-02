@@ -1,47 +1,28 @@
 #!/usr/bin/env python3
 """
-bake.py — 階段 B：像素領域的決定性烘焙
+bake.py — 像素領域的決定性烘焙
 
-這支程式做的事只有四件：**整數像素平移、水平翻轉、z 排序、疊圖**。
+這支程式做的事只有三件：**整數像素平移、水平翻轉、疊圖**。
 它的唯一價值就是「不做別的」——不重新採樣、不旋轉、不縮放、不做 alpha 混合。
 
 為什麼要這麼嚴
 --------------
-本專案的降採樣比是 21:1（1344x1176 -> 64x56）。一條腿只有 7 像素寬，
-眼瞼只有 3.5 像素高。在高解析度「把後腿轉 25 度」在輸出端的全部意義，
+降採樣比是 21:1。在高解析度「把後腿轉 25 度」在輸出端的全部意義，
 是把腿下段的 3 個像素往旁邊挪 2 格——而挪哪幾格是由降採樣格線與旋轉角度的
-交互作用決定的，不受我們控制。那就是閃爍。Dead Cells 的美術總監至今說
-他們沒找到閃爍的解法，原因就在這裡（見 docs/05 第三節）。
+交互作用決定的，不受我們控制。那就是閃爍。
+Dead Cells 的美術總監至今說他們沒找到閃爍的解法，原因就在這裡（docs/05 第三節）。
 
-解法是把降採樣的次數從「每格一次」降到「每個姿勢一次」：
+兩種動畫型別
+------------
+    frames     AI 一次生成一張含全部影格的圖 -> cutstrip 切開對齊
+               -> pixelate 降採樣 -> 這裡串成 spritesheet
+    transform  整張 master sprite 做整數位移與水平翻轉（呼吸、轉身、跳躍）
 
-    階段 A（人工核可，只跑一次）
-        16 個高解析部件 -> 自由旋轉與位移 -> 組成姿勢
-        -> 在 1344x1176 的同一組格線上降採樣「一次」
-        -> 產出 7 個像素領域圖層（每個都是完整的 64x56 RGBA PNG）
-
-    階段 B（本程式，全自動，逐位元決定性）
-        像素領域圖層 -> 整數平移 + 水平翻轉 + z 排序 -> spritesheet
-
-階段 B 重用的是逐位元相同的像素叢集，物理上不可能閃爍。
-
-七個像素領域圖層群
-------------------
-只拆真正需要獨立運動的部件，其餘合併。否則降採樣的 coverage 會在重疊處
-把兩邊都吃掉（腿與軀幹交界，兩者各佔 30%，合成圖是實心，分部件圖是空洞）。
-
-    core     = shadow + torso + leg_hind_far + leg_fore_far
-                      + leg_hind_near + leg_fore_near
-    head     = head + muzzle + eye_far + eye_near
-    ear_far  = ear_far
-    ear_near = ear_near
-    tail     = tail
-    eyelid   = eyelid
-    jaw      = jaw + tongue
-
-檔名：build/pixparts/<character>_<pose>_<group>.png，每張都是完整畫布，
-角色已在正確位置上，其餘透明。不裁切、不記 offset——所以合成就只是
-「整數平移 + 疊圖」，極簡且不可能對錯位。
+**曾經有第三種 `rig`**：把角色拆成七個像素領域圖層，逐格做整數平移再疊起來。
+那條路線於 2026-08-01 移除——單段式部件繞肩關節旋轉會讓腳掌畫弧離開地面，
+實測 walk 與 idle_breathe 產出完全相同的影格。程式碼於 2026-08-02 一併清掉：
+四個角色定稿後沒有任何動畫是 rig 型，留著只會讓人以為那條路還在。
+還原點 git commit `04f5ed2`。**不要再走回去**（CLAUDE.md 規則 4）。
 
 硬性檢查（違反就中止，不會默默通過）
 ------------------------------------
@@ -49,16 +30,10 @@ bake.py — 階段 B：像素領域的決定性烘焙
 2. 所有位移必須是 JSON 整數字面值，小數（含 2.0）一律報錯
 3. alpha 只能是 0 或 255（4bpp 索引色沒有半透明）
 4. 同一個動畫的所有影格尺寸一致
-5. 圖層 PNG 的尺寸必須正好等於畫布尺寸
 
 用法
 ----
-    .venv/bin/python tools/bake.py --character brown_mixed \\
-        --parts-dir build/pixparts \\
-        --anim      specs/animations/brown_mixed.anim.json \\
-        --out-dir   build/sheets
-
-動畫格式見 docs/10_動畫格式.md。
+    .venv/bin/python tools/bake.py --character brown_mixed
 """
 
 import argparse
@@ -67,6 +42,9 @@ import json
 import pathlib
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from cell import cell_for   # noqa: E402
 
 try:
     import numpy as np
@@ -81,23 +59,8 @@ ROOT = Path(__file__).resolve().parent.parent
 # 降採樣比是整數，每個來源像素都確定性地映射到一個目標格。
 FRAME_W_DEFAULT = 64
 FRAME_H_DEFAULT = 56
-
-# 七個像素領域圖層群 -> 它們在 rig.json 裡對應哪些高解析部件。
-# 這張表只用來從 rig.json 的 z 推導圖層的疊合順序。
-LAYER_GROUPS = {
-    "core": ["shadow", "torso",
-             "leg_hind_far", "leg_fore_far", "leg_hind_near", "leg_fore_near"],
-    "head": ["head", "muzzle", "eye_far", "eye_near"],
-    "ear_far": ["ear_far"],
-    "ear_near": ["ear_near"],
-    "tail": ["tail"],
-    "eyelid": ["eyelid"],
-    "jaw": ["jaw", "tongue"],
-}
-
-# 沒有 rig.json 時的後備順序（下 -> 上）。這串正好等於用 rig.json 的
-# 「群內最大 z」算出來的結果，寫死在這裡是為了讓 rig 檔遺失時仍然可跑。
-FALLBACK_LAYER_ORDER = ["tail", "core", "ear_far", "jaw", "head", "eyelid", "ear_near"]
+# 影格格的權威來源是角色規格檔的 render.sprite_cell（見 tools/cell.py）。
+# 上面兩個常數只在完全沒有規格檔時才用得到。
 
 # transform 型動畫的來源是整張 master sprite，在內部當成單一圖層處理，
 # 好讓兩種型別共用同一條合成管線。
@@ -111,17 +74,17 @@ class SkipAnimation(Exception):
 
 
 class BakeError(Exception):
-    """資料違反階段 B 的契約。一律中止，不做任何猜測性的修補。"""
+    """資料違反烘焙的契約。一律中止，不做任何猜測性的修補。"""
 
 
 # --------------------------------------------------------------------------
-# 型別檢查：階段 B 只認整數
+# 型別檢查：只認整數
 # --------------------------------------------------------------------------
 
 def as_int(value, where):
     """取整數像素位移。小數一律報錯——包含 2.0 這種數值上是整數的寫法。
 
-    為什麼連 2.0 都要擋：階段 B 的全部價值就是「保證沒有重新採樣」。
+    為什麼連 2.0 都要擋：這支程式的全部價值就是「保證沒有重新採樣」。
     只要位移欄位可以是浮點數，就有人會寫 2.5，而 2.5 會在下游被某個
     round() 悄悄吸掉，變成看不出來的格線漂移。在 JSON 裡就要求整數字面值，
     是唯一能在最上游擋住的地方。
@@ -132,7 +95,7 @@ def as_int(value, where):
         return value
     if isinstance(value, float):
         raise BakeError(
-            "%s = %r 是小數。階段 B 只做整數像素平移，非整數位移會破壞像素網格；"
+            "%s = %r 是小數。烘焙只做整數像素平移，非整數位移會破壞像素網格；"
             "數值上是整數也請寫成整數字面值（%d 而不是 %r）"
             % (where, value, int(value), value))
     raise BakeError("%s = %r 不是數字" % (where, value))
@@ -151,12 +114,6 @@ def as_bool(value, where):
     if isinstance(value, bool):
         return value
     raise BakeError("%s = %r 不是布林值" % (where, value))
-
-
-def as_pose(value, where):
-    if isinstance(value, str) and value:
-        return value
-    raise BakeError("%s = %r 不是有效的姿勢名稱" % (where, value))
 
 
 def as_positive_int(value, where):
@@ -205,7 +162,7 @@ def load_rgba(path, where):
     """讀成 RGBA uint8 陣列，並強制 alpha 是二值。
 
     半透明像素在 4bpp 索引色裡無法表示，而且會逼合成階段做 alpha 混合，
-    混合出來的中間色不在調色盤裡——那是階段 B 絕對不能發生的事。
+    混合出來的中間色不在調色盤裡——那是絕對不能發生的事。
     """
     arr = np.array(Image.open(path).convert("RGBA"), dtype=np.uint8)
     alpha = arr[..., 3]
@@ -213,145 +170,13 @@ def load_rgba(path, where):
     if bad.size:
         raise BakeError(
             "%s（%s）有 %d 個半透明像素（alpha=%s...）。"
-            "階段 B 不做 alpha 混合，混合會產生調色盤外的中間色"
+            "烘焙不做 alpha 混合，混合會產生調色盤外的中間色"
             % (where, path, int(((alpha != 0) & (alpha != 255)).sum()),
                ", ".join(str(int(v)) for v in bad[:4])))
     # 透明處一律清成 (0,0,0,0)，讓輸出可逐位元重現
     arr[alpha == 0] = 0
     return arr
 
-
-def layer_draw_order(rig_path):
-    """決定七個圖層群的疊合順序（下 -> 上）。
-
-    群的 z 取「群內成員的最大 z」。理由：一個群是被壓平成一張圖的，
-    它必須畫在它所包含的每一個部件該在的位置之上，最上面那個成員決定整群。
-
-    用 rig.json 的 z 實際算出來是：
-        tail(10) < core(41) < ear_far(45) < jaw(58) < head(62)
-                 < eyelid(63) < ear_near(70)
-
-    合併壓平無可避免地要在兩處做取捨，這裡明寫出來：
-      * tail(10) 在 core 之後 -> 尾巴被軀幹(30)遮住。正確。
-        代價是尾巴也會被 core 裡的 shadow(0) 遮住，但陰影貼地、尾巴在空中，
-        實際重疊極少。
-      * jaw(58) 在 head 之前 -> 下顎張開時露出的部分在頭下方，
-        與 muzzle(60) 重疊的部分保持被遮住。正確，因為 jaw 的 z 低於 muzzle。
-    """
-    if rig_path is not None and rig_path.exists():
-        parts = json.loads(rig_path.read_text()).get("parts", {})
-        zs = {}
-        for group, members in LAYER_GROUPS.items():
-            vals = [parts[m]["z"] for m in members
-                    if m in parts and isinstance(parts[m].get("z"), int)]
-            if not vals:
-                return list(FALLBACK_LAYER_ORDER), "fallback（rig.json 缺 %s 的 z）" % group
-            zs[group] = max(vals)
-        # 同 z 時用群名排序，確保結果與字典走訪順序無關
-        return sorted(zs, key=lambda g: (zs[g], g)), str(rig_path)
-    return list(FALLBACK_LAYER_ORDER), "fallback（找不到 rig.json）"
-
-
-def layer_order_from_report(path):
-    """讀 assemble.py `--report` 產生的 JSON，取它算出來的 group_draw_order。
-
-    階段 A 是用窮舉七個群的 5040 種排法、挑「跨群 z 反轉最少」的那個，
-    比這裡的「群內最大 z」更講究。兩邊算出來的順序目前一致，但只要階段 A
-    改過 rig.json 的 z，這份報告就是權威——階段 A 給人核可的預覽圖是照它畫的，
-    階段 B 必須畫出一樣的東西，否則核可過的姿勢和實際烘出來的不是同一張。
-    """
-    data = json.loads(Path(path).read_text())
-    order = data.get("group_draw_order")
-    if not isinstance(order, list) or not order:
-        raise BakeError("%s 裡沒有 group_draw_order，這不是 assemble.py 的報告？" % path)
-    missing = sorted(set(LAYER_GROUPS) - set(order))
-    extra = sorted(set(order) - set(LAYER_GROUPS))
-    if missing or extra:
-        raise BakeError(
-            "%s 的 group_draw_order 與七個圖層群對不起來：缺 %s，多 %s"
-            % (path, missing or "無", extra or "無"))
-    return list(order), "%s 的 group_draw_order" % rel_to_root(path)
-
-
-class LayerCache(object):
-    """姿勢 -> 七張圖層的快取。同一次 bake 裡每個姿勢只讀一次磁碟。"""
-
-    def __init__(self, parts_dir, character, frame_w, frame_h,
-                 allow_missing=False):
-        self.parts_dir = parts_dir
-        self.character = character
-        self.frame_w = frame_w
-        self.frame_h = frame_h
-        self.allow_missing = allow_missing
-        self._cache = {}
-        self.missing = []          # (pose, group) 被當成全透明處理的清單
-        self.loaded_files = []     # 實際讀到的檔案，寫進 atlas 當作追溯依據
-
-    def candidates(self, pose, group):
-        """這個 (姿勢, 圖層群) 可以接受的檔名，由契約名往後備名排序。
-
-        契約名（docs/10 第 6.1 節）是 `<char>_<pose>_<group>.png`，但階段 A 的
-        最後一步是 `pixelate.py`，而它的輸出檔名寫死成 `<stem>_<width>px.png`
-        （tools/pixelate.py 的 sprite_path）。照 assemble.py docstring 給的指令
-        跑完，磁碟上實際是 `brown_mixed_stand_core_64px.png`——比契約名多了
-        `_64px`，於是 bake.py 一個圖層都找不到。
-
-        兩邊都不改而在這裡收斂：契約名優先，找不到才吃 pixelate.py 的命名。
-        這只是「認得同一張圖的兩個檔名」，不影響階段 B 的任何運算。
-        """
-        base = "%s_%s_%s" % (self.character, pose, group)
-        return [self.parts_dir / (base + ".png"),
-                self.parts_dir / ("%s_%dpx.png" % (base, self.frame_w))]
-
-    def path_of(self, pose, group):
-        """實際存在的那個檔名；都不存在時回傳契約名（給錯誤訊息用）。"""
-        cands = self.candidates(pose, group)
-        for p in cands:
-            if p.exists():
-                return p
-        return cands[0]
-
-    def get(self, pose):
-        if pose in self._cache:
-            return self._cache[pose]
-
-        layers, absent = {}, []
-        for group in sorted(LAYER_GROUPS):
-            p = self.path_of(pose, group)
-            if not p.exists():
-                absent.append(group)
-                layers[group] = None
-                continue
-            arr = load_rgba(p, "圖層 %s/%s" % (pose, group))
-            h, w = arr.shape[:2]
-            if (w, h) != (self.frame_w, self.frame_h):
-                raise BakeError(
-                    "圖層 %s 是 %dx%d，畫布是 %dx%d。像素領域圖層必須是完整畫布"
-                    "（角色已在正確位置、其餘透明、不裁切、不記 offset），"
-                    "否則階段 B 就不再只是整數平移了" %
-                    (p, w, h, self.frame_w, self.frame_h))
-            layers[group] = arr
-            self.loaded_files.append(p)
-
-        if absent:
-            if not self.allow_missing:
-                raise BakeError(
-                    "姿勢 '%s' 缺少 %d 個圖層：%s\n  找過的路徑：\n    %s\n"
-                    "  （階段 A 還沒跑完就會這樣。確定要當成全透明請加 "
-                    "--allow-missing-layers）"
-                    % (pose, len(absent), ", ".join(absent),
-                       "\n    ".join(str(c) for g in absent
-                                     for c in self.candidates(pose, g))))
-            for g in absent:
-                self.missing.append((pose, g))
-
-        self._cache[pose] = layers
-        return layers
-
-
-# --------------------------------------------------------------------------
-# 關鍵影格展開：步進，不補間
-# --------------------------------------------------------------------------
 
 def expand_track(keys, frames, spec, where):
     """把關鍵影格展開成逐格狀態。**步進取值，絕不補間。**
@@ -508,8 +333,7 @@ def resolve_base_ms(anim, defaults, where):
     return int(round(1000.0 / float(fps)))
 
 
-def bake_animation(anim, defaults, cache, master, order, allowed,
-                   frame_w, frame_h, default_pose):
+def bake_animation(anim, defaults, master, allowed, frame_w, frame_h):
     """烘焙一個動畫，回傳 (frames 陣列, meta 字典)。"""
     aid = anim.get("id")
     if not aid:
@@ -517,13 +341,16 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
     where = "動畫 %s" % aid
 
     if anim.get("status") == "PENDING_REGEN":
-        # 這些動畫的來源（部件旋轉路線）已刪除，等用 frames 路線重生。
-        # 跳過而不是報錯——半完成的專案要能繼續建置。
-        raise SkipAnimation("待重生（來源已隨部件旋轉路線移除）")
+        # 半完成的專案要能繼續建置：跳過而不是報錯。
+        raise SkipAnimation("標記為待重生")
 
     atype = anim.get("type", defaults.get("type", "transform"))
-    if atype not in ("transform", "rig", "frames"):
-        raise BakeError("%s 的 type='%s' 不認得（transform / rig / frames）" % (where, atype))
+    if atype == "rig":
+        raise BakeError("%s 是 rig 型。部件旋轉路線已於 2026-08-01 移除"
+                        "（腳掌會畫弧離開地面），請改用 frames 型。"
+                        "還原點 git commit 04f5ed2。" % where)
+    if atype not in ("transform", "frames"):
+        raise BakeError("%s 的 type='%s' 不認得（transform / frames）" % (where, atype))
 
     frames = as_positive_int(anim.get("frames"), "%s 的 frames" % where)
     base_ms = resolve_base_ms(anim, defaults, where)
@@ -575,60 +402,31 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
                             % (where, frames, src, len(files)))
         per_frame_layers = []
         for f in files:
-            im = np.array(Image.open(f).convert("RGBA"))
+            im = load_rgba(f, "%s 的影格 %s" % (where, f.name))
+            h, w = im.shape[:2]
+            if (w, h) != (frame_w, frame_h):
+                # 尺寸不符不能放過：blit 會把它貼在左上角，角色整個偏掉，
+                # 而且畫面上看起來只是「動畫抖了一下」，很難回推原因。
+                # 正確的來源是 pixelate.py --width/--height --no-crop，
+                # 那組參數保證每一格都是完整畫布。
+                raise BakeError(
+                    "%s 的影格 %s 是 %dx%d，畫布是 %dx%d。"
+                    "影格必須是完整畫布——請確認 pixelate.py 有加 --no-crop"
+                    % (where, f.name, w, h, frame_w, frame_h))
             per_frame_layers.append([(f.stem, im, 0, 0)])
-        poses = []
         layer_names = [f.stem for f in files]
     elif atype == "transform":
         misplaced = [k for k in ("layers", "pose", "pose_track") if k in anim]
         if misplaced:
             raise BakeError(
-                "%s 是 transform 型卻有 %s。這幾個欄位只有 rig 型看得懂，"
-                "留著會讓人以為部件真的動了——請把 type 改成 'rig'"
+                "%s 是 transform 型卻有 %s。這幾個欄位屬於已移除的部件旋轉路線"
+                "（rig 型），留著會讓人以為部件真的動了——請刪掉它們。"
                 % (where, "、".join(misplaced)))
         if master is None:
             raise BakeError("%s 是 transform 型，但沒有載入 master sprite" % where)
         # 整隻 sprite 當成單一圖層，共用同一條合成管線
         per_frame_layers = [[(MASTER_LAYER, master, 0, 0)] for _ in range(frames)]
-        poses = []
         layer_names = [MASTER_LAYER]
-    else:
-        anim_pose = as_pose(anim["pose"], "%s 的 pose" % where) \
-            if "pose" in anim else default_pose
-        pose_states = expand_track(anim.get("pose_track"), frames,
-                                   {"pose": (as_pose, anim_pose)},
-                                   "%s 的 pose_track" % where)
-        poses = [s["pose"] for s in pose_states]
-
-        layers_spec = anim.get("layers", {})
-        if not isinstance(layers_spec, dict):
-            raise BakeError("%s 的 layers 必須是 {圖層名: 關鍵影格陣列}" % where)
-        unknown = [g for g in layers_spec if g not in LAYER_GROUPS]
-        if unknown:
-            raise BakeError("%s 的 layers 有不存在的圖層群 %s，可用的是 %s"
-                            % (where, ", ".join(sorted(unknown)),
-                               ", ".join(sorted(LAYER_GROUPS))))
-
-        layer_spec = {"dx": (as_int, 0), "dy": (as_int, 0), "show": (as_bool, True)}
-        states = {}
-        for group in order:
-            states[group] = expand_track(layers_spec.get(group), frames, layer_spec,
-                                         "%s 的 layers.%s" % (where, group))
-
-        per_frame_layers = []
-        for f in range(frames):
-            pose_layers = cache.get(poses[f])
-            row = []
-            for group in order:                      # order 已是由下而上
-                st = states[group][f]
-                if not st["show"]:
-                    continue
-                img = pose_layers.get(group)
-                if img is None:
-                    continue                          # --allow-missing-layers
-                row.append((group, img, st["dx"], st["dy"]))
-            per_frame_layers.append(row)
-        layer_names = list(order)
 
     # ---- 逐格合成 ---------------------------------------------------------
     out_frames, per_frame_clip, colours = [], [], set()
@@ -661,7 +459,6 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
         "frame_ms": base_ms,
         "total_ms": sum(g["ms"] for g in gstates),
         "layers": layer_names,
-        "poses": poses,
         "colors": len(colours),
         "clipped_px": clipped_total,
         "frames": [
@@ -675,7 +472,6 @@ def bake_animation(anim, defaults, cache, master, order, allowed,
                 "flip": gstates[f]["flip"],
                 "dx": gstates[f]["x"],
                 "dy": gstates[f]["y"],
-                "pose": poses[f] if poses else None,
                 "screen_dx": screen[f]["x"] if screen else 0,
                 "screen_dy": screen[f]["y"] if screen else 0,
                 "clipped_px": per_frame_clip[f],
@@ -731,12 +527,12 @@ def place_master(master_raw, frame_w, frame_h, log):
 
     master 通常是 pixelate.py 裁到內容範圍的產物（實測 64x54），
     比 64x56 的畫布小。放置規則必須是決定性的而且只有一種，否則
-    transform 型與 rig 型的影格會對不齊。
+    transform 型與 frames 型的影格會對不齊。
     """
     h, w = master_raw.shape[:2]
     if w > frame_w or h > frame_h:
         raise BakeError("master sprite 是 %dx%d，比畫布 %dx%d 大，"
-                        "階段 B 不做縮放" % (w, h, frame_w, frame_h))
+                        "烘焙不做縮放" % (w, h, frame_w, frame_h))
     canvas = np.zeros((frame_h, frame_w, 4), dtype=np.uint8)
     ox, oy = (frame_w - w) // 2, frame_h - h
     blit(canvas, master_raw, ox, oy)
@@ -746,26 +542,25 @@ def place_master(master_raw, frame_w, frame_h, log):
     return canvas, (ox, oy)
 
 
-def run(character, parts_dir, anim_path, out_dir,
-        palette_path=None, master_path=None, rig_path=None,
-        frame_w=FRAME_W_DEFAULT, frame_h=FRAME_H_DEFAULT,
-        only=None, scale=8, default_pose="stand", assemble_report=None,
-        allow_missing_layers=False, strict_clip=False, keep_going=False,
+def run(character, anim_path, out_dir,
+        palette_path=None, master_path=None,
+        frame_w=None, frame_h=None,
+        only=None, scale=8, strict_clip=False, keep_going=False,
         quiet=False):
     """烘焙全部（或指定的）動畫。回傳摘要字典。ok=False 代表有動畫失敗。"""
     log = (lambda *_a: None) if quiet else (lambda m: print(m))
 
-    # 部件旋轉路線移除後，parts_dir 只有 rig 型會用到，而 rig 型已經沒有了。
-    # 允許 None：frames 型自帶影格、transform 型用 master。
-    parts_dir = Path(parts_dir) if parts_dir else Path("build/pixparts")
+    if frame_w is None or frame_h is None:
+        cw, ch = cell_for(character)
+        frame_w = frame_w or cw
+        frame_h = frame_h or ch
+
     anim_path = Path(anim_path)
     out_dir = Path(out_dir)
     palette_path = Path(palette_path) if palette_path else \
         ROOT / ("specs/palettes/%s.json" % character)
     master_path = Path(master_path) if master_path else \
         ROOT / ("art/approved/%s/master_stand_r_64px.png" % character)
-    rig_path = Path(rig_path) if rig_path else \
-        ROOT / ("art/rigs/%s/rig.json" % character)
 
     if not anim_path.exists():
         raise BakeError("找不到動畫定義：%s" % anim_path)
@@ -773,10 +568,6 @@ def run(character, parts_dir, anim_path, out_dir,
         raise BakeError("找不到調色盤：%s" % palette_path)
 
     allowed, _roles = load_palette(palette_path)
-    rig_order, order_src = layer_draw_order(rig_path)
-    order = rig_order
-    if assemble_report:
-        order, order_src = layer_order_from_report(assemble_report)
     doc = json.loads(anim_path.read_text())
     defaults = doc.get("defaults", {})
     anims = doc.get("animations", [])
@@ -790,13 +581,8 @@ def run(character, parts_dir, anim_path, out_dir,
 
     log("角色 %s  畫布 %dx%d  調色盤 %d 色（%s）"
         % (character, frame_w, frame_h, len(allowed), rel_to_root(palette_path)))
-    log("圖層順序（下 -> 上）：%s   來源：%s" % (" < ".join(order), order_src))
-    if order != rig_order:
-        # 兩邊不一致不當成錯誤（階段 A 的算法比較講究，它贏），但一定要說出來，
-        # 否則「核可的預覽圖」和「烘出來的影格」會不知不覺變成兩張不同的圖
-        log("  [警告] 這個順序與 rig.json 的 z 推導結果不同：%s" % " < ".join(rig_order))
 
-    # transform 型才需要 master；rig 型完全用不到它
+    # 只有 transform 型需要 master；frames 型自帶影格
     needs_master = any(a.get("type", defaults.get("type", "transform")) == "transform"
                        for a in anims if not only or a.get("id") in only)
     master, master_off = None, None
@@ -807,9 +593,6 @@ def run(character, parts_dir, anim_path, out_dir,
             load_rgba(master_path, "master sprite"), frame_w, frame_h, log)
         check_frame_palette(master, allowed, "master sprite %s" % master_path.name)
 
-    cache = LayerCache(parts_dir, character, frame_w, frame_h,
-                       allow_missing=allow_missing_layers)
-
     out_dir.mkdir(parents=True, exist_ok=True)
     entries, failures, skipped, total_frames = [], [], [], 0
 
@@ -818,8 +601,8 @@ def run(character, parts_dir, anim_path, out_dir,
         if only and aid not in only:
             continue
         try:
-            frames, meta = bake_animation(anim, defaults, cache, master, order,
-                                          allowed, frame_w, frame_h, default_pose)
+            frames, meta = bake_animation(anim, defaults, master,
+                                          allowed, frame_w, frame_h)
             if strict_clip and meta["clipped_px"]:
                 raise BakeError("動畫 %s 有 %d 個不透明像素被畫布邊界裁掉"
                                 % (aid, meta["clipped_px"]))
@@ -872,20 +655,14 @@ def run(character, parts_dir, anim_path, out_dir,
             failures.append({"id": aid, "error": str(e)})
             log("  [失敗] %-16s %s" % (aid, e))
 
-    for pose, group in cache.missing:
-        log("  [警告] 姿勢 %s 缺圖層 %s，當成全透明處理" % (pose, group))
-
     index = {
         "character_id": character,
         "format_version": 1,
         "generator": "tools/bake.py",
         "frame_size": [frame_w, frame_h],
-        "layer_order": order,
         "sources": {
             "anim": rel_to_root(anim_path),
             "palette": rel_to_root(palette_path),
-            "parts_dir": rel_to_root(parts_dir),
-            "rig": rel_to_root(rig_path) if rig_path.exists() else None,
             "master": rel_to_root(master_path) if needs_master else None,
             "master_offset": list(master_off) if master_off else None,
         },
@@ -894,7 +671,6 @@ def run(character, parts_dir, anim_path, out_dir,
         "animations": entries,
         "failed": failures,
         "skipped": skipped,
-        "missing_layers": ["%s/%s" % (p, g) for p, g in cache.missing],
     }
 
     ok = not failures
@@ -927,27 +703,18 @@ def run(character, parts_dir, anim_path, out_dir,
 
 def main():
     ap = argparse.ArgumentParser(
-        description="階段 B：把像素領域圖層與動畫定義烘焙成 spritesheet（純整數運算）")
+        description="把動畫定義烘焙成 spritesheet（純整數運算）")
     ap.add_argument("--character", "-c", required=True)
-    ap.add_argument("--parts-dir", default="build/pixparts",
-                    help="像素領域圖層目錄（預設 build/pixparts）")
     ap.add_argument("--anim", help="動畫定義（預設 specs/animations/<char>.anim.json）")
     ap.add_argument("--out-dir", default="build/sheets")
     ap.add_argument("--palette", help="預設 specs/palettes/<char>.json")
     ap.add_argument("--master", help="transform 型的來源 sprite，"
                                      "預設 art/approved/<char>/master_stand_r_64px.png")
-    ap.add_argument("--rig", help="預設 art/rigs/<char>/rig.json，只用來決定圖層疊合順序")
-    ap.add_argument("--assemble-report",
-                    help="assemble.py --report 產生的 JSON。有給就以它的 "
-                         "group_draw_order 為準，確保階段 A 核可的預覽圖與"
-                         "階段 B 烘出來的影格是同一張")
-    ap.add_argument("--frame-w", type=int, default=FRAME_W_DEFAULT)
-    ap.add_argument("--frame-h", type=int, default=FRAME_H_DEFAULT)
+    ap.add_argument("--frame-w", type=int,
+                    help="省略則讀 specs/characters/<char>.json 的 render.sprite_cell")
+    ap.add_argument("--frame-h", type=int)
     ap.add_argument("--only", action="append", help="只烘焙指定動畫，可重複")
     ap.add_argument("--scale", type=int, default=8, help="另存放大預覽（0 = 不存）")
-    ap.add_argument("--default-pose", default="stand")
-    ap.add_argument("--allow-missing-layers", action="store_true",
-                    help="缺圖層時當成全透明而不是中止（階段 A 未完成時用）")
     ap.add_argument("--strict-clip", action="store_true",
                     help="有像素被畫布邊界裁掉就視為錯誤")
     ap.add_argument("--keep-going", action="store_true",
@@ -959,19 +726,14 @@ def main():
     try:
         result = run(
             character=args.character,
-            parts_dir=args.parts_dir,
             anim_path=anim,
             out_dir=args.out_dir,
             palette_path=args.palette,
             master_path=args.master,
-            rig_path=args.rig,
             frame_w=args.frame_w,
             frame_h=args.frame_h,
             only=args.only,
             scale=args.scale,
-            default_pose=args.default_pose,
-            assemble_report=args.assemble_report,
-            allow_missing_layers=args.allow_missing_layers,
             strict_clip=args.strict_clip,
             keep_going=args.keep_going,
         )

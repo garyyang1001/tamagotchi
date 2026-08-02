@@ -213,6 +213,56 @@ def check_animations(cid, r):
     return total_frames
 
 
+def check_protected_roles(cid, r):
+    """保護色的面積在各動畫之間應該大致穩定。
+
+    這條是實測長出來的：brindle_guard 的粉色胸背帶在 14 個動畫裡是 51-90 px，
+    只有 eat 那張是 185-199——模型把背帶畫成一條沿著前腿到腳掌的粉線，
+    降到 64px 讀起來是「狗穿粉紅襪子」。像素數的離群值直接就指出是哪一張要重生。
+    """
+    pal_path = ROOT / f"specs/palettes/{cid}.json"
+    anim_path = ROOT / f"specs/animations/{cid}.anim.json"
+    if not pal_path.exists() or not anim_path.exists():
+        return
+    pal = json.loads(pal_path.read_text())
+    rules = [x for x in pal.get("protect", []) if x.get("role")] if isinstance(pal, dict) else []
+    if not rules:
+        return
+    roles = {c["role"]: c["hex"].upper() for c in pal["colors"] if isinstance(c, dict)}
+
+    anims = json.loads(anim_path.read_text()).get("animations", [])
+    for rule in rules:
+        hexv = roles.get(rule["role"])
+        if not hexv:
+            continue
+        tgt = np.array([int(hexv.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)], dtype=np.uint8)
+        per_anim = {}
+        for a in anims:
+            fd = a.get("frames_dir")
+            if not fd:
+                continue
+            counts = []
+            for f in sorted((ROOT / fd).glob("*_64px.png")):
+                arr = np.array(Image.open(f).convert("RGBA"))
+                op = arr[..., 3] > 0
+                counts.append(int((op & np.all(arr[..., :3] == tgt, axis=-1)).sum()))
+            if counts:
+                per_anim[a["id"]] = counts
+        allc = sorted(x for v in per_anim.values() for x in v)
+        if len(allc) < 8:
+            continue
+        med = allc[len(allc) // 2]
+        if med == 0:
+            continue
+        bad = {k: v for k, v in per_anim.items() if max(v) > med * 2}
+        if bad:
+            r.warn(f"{rule['role']} 的面積在這些動畫異常偏高（中位數 {med} px）："
+                   + "，".join(f"{k} {max(v)}px" for k, v in bad.items())
+                   + "。通常代表模型把它畫到不該有的部位，該張要重生")
+        else:
+            r.note(f"{rule['role']} 面積穩定：{allc[0]}–{allc[-1]} px，中位數 {med}")
+
+
 def check_reproducible(cid, r, do_rebuild):
     sh = ROOT / f"art/approved/{cid}/REBUILD.sh"
     out = ROOT / f"art/approved/{cid}/master_stand_r_64px.png"
@@ -246,6 +296,7 @@ def validate(cid, do_rebuild):
     palette = check_palette(cid, r)
     check_sprite(cid, r, palette)
     check_animations(cid, r)
+    check_protected_roles(cid, r)
     check_reproducible(cid, r, do_rebuild)
 
     tier = -1

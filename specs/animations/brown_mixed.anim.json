@@ -55,7 +55,7 @@
       "status": "IMPLEMENTED",
       "_note": "dy=3 是量出來的不是猜的：stand 姿勢裡 eyelid 靜止在第 20-22 列，眼睛的虹膜／瞳孔像素共 12 個落在第 23-25 列。下滑 3 px 蓋掉 10 個，只剩 2 個外眼角像素；dy=2 剩 3 個、dy=4 已經滑過頭剩 8 個。f0 與 f2 的像素完全相同（都是睜眼），這是對稱眨眼無法避免的，preview.py 會回報一次「重複影格」警告。",
       "_timing": "3 格 × 100ms = 300ms，就是 docs/07 第三節列的 3 格 / 10 fps。閉眼只有 1 格，所以「閉眼 100ms」就是這個眨眼的全部長度，落在真實犬隻的範圍內。",
-      "frames_dir": "build/strip/idle_blink_px",
+      "frames_dir": "build/strip/brown_mixed/idle_blink_px",
       "source_sheet": "art/generated/B4_brown_mixed_idle_blink.png"
     },
     {
@@ -69,7 +69,7 @@
       "desc": "抬頭張望。頭連同眼瞼、下顎、雙耳整體位移：先後仰抬頭，再前伸探看，最後回正。身體與尾巴不動。",
       "status": "IMPLEMENTED",
       "_note": "原本的 desc 寫「左右張望、只有頭部轉動」，那在側視 64px 上做不到——真正的左右轉頭是換剪影（同 docs/05 第四節撤回坐姿那段的理由），階段 B 只能整數平移。改用「後仰抬頭 → 前伸探看」表達張望。五個圖層必須一起動：eyelid / jaw / ear_* 在 rig.json 裡都掛在 head 底下，只動 head 群會讓眉線、下巴、耳根各自錯開 1 px。實測 ±2 px 以內剪影仍是單一連通區、沒有多出破洞，所以脖子不會裂開。",
-      "frames_dir": "build/strip/idle_look_px",
+      "frames_dir": "build/strip/brown_mixed/idle_look_px",
       "source_sheet": "art/generated/B4_brown_mixed_idle_look.png"
     },
     {
@@ -83,7 +83,7 @@
       "desc": "抖耳朵。近耳往上外側彈一下再垂回來，遠耳晚一格跟著小幅擺出去。頭與身體不動。",
       "status": "IMPLEMENTED",
       "_note": "原本的 desc 寫「只有耳朵旋轉」，階段 B 不能旋轉（docs/05 鐵律 3），所以是整層平移。近耳 (+1,-1) 是彈起，(+1,0) 是垂下的跟隨，兩格拆開才有「甩一下」的重量感。遠耳晚一格才動，是刻意的次要動作——兩耳同步會像整顆頭在跳。近耳實測 dx=+2 就會和頭之間出現肉眼可見的縫，所以上限是 +1。",
-      "frames_dir": "build/strip/idle_ear_twitch_px",
+      "frames_dir": "build/strip/brown_mixed/idle_ear_twitch_px",
       "source_sheet": "art/generated/B4_brown_mixed_idle_ear_twitch.png"
     },
     {
@@ -98,7 +98,7 @@
       "status": "IMPLEMENTED",
       "_note": "尾巴只有 11x6 px，dy 從 +1 掃到 -2 已經是半個尾巴高。抬高時同時往右 1 px 是必要的補償：tail 的 z 最低（10），尾根靠鑽進軀幹裡藏起來，實測四格與 core 的重疊分別是 7 / 7 / 3 / 5 px，一旦往左移尾根就會脫離身體浮在空中。",
       "_timing": "220+180+220+180 = 800ms/循環 = 1.25 Hz。docs/07 的 8 fps 是列表預設值，這裡刻意放慢到 5 fps——「大擺幅慢速」是這隻狗和吉娃娃的辨識差異，寫在 desc 裡卻用一樣的速度就等於沒做。兩個端點（最低 f0、最高 f2）各多 40ms，鐘擺在兩端本來就慢。",
-      "frames_dir": "build/strip/tail_wag_px",
+      "frames_dir": "build/strip/brown_mixed/tail_wag_px",
       "source_sheet": "art/generated/B4_brown_mixed_tail_wag.png"
     },
     {
@@ -113,7 +113,7 @@
       "status": "IMPLEMENTED",
       "_timing": "V-Pet 慣例：持續狀態 2 格、瞬間反應 1 格。這裡沒有影格預算可以花在重複格上，改用不等長的 ms 表達同一個節奏——f0 站姿停 250ms（2 單位）、f1/f2 的兩個過渡各 125ms（1 單位）、f3 坐定 375ms（3 單位）。總長 875ms。",
       "_design": "只有 stand / sit / lie 三個姿勢可用，中間格不是補間出來的，是「換姿勢 + 整數位移」：f1 是站姿加重心後移的預備，f2 是坐姿加頭部尚未落定的餘勢。頭的 x 逐格 33->32->31->30、y 15->16->16->17，身體剪影則在 f1/f2 之間一次換完。",
-      "frames_dir": "build/strip/sit_down_px",
+      "frames_dir": "build/strip/brown_mixed/sit_down_px",
       "source_sheet": "art/generated/B4_brown_mixed_sit_down.png"
     },
     {
@@ -127,7 +127,7 @@
       "desc": "站起。反向播放 sit_down——Digimon V-Pet 用 12 張 sprite 撐出 8 種行為就是靠這招，省一次生成而且保證兩個方向完全對稱。",
       "status": "IMPLEMENTED",
       "_design": "逐格是 sit_down 的完全反向：頭的 x 30->31->32->33、y 17->16->16->15，尾巴 39->37->28->27。剪影在 f1/f2 之間換回站姿。",
-      "frames_dir": "build/strip/sit_down_px",
+      "frames_dir": "build/strip/brown_mixed/sit_down_px",
       "reverse": true
     },
     {
@@ -142,7 +142,7 @@
       "status": "IMPLEMENTED",
       "_design": "頭的落差最大（sit 的 (30,17) 到 lie 的 (36,30)），所以中間兩格的位移給到 2px：f1 是坐姿加前身下沉，f2 是趴姿加頭尚未貼低。耳朵在 f2 比頭多留 1px 在上面，是甩動的次要動作。f3 眼瞼 dy=1 半闔，接 sleep_breathe。",
       "_asset_issue": "階段 A 的 lie 姿勢有兩個缺陷，階段 B 補不了。(1) 脖子零餘裕：head 群在 lie 姿勢只要往上移 1px，整顆頭就跟身體斷成兩塊（實測 dy<=-1 一律斷、dx 完全無關）。原本 f2 設計的「頭尚未貼低」2px 餘勢因此被拿掉，f2/f3 的頭只差 1px 的 dx。(2) 前腿與胸口之間有一個 6px 寬的洞（第 46-51 列的 x35-40），高解析原圖就是分離的，不是降採樣吃掉的。修法都在 specs/poses/brown_mixed.poses.json 的 lie 段：leg_fore_far / leg_fore_near 的 x 要往回收到接得到胸口（必須是 21 的整數倍），head 的 y 要往下 21 讓脖子有重疊；改完重跑 assemble.py + pixelate.py + bake.py。",
-      "frames_dir": "build/strip/lie_down_px",
+      "frames_dir": "build/strip/brown_mixed/lie_down_px",
       "source_sheet": "art/generated/B4_brown_mixed_lie_down.png"
     },
     {
@@ -157,7 +157,7 @@
       "status": "IMPLEMENTED",
       "_design": "眼瞼是分開算的：eyelid 的 dy = 頭的 dy + 蓋住眼睛的量（f0 +3 全閉、f1 +1 半開、f2 之後 0 全開）。眼瞼原位在第 20-22 列、眼睛在第 23-25 列，所以 dy=3 剛好蓋住，三個姿勢都成立。f1 的下顎比頭少抬 1px，等於嘴微張——醒來的那一下。",
       "_asset_issue": "階段 A 的 lie 姿勢有兩個缺陷，階段 B 補不了。(1) 脖子零餘裕：head 群在 lie 姿勢只要往上移 1px，整顆頭就跟身體斷成兩塊（實測 dy<=-1 一律斷、dx 完全無關）。原本 f2 設計的「頭尚未貼低」2px 餘勢因此被拿掉，f2/f3 的頭只差 1px 的 dx。(2) 前腿與胸口之間有一個 6px 寬的洞（第 46-51 列的 x35-40），高解析原圖就是分離的，不是降採樣吃掉的。修法都在 specs/poses/brown_mixed.poses.json 的 lie 段：leg_fore_far / leg_fore_near 的 x 要往回收到接得到胸口（必須是 21 的整數倍），head 的 y 要往下 21 讓脖子有重疊；改完重跑 assemble.py + pixelate.py + bake.py。",
-      "frames_dir": "build/strip/lie_down_px",
+      "frames_dir": "build/strip/brown_mixed/lie_down_px",
       "reverse": true
     },
     {
@@ -188,7 +188,7 @@
           "y": -1
         }
       ],
-      "frames_dir": "build/strip/walk_px",
+      "frames_dir": "build/strip/brown_mixed/walk_px",
       "source_sheet": "art/generated/B4_brown_mixed_walk.png"
     },
     {
@@ -219,7 +219,7 @@
       "desc": "吃東西。低頭啄食——只有頭與下顎在動，軀幹與四腿完全不動（core 圖層零位移），所以不會讀成整隻狗下沉。頭同時往前 2px 伸向食盆，耳朵比頭慢一拍，下顎在啄到底那格張開 2px。",
       "status": "IMPLEMENTED",
       "_timing": "4 格 x 170ms = 0.68 秒/口。啄食比咀嚼快，循環播放就是連續進食。",
-      "frames_dir": "build/strip/eat_px",
+      "frames_dir": "build/strip/brown_mixed/eat_px",
       "source_sheet": "art/generated/B4_brown_mixed_eat.png"
     },
     {
@@ -232,7 +232,7 @@
       "frames": 4,
       "desc": "吃飽開心。整體彈跳三格，頭與耳朵左右微搖、耳朵落後一拍，尾巴大擺幅。",
       "status": "IMPLEMENTED",
-      "frames_dir": "build/strip/eat_happy_px",
+      "frames_dir": "build/strip/brown_mixed/eat_happy_px",
       "source_sheet": "art/generated/B4_brown_mixed_eat_happy.png"
     },
     {
@@ -246,7 +246,7 @@
       "desc": "睡覺。趴姿、眼瞼蓋住眼睛，整體極緩起伏 1px；近側耳朵晚一格才跟上，讓四格都是不同的畫面而不是兩張重複。",
       "status": "IMPLEMENTED",
       "_timing": "4 格 x 880ms = 3.52 秒/循環 = 17.0 次/分。睡眠時比清醒的 20 次/分更慢，落在犬隻休息值 10-30 內。",
-      "frames_dir": "build/strip/sleep_breathe_px",
+      "frames_dir": "build/strip/brown_mixed/sleep_breathe_px",
       "source_sheet": "art/generated/B4_brown_mixed_sleep_breathe.png"
     },
     {
@@ -259,7 +259,7 @@
       "frames": 4,
       "desc": "打呵欠。坐姿，下顎大開到 5px、頭略後仰、眼睛先瞇後閉。最大開口那格停 460ms——呵欠的力量全在那個停頓。",
       "status": "IMPLEMENTED",
-      "frames_dir": "build/strip/yawn_px",
+      "frames_dir": "build/strip/brown_mixed/yawn_px",
       "source_sheet": "art/generated/B4_brown_mixed_yawn.png"
     },
     {
@@ -273,7 +273,7 @@
       "desc": "邀玩。整體前傾 2px、頭壓到胸口高度、嘴張開、尾巴高舉，第 2 格停 400ms 保持邀請，第 3 格整隻彈起 2px 收尾——「壓低、停住、彈起」的節奏才是邀玩，跟 eat 的連續啄食讀起來不會混。注意：真正的 play bow 是「前低後高」的換剪影動作，階段 A 目前只有 stand/sit/lie 三個姿勢、沒有 bow，所以軀幹本身無法傾斜。",
       "status": "IMPLEMENTED",
       "_asset_issue": "f2 的尾巴原本是 (-1,-2)，實測會整條脫離身體浮在空中（35px 的獨立連通塊）。tail 的 z 最低（10），尾根靠鑽進軀幹裡藏起來，往左移就露餡——tail_wag 的 _note 已經量過這件事。改成 (+1,-2)：一樣抬高，但尾根留在身體裡。",
-      "frames_dir": "build/strip/play_bow_px",
+      "frames_dir": "build/strip/brown_mixed/play_bow_px",
       "source_sheet": "art/generated/B4_brown_mixed_play_bow.png"
     },
     {
@@ -288,7 +288,7 @@
       "status": "IMPLEMENTED",
       "_timing": "4 格 x 80ms = 0.32 秒/步幅循環，約每分鐘 188 步幅。比 walk（4 格 x 125ms）快得多。",
       "_asset_issue": "f2 的尾巴原本是 (-2,-2)，同 play_bow 會脫離身體。在 dy=-2 的高度，dx 最左只能到 0，再往左就斷。desc 寫的「尾巴往後上方拉」因此只剩 f1/f3 的 -1 在表達。",
-      "frames_dir": "build/strip/chase_ball_px",
+      "frames_dir": "build/strip/brown_mixed/chase_ball_px",
       "source_sheet": "art/generated/B4_brown_mixed_chase_ball.png"
     },
     {
@@ -400,7 +400,7 @@
       "frames": 4,
       "desc": "被摸的反應。頭往後上方蹭進手掌、眼睛全程瞇起（眼瞼壓在眼睛上 2px 而不是 3px，留一條縫才是瞇不是閉），尾巴輕搖。",
       "status": "IMPLEMENTED",
-      "frames_dir": "build/strip/pet_react_px",
+      "frames_dir": "build/strip/brown_mixed/pet_react_px",
       "source_sheet": "art/generated/B4_brown_mixed_pet_react.png"
     },
     {
@@ -413,7 +413,7 @@
       "frames": 4,
       "desc": "上廁所。第 0 格站著，之後換成坐姿的剪影當作下蹲，頭逐格低下 1px 再 2px、尾巴逐格抬起，第 2 格停 500ms。**全程只有既有圖層的整數平移，畫面上不可能出現任何排泄物**——階段 B 沒有新增像素的能力。",
       "status": "IMPLEMENTED",
-      "frames_dir": "build/strip/toilet_px",
+      "frames_dir": "build/strip/brown_mixed/toilet_px",
       "source_sheet": "art/generated/B4_brown_mixed_toilet.png"
     }
   ],

@@ -1,0 +1,104 @@
+{
+  "_note": "master 是單張站姿基準圖；其餘 15 張是動畫影格圖。stand_up/wake_up 反向播放 sit_down/lie_down；idle_breathe/turn/happy/sad_wait 是程序式的（master + screen_offset 或水平翻轉），都不生成。{TEMPO}/{TEMPO_RUN}/{EAR_TWITCH} 由角色檔填入——同一個動作，不同狗的節奏與耳型不同。",
+  "animations": {
+    "walk": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: a four frame walk cycle seen from the side, facing right. Frame 1 the near front leg is reaching forward and the near rear leg is extended back, the contact position. Frame 2 the legs pass underneath the body, the weight over the planted legs. Frame 3 the opposite pair of legs is extended, the mirror of frame 1. Frame 4 the legs pass underneath the body again. In every frame at least two paws are flat on the ground line. {TEMPO}"
+    },
+    "idle_blink": {
+      "grid": "2x2",
+      "frames": 3,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: frame 1 the eyes are fully open; frame 2 the eyes are half closed, the upper eyelid covering the top half; frame 3 the eyes are fully closed, a simple dark line. Nothing else in the body moves at all. The fourth quadrant is empty magenta."
+    },
+    "idle_look": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog turns its head to look around. Frame 1 head facing forward. Frame 2 head turned slightly toward the viewer. Frame 3 head turned back to forward. Frame 4 head tilted slightly down. Only the head and ears move; the body and all four legs stay completely still."
+    },
+    "idle_ear_twitch": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: {EAR_TWITCH} Only the ears move; head, body and legs stay completely still."
+    },
+    "tail_wag": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the tail swings. Frame 1 the tail is low and to the left. Frame 2 the tail is raised to the middle. Frame 3 the tail is high and to the right. Frame 4 the tail is back to the middle. {TEMPO} Only the tail moves; head, body and legs stay completely still."
+    },
+    "sit_down": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog sits down. Frame 1 standing on all four legs. Frame 2 the rear legs begin to fold, the hindquarters lowering. Frame 3 the hindquarters are almost down, the front legs still straight. Frame 4 fully seated, rear legs folded under, front legs straight and vertical, back upright and leaning slightly back. The silhouette must clearly change between frame 1 and frame 4 - a sitting dog is a different shape, not the same shape made shorter."
+    },
+    "lie_down": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog lies down from a sitting position. Frame 1 seated. Frame 2 the front legs slide forward and the chest lowers. Frame 3 the chest is almost on the ground. Frame 4 fully lying down, belly and chest on the ground, front legs stretched forward flat, rear legs folded alongside the body, head up and alert resting above the front paws."
+    },
+    "eat": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog eats from the ground. Frame 1 the head lowers toward the ground. Frame 2 the head is down, the mouth open. Frame 3 the head is down, the mouth closed, chewing. Frame 4 the head lifts slightly. The body and all four legs stay planted and still; only the head, neck and jaw move. **Draw absolutely nothing on the ground - no bowl, no food, no dish.** The food bowl is a separate sprite drawn by the game underneath the dog's muzzle.{BOWL}",
+      "_why": "2026-08-02 改寫：原本寫「eats from a bowl on the ground」，模型畫出來的碗**三隻狗全部讀不出來**——都是吻部下方一團深色，和頭連在一起。改成地上什麼都不畫，碗拆成共用物件由 render 層畫在吻部下方。一顆碗四個角色共用，而且位置由程式決定，不再靠模型猜。"
+    },
+    "eat_happy": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog is happy after eating. Frame 1 standing, mouth closed in a content curve, licking the muzzle. Frame 2 the tongue out licking the nose. Frame 3 head tilted, tail up. Frame 4 back to standing, tail still up. The four paws stay flat on the ground in all frames."
+    },
+    "sleep_breathe": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog is asleep lying down. In all four frames the dog is lying on its belly, front legs stretched forward, head resting down on or beside the front paws, eyes closed as simple dark lines. The only difference between frames is a very small rise and fall of the ribcage: frame 1 and 4 are the lowest, frames 2 and 3 the ribcage is one pixel higher. Nothing else moves at all."
+    },
+    "yawn": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog yawns. Frame 1 mouth closed, eyes open. Frame 2 the mouth begins to open, eyes narrowing. Frame 3 the mouth is wide open in a big yawn, eyes squeezed shut, tongue visible. Frame 4 the mouth closes again, eyes still narrow. The body and legs stay completely still."
+    },
+    "play_bow": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog does a play bow inviting play. Frame 1 standing normally. Frame 2 the front legs begin to fold and the chest lowers. Frame 3 the chest and front legs are down on the ground while the hindquarters stay up high, the classic play bow. Frame 4 the same bow held, tail raised. The rear paws stay flat on the ground throughout."
+    },
+    "chase_ball": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog runs. Frame 1 both front legs reaching forward together and both rear legs extended back, the body stretched out, all four paws off the ground at the lowest point of the stride. Frame 2 the legs gathering under the body, paws near the ground. Frame 3 the legs bunched together under the body, the back arched, ready to push off. Frame 4 the legs extending again. {TEMPO_RUN}"
+    },
+    "pet_react": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog enjoys being petted. Frame 1 head level, eyes open. Frame 2 the head leans and presses upward and to the side, eyes narrowing. Frame 3 the head presses further into the touch, eyes closed happily in a curve. Frame 4 the head returns partway. Only the head and neck move; the body and all four legs stay planted."
+    },
+    "toilet": {
+      "grid": "2x2",
+      "frames": 4,
+      "layout": "a 2 by 2 grid of four frames, read left to right then top to bottom. The four frames sit in four equal quadrants with clear empty magenta space between them. No borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: the dog squats. Frame 1 standing. Frame 2 the rear legs begin to bend and the hindquarters lower. Frame 3 the dog is in a low squat, rear legs bent, front legs straight, back slightly arched, head turned to look back. Frame 4 the same squat held. Show only the posture. Draw absolutely nothing on the ground."
+    },
+    "master": {
+      "grid": "1x1",
+      "frames": 1,
+      "layout": "ONE single figure, centred, standing in a neutral alert pose. The BODY is seen from the side in full profile, facing RIGHT, with all four paws flat on the ground and the whole length of the back and the tail visible. No grid, no second figure, no borders, no dividing lines, no numbers, no labels.",
+      "text": "THE FRAMES: a single standing reference pose. The body is in FULL SIDE PROFILE facing right - shoulder, ribcage, hip and all four legs are seen from the side, and the chest is NOT pointing at the viewer. Only the HEAD is turned very slightly toward the viewer, just enough that both eyes and both ears read clearly. The dog stands squarely with weight even on all four paws, head up. This is the master reference sprite that every animation will be matched against, so the build, the markings and the proportions must be exactly as described below.",
+      "single": true,
+      "_why": "姿勢要和另外兩隻的 master 一致：側身朝右。第一次生成寫成「side-on three-quarter view so that both eyes and both ears are visible」，模型直接畫成正面朝前——而全部 15 個動畫都是側面，切換時角色會整個轉向。改成把「身體全側面」與「只有頭微轉」分開講。"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "_note": "brindle_guard master 的手工修補。淡藍虹膜在 50px sprite 上只有 5 個像素，量化保不住高光——依 CLAUDE.md 規則 2，5 像素以下的細節一律手工畫。這隻的眼睛是全專案最強的單一辨識特徵（brown_mixed 是琥珀色），值得每一個像素。",
+  "key": { "O": "eye_dark", "I": "eye_iris", "H": "eye_highlight", ".": null },
+  "patches": [
+    {
+      "name": "eye_near",
+      "_desc": "近側眼。淡藍虹膜 + 1px 白色高光。這 1 個像素決定角色有沒有生命感。",
+      "x": 38, "y": 11,
+      "rows": ["OOO", "HII", "OOO"]
+    },
+    {
+      "name": "eye_far",
+      "_desc": "遠側眼。3/4 視角前縮，小一格。",
+      "x": 44, "y": 11,
+      "rows": ["OOO", "HII", "OOO"]
+    }
+  ]
+}

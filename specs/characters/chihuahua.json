@@ -1,0 +1,163 @@
+{
+  "character_id": "chihuahua",
+  "display_name_zh": "長毛吉娃娃",
+  "spec_version": 2,
+  "status": "APPROVED",
+  "reference_photos": [
+    "art/reference/chihuahua/photo_01.jpg",
+    "art/reference/chihuahua/photo_02.jpg",
+    "art/reference/chihuahua/photo_03.jpg",
+    "art/reference/chihuahua/photo_04.jpg",
+    "art/reference/chihuahua/photo_05.jpg",
+    "art/reference/chihuahua/photo_06.jpg",
+    "art/reference/chihuahua/photo_07.jpg",
+    "art/reference/chihuahua/photo_08.jpg",
+    "art/reference/chihuahua/photo_09.jpg",
+    "art/reference/chihuahua/photo_10.jpg"
+  ],
+  "reference_coverage": {
+    "front": "OK（photo_10 是正面特寫，五官最清楚）",
+    "three_quarter": "OK（多張）",
+    "side_standing": "OK（photo_09 站姿全身，尾巴與體態最清楚）",
+    "lying": "OK（photo_07 趴姿）",
+    "note": "十張。這是三隻狗裡參考最完整的一隻——正面／3四分之一／側面站姿／趴姿都有。"
+  },
+  "proportions": {
+    "note": "以 512 母版座標系測量，站立姿態。公主全高 = 420 為 100% 基準。",
+    "total_height": 160,
+    "ratio_to_princess": 0.381,
+    "body_length": 165,
+    "shoulder_height": 118,
+    "head_to_body": 2.9,
+    "build": "極小、蘋果頭、身體短、腿細，長毛讓輪廓看起來蓬鬆",
+    "vs_others": "brown_mixed 250、brindle_guard 265、這隻 160。**體型是這隻狗最強的辨識線索，而且完全免費**——同框時它只有另外兩隻的六成高，不用看任何細節就分得出來。",
+    "render_note": "實測 sprite 是 44×36、986 個不透明像素。高度是 brindle_guard（55）的 65%、brown_mixed（54）的 67%——和規格裡的真實比例 160/265 = 60% 接近，只壓縮了一點點。沒有壓得更小的原因：再小下去眼睛就撐不到 2 px，讀不出來。"
+  },
+  "identity_features": {
+    "size": {
+      "value": "極小型犬。肩高只有另外兩隻的一半多一點。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "note": "docs/09 說剪影分不出同種個體——但那是指**同尺寸**的個體。體型差到這個程度，剪影就是最強的頻道。三歲小孩最先讀到的是大小。"
+    },
+    "white_markings": {
+      "value": "額頭正中一道白斑往下延伸到吻部、整圈白色圍脖與胸口、四腳白襪。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "render_rule": "**白色要畫成大色塊，不能畫成細線。** 額斑在 64px 上約 2-3 px 寬，圍脖是最大的一塊白（十幾個像素），四腳各 2-3 px。",
+      "note": "**這是色相分不開時唯一還能用的頻道。** 實測吉娃娃的巧克力 #5E432E （色相 26°、明度 37%）正好落在 brown_mixed 的 coat_mid #4A3225 與 coat_light #66452F 中間——毛色**分不開**。但 brown_mixed 與 brindle_guard 身上完全沒有白色。所以這隻的一句話身分是「有白色的那隻」。"
+    },
+    "ears": {
+      "value": "巨大直立三角耳，耳位偏側，邊緣有濃密的長飾毛（金褐帶奶油色尖端）。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "note": "和 brindle_guard 的立耳要分開：那隻是**乾淨銳利**的三角形，這隻是**帶飾毛的蓬鬆扇形**，比例上大得多（相對頭部）。64px 上用鋸齒狀的外緣表現飾毛。"
+    },
+    "eye_brows": {
+      "value": "雙眼上方各有一塊明顯的金褐色斑，形狀像眉毛但面積大得多，往下延伸到頰。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGH",
+      "note": "**這是這隻狗的眼睛能被讀到的原因。** 牠的虹膜是接近黑的深褐，在深色臉上本來不會有對比——是周圍那圈金褐把眼睛襯出來的。brown_mixed 只有兩個小圓點，這隻是大色塊。"
+    },
+    "eyes": {
+      "value": "又大又圓、深褐近黑、外凸，佔頭部比例很大。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGH",
+      "note": "三隻狗的眼睛：brown_mixed 琥珀（亮）、brindle_guard 淡藍（亮）、這隻深褐（暗）。這隻要靠**高光**和金褐眼圈才讀得到，不能只靠虹膜色。體型雖然小，但眼睛佔頭比例最大，所以 64px 上反而不會比另外兩隻小。",
+      "render_note": "量化會把眼睛壓成 9px 的實心黑方塊，讀起來像粗眼線。master 用 patch.json 逐像素重畫成「暗眼 + 1px 白高光」。動畫則靠金褐眼圈——實測那圈亮色夠大，量化保得住。"
+    },
+    "nose": {
+      "value": "肝色偏粉的鼻子，比 brown_mixed 的肝棕更亮更粉。",
+      "confirmed": true,
+      "source": "photo",
+      "render_note": "protect 抓不出來：鼻子 #7C2F1C 和巧克力毛 #5C371A 的色相只差 14°，tol 25 就誤傷 18,997 px（整身毛會被染成鼻子色）。master 手工畫，動畫接受它降採樣成「白吻部上的一個深色點」——那本來就是鼻子在這個尺度該有的樣子。"
+    },
+    "coat": {
+      "value": "長毛。頸胸有蓬鬆的圍脖，四肢後方有飾毛，尾巴是羽狀。",
+      "confirmed": true,
+      "source": "photo",
+      "render_rule": "長毛在 64px 上不畫毛流，用**外緣的不規則鋸齒**表現，內部維持平塗。"
+    },
+    "tail": {
+      "value": "羽狀長毛尾，向上捲過背部，末端是淺色（奶油／金）。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGH",
+      "note": "三隻狗的尾巴：brown_mixed 低垂粗短、brindle_guard 上揚細長、這隻**捲過背部的蓬鬆羽毛**。尾巴在剪影邊緣、面積大、而且會動。"
+    },
+    "tan_points": {
+      "value": "後腿與臀部有金褐色斑，胸前圍脖下緣也帶金褐。",
+      "confirmed": true,
+      "source": "photo"
+    }
+  },
+  "personality": {
+    "traits": [
+      "黏人",
+      "警覺",
+      "話多",
+      "怕冷"
+    ],
+    "motion_tempo": "fast_small",
+    "note": "小型犬的節奏最快、幅度最小。呼吸 30 次/分（另外兩隻是 20 與 24）——體型越小呼吸越快，這是真實的，而且免費換到第四條識別頻道。"
+  },
+  "signature_behaviors": [
+    {
+      "id": "shiver_warm",
+      "desc": "縮成一團取暖（不是害怕的發抖——見 expression_limit）"
+    },
+    {
+      "id": "lap_seek",
+      "desc": "往畫面前方靠，像是要爬上來"
+    },
+    {
+      "id": "ear_perk",
+      "desc": "兩耳同時豎到最高，聽到聲音"
+    }
+  ],
+  "expression_limit": {
+    "rule": "**不做害怕的發抖、不做蜷縮躲藏、不做夾尾。**",
+    "why": "小型犬很容易被畫成膽小可憐的樣子，那正好踩到 CLAUDE.md 規則 1 的線。這隻的個性是黏人不是膽小。`shiver_warm` 要配合閉眼與放鬆的耳朵，讀起來是舒服不是害怕。"
+  },
+  "palette": "specs/palettes/chihuahua.json",
+  "mirror_policy": {
+    "default": "mirror_safe",
+    "note": "白斑與金褐斑大致左右對稱。但動畫改走 frames 路線之後鏡射政策不再重要——轉身是 AI 直接畫兩個方向，不是程式翻轉。"
+  },
+  "render": {
+    "sprite_cell": [
+      64,
+      56
+    ],
+    "master": "art/approved/chihuahua/master_stand_r_64px.png",
+    "note": "44×36、986 個不透明像素、10 色。三隻狗的面積：1809 / 1253 / 986。"
+  },
+  "three_channel_identity": {
+    "_ref": "docs/09 第三節。每隻狗一個「一個詞的身分」，三條頻道指向同一答案。",
+    "one_word": "小白胸",
+    "silhouette": "**最小** + 巨大蓬鬆飾毛耳 + 捲過背的羽狀尾",
+    "value": "巧克力底 + **大面積純白**（額斑／圍脖／四腳）= 明度跨距最大",
+    "hue": "巧克力 + 金褐 + **白** + 肝粉鼻 + 黃色項圈",
+    "_warning": "**色相這條頻道對 brown_mixed 是失效的。** 實測兩隻的巧克力與金褐在色相與明度上都幾乎重合。所以這隻完全靠體型與白色來分——設計上不要再往「換一個褐色調」的方向補救，那條路已經量過，走不通。",
+    "vs_brown_mixed": "體型 160↔250、巨大立耳↔長垂耳、有白↔完全無白、羽狀捲尾↔低垂粗短尾、深褐眼↔琥珀眼、黃項圈↔藍項圈",
+    "vs_brindle_guard": "體型 160↔265、蓬鬆飾毛耳↔銳利立耳、巧克力↔金褐虎斑、有白↔無白、深褐眼↔淡藍眼、黃項圈↔粉背帶"
+  },
+  "open_questions": [],
+  "reproducibility": {
+    "rebuild": "art/approved/chihuahua/REBUILD.sh",
+    "inputs": [
+      "art/approved/chihuahua/master_stand_r_source.png",
+      "art/approved/chihuahua/master_stand_r.remap.json",
+      "art/approved/chihuahua/master_stand_r.patch.json",
+      "specs/palettes/chihuahua.json"
+    ],
+    "note": "重跑 REBUILD.sh 必須逐位元產出同一張圖。validate.py --rebuild 會驗。"
+  },
+  "palette_night": "specs/palettes/chihuahua_night.json",
+  "_night_note": "夜間用同一批影格 + 夜間調色盤（tools/nightpal.py 從日間推出來的）。game.c 已經有夜間模式，這裡補上視覺。仿射變換保序，所以 docs/09 的明度分離在夜間仍然成立。"
+}

@@ -1,0 +1,92 @@
+{
+  "palette_id": "scene_night",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "scene 的夜間置換。**角色編號逐一對應**，換調色盤就換夜間。\ngame.c 已經有夜間模式（動畫放慢到 0.7 倍），這裡補上視覺。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#241F1C"
+    },
+    {
+      "index": 2,
+      "role": "wall_light",
+      "hex": "#3E4152",
+      "note": "夜間的牆。整組往藍紫偏、明度砍到三成——不是把日間調色盤變暗，是重新挑的：夜晚的光是冷的"
+    },
+    {
+      "index": 3,
+      "role": "wall_shade",
+      "hex": "#33364A"
+    },
+    {
+      "index": 4,
+      "role": "floor_light",
+      "hex": "#4A4450"
+    },
+    {
+      "index": 5,
+      "role": "floor_shade",
+      "hex": "#3B3743"
+    },
+    {
+      "index": 6,
+      "role": "rug_light",
+      "hex": "#6B4A50",
+      "note": "夜間的地毯刻意保留暖色。原本 #544149 和地板 #4A4450 只差 6 個亮度，整片糊成一塊——地毯的作用是把角色框成一組，糊掉就白做了。"
+    },
+    {
+      "index": 7,
+      "role": "rug_shade",
+      "hex": "#563A42"
+    },
+    {
+      "index": 8,
+      "role": "wood_dark",
+      "hex": "#3A3038"
+    },
+    {
+      "index": 9,
+      "role": "wood_light",
+      "hex": "#4E4148"
+    },
+    {
+      "index": 10,
+      "role": "sky_blue",
+      "hex": "#2A3050",
+      "note": "窗外的夜空。比牆更暗——夜裡窗戶是暗的，白天才是亮的，這一格的明暗反轉是夜間最明顯的訊號"
+    },
+    {
+      "index": 11,
+      "role": "metal_light",
+      "hex": "#5E5A5E"
+    },
+    {
+      "index": 12,
+      "role": "metal_dark",
+      "hex": "#48454A"
+    },
+    {
+      "index": 13,
+      "role": "ball_red",
+      "hex": "#7A4048"
+    },
+    {
+      "index": 14,
+      "role": "bed_blue",
+      "hex": "#4C5A6A"
+    },
+    {
+      "index": 15,
+      "role": "bed_light",
+      "hex": "#5E6E80"
+    }
+  ]
+}

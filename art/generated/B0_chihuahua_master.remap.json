@@ -1,0 +1,16 @@
+{
+  "_note": "chihuahua master 的語意對照表。巧克力在量化後被切成 5 群（a/d/l/m 幾乎同值），全部併回 coat_mid；g 稍亮給 coat_light。tan 的四階 112/156/180/204 對到 tan_dark / tan_mid / tan_light / white_shade——最後那階是尾巴羽毛與耳朵飾毛的奶油色。眼睛、鼻子、項圈在這一步全部被量化吃掉，由調色盤的 protect 段負責。",
+  "#281306": "outline",
+  "#331909": "coat_dark",
+  "#5C371A": "coat_mid",
+  "#5B361A": "coat_mid",
+  "#593519": "coat_mid",
+  "#5D381B": "coat_mid",
+  "#663918": "coat_light",
+  "#A26331": "tan_dark",
+  "#D5913D": "tan_mid",
+  "#E7AC58": "tan_light",
+  "#EAC794": "white_shade",
+  "#FAF4E7": "white_pure",
+  "#F9F1E4": "white_pure"
+}

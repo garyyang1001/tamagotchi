@@ -274,6 +274,122 @@ def final_quantize(rgba: np.ndarray, n_colors: int,
 
 
 # --------------------------------------------------------------------------
+# 步驟 5：保護色
+# --------------------------------------------------------------------------
+
+def apply_protect(small: np.ndarray, rgb: np.ndarray, mask: np.ndarray,
+                  rules: list, roles: dict) -> list:
+    """把量化會吃掉的極小特徵，從原圖直接蓋回降採樣結果。
+
+    為什麼需要：k-means 是照面積分配色群的。眼睛在原圖只佔 0.06%，
+    永遠拿不到自己的一群，會被併進附近的大色塊。實測 brown_mixed 的
+    master 有眼睛（那是手工補的），15 個動畫全部沒有——狗一走路就沒眼睛。
+
+    做法是繞過量化：在**原圖**（還沒預量化）裡用色相抓出目標像素，
+    用同一組格線降採樣成遮罩，最後直接蓋上調色盤的角色色。
+    這樣 59 格影格都有眼睛，而且是純函式、可重現。
+    """
+    th, tw = small.shape[:2]
+    opaque = small[..., 3] > 0
+    hits = []
+
+    for rule in rules:
+        role = rule["role"]
+        if role not in roles:
+            continue
+        tgt = np.array(parse_hex(rule["src_hex"]), dtype=float)
+        tol = float(rule.get("tol", 45))
+
+        # 原圖裡的目標像素（限前景，背景的洋紅不能算進來）
+        d = np.sqrt(((rgb.astype(float) - tgt) ** 2).sum(axis=2))
+        src_hit = (d <= tol) & mask
+        if not src_hit.any():
+            continue
+
+        # 用和 downsample_mode 完全相同的格線，覆蓋率門檻放低
+        cov = float(rule.get("coverage", 0.12))
+        sh, sw = mask.shape
+        xs = [round(i * sw / tw) for i in range(tw + 1)]
+        ys = [round(i * sh / th) for i in range(th + 1)]
+        cell = np.zeros((th, tw), dtype=bool)
+        for ty in range(th):
+            y0, y1 = ys[ty], max(ys[ty] + 1, ys[ty + 1])
+            for tx in range(tw):
+                x0, x1 = xs[tx], max(xs[tx] + 1, xs[tx + 1])
+                sub = src_hit[y0:y1, x0:x1]
+                if sub.size and sub.sum() / sub.size >= cov:
+                    cell[ty, tx] = True
+
+        # 只蓋在已經不透明的像素上——保護色不該長出剪影之外的東西
+        cell &= opaque
+
+        # 粗細下限：只保留屬於某個 k×k 全命中方塊的像素。
+        # 為什麼需要：模型常常沿著腿的輪廓補一條 1 px 寬的粉線
+        # （它以為那是背帶的帶子），降到 64px 之後讀起來是「狗穿粉紅襪子」。
+        # 提示詞明確禁止過一輪，仍然有一半的圖會畫。改在這裡擋：
+        # 胸背帶在 64px 上是 2-4 px 厚的塊，1 px 寬的一律是輪廓雜訊。
+        # 實測乾淨的圖只掉 5-13%（都是外緣），畫壞的圖掉 48-53%（就是那些腿線）。
+        # **不要**套在眼睛上：那才 2 px，k=2 會整個消失。
+        k = int(rule.get("min_thickness", 1))
+        if k >= 2 and cell.any():
+            sq = cell[:, :]
+            for dy in range(k):
+                for dx in range(k):
+                    if dy or dx:
+                        sq = sq & np.roll(np.roll(cell, -dy, 0), -dx, 1)
+            sq[-(k - 1):, :] = False
+            sq[:, -(k - 1):] = False
+            keep = np.zeros_like(cell)
+            for dy in range(k):
+                for dx in range(k):
+                    keep |= np.roll(np.roll(sq, dy, 0), dx, 1)
+            cell &= keep
+
+        if not cell.any():
+            continue
+        small[cell] = (*roles[role], 255)
+        n = int(cell.sum())
+
+        # 高光：每個連通區塊最左邊那一格改成高光色，和 master 的手工補法一致。
+        # 門檻用 highlight_min_blob 控制，因為它在小尺寸上**本質不穩定**：
+        # 區塊大小取決於該格的姿勢，實測走路四格是 3/3/2/2，高光就只在前兩格出現，
+        # 播放起來是眼睛一閃一閃。所以動畫尺度直接把門檻設高關掉它，
+        # 只留純虹膜色；master 的高光是 patch.json 手工畫的，那是靜態姿勢。
+        hl = rule.get("highlight_role")
+        if hl and hl in roles:
+            for blob in _blobs(cell):
+                if len(blob) >= int(rule.get("highlight_min_blob", 3)):
+                    y, x = min(blob, key=lambda p: (p[1], p[0]))
+                    small[y, x] = (*roles[hl], 255)
+        hits.append((role, n))
+
+    return hits
+
+
+def _blobs(cell: np.ndarray) -> list:
+    """8-連通區塊。用在保護色的高光配置。"""
+    seen = np.zeros_like(cell)
+    out = []
+    for sy, sx in zip(*np.where(cell)):
+        if seen[sy, sx]:
+            continue
+        stack, blob = [(sy, sx)], []
+        seen[sy, sx] = True
+        while stack:
+            y, x = stack.pop()
+            blob.append((y, x))
+            for dy in (-1, 0, 1):
+                for dx in (-1, 0, 1):
+                    ny, nx = y + dy, x + dx
+                    if (0 <= ny < cell.shape[0] and 0 <= nx < cell.shape[1]
+                            and cell[ny, nx] and not seen[ny, nx]):
+                        seen[ny, nx] = True
+                        stack.append((ny, nx))
+        out.append(blob)
+    return out
+
+
+# --------------------------------------------------------------------------
 # 主流程
 # --------------------------------------------------------------------------
 
@@ -281,7 +397,7 @@ def pixelate(src: Path, target_w: int, n_colors: int, bg_rgb: tuple,
              tol: float, scale: int, coverage: float, out_dir: Path,
              fixed_palette=None, crop: bool = True,
              target_h=None, remap=None, roles=None,
-             remap_fallback=False) -> dict:
+             remap_fallback=False, protect=None) -> dict:
     img = Image.open(src).convert("RGB")
     rgb = np.array(img)
 
@@ -308,6 +424,8 @@ def pixelate(src: Path, target_w: int, n_colors: int, bg_rgb: tuple,
     small, palette, missing = final_quantize(
         small, n_colors, fixed_palette, remap, roles, remap_fallback)
 
+    protected = apply_protect(small, rgb, mask, protect, roles) if protect and roles else []
+
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = src.stem
 
@@ -329,6 +447,7 @@ def pixelate(src: Path, target_w: int, n_colors: int, bg_rgb: tuple,
         "palette": [f"#{r:02X}{g:02X}{b:02X}" for r, g, b in palette],
         "opaque_pixels": int((small[..., 3] > 0).sum()),
         "unmapped_colors": missing,
+        "protected": {r: n for r, n in protected},
         "sprite": str(sprite_path),
         "preview": str(preview_path),
     }
@@ -370,11 +489,14 @@ def main() -> None:
                          f"預設 {DEFAULT_FALLBACK_ROLES}。"
                          "**不要**放亮色進去——殘渣是描邊附近的邊緣像素，"
                          "吸到亮色會在角色身上產生白斑")
+    ap.add_argument("--no-protect", action="store_true",
+                    help="停用調色盤裡的 protect 規則。只有在 --dump-clusters "
+                         "看原始色群時才需要——保護色是蓋在量化之後的")
     ap.add_argument("--dump-clusters", action="store_true",
                     help="輸出對照表範本，填好角色後再用 --remap")
     args = ap.parse_args()
 
-    fixed, roles = None, None
+    fixed, roles, protect = None, None, None
     if args.palette:
         data = json.loads(args.palette.read_text())
         entries = data["colors"] if isinstance(data, dict) else data
@@ -382,7 +504,10 @@ def main() -> None:
                    if not (isinstance(c, dict) and c.get("transparent"))]
         fixed = [parse_hex(c["hex"] if isinstance(c, dict) else c) for c in entries]
         roles = {c["role"]: parse_hex(c["hex"]) for c in entries if isinstance(c, dict)}
-        print(f"調色盤：{args.palette}（{len(fixed)} 色）")
+        if isinstance(data, dict) and not args.no_protect and not args.dump_clusters:
+            protect = [r for r in data.get("protect", []) if not r.get("_note")]
+        print(f"調色盤：{args.palette}（{len(fixed)} 色）"
+              + (f"，{len(protect)} 條保護色規則" if protect else ""))
 
     remap = json.loads(args.remap.read_text()) if args.remap else None
 
@@ -406,7 +531,7 @@ def main() -> None:
                      # dump 模式要看 AI 自然的色群，不能先被吸附掉
                      fixed_palette=None if (remap or args.dump_clusters) else fixed,
                      crop=not args.no_crop, target_h=args.height,
-                     remap=remap, roles=roles, remap_fallback=fb)
+                     remap=remap, roles=roles, remap_fallback=fb, protect=protect)
         print(f"{src.name}")
         print(f"  來源 {r['source_size'][0]}x{r['source_size'][1]}"
               f"  →  sprite {r['sprite_size'][0]}x{r['sprite_size'][1]}"
@@ -417,6 +542,8 @@ def main() -> None:
             path.write_text(json.dumps(stub, indent=2))
             print(f"  對照表範本已寫出，請填入語意角色再用 --remap：{path}")
             print(f"  可用角色：{', '.join(roles) if roles else '(先給 --palette)'}")
+        if r.get("protected"):
+            print("  保護色：" + "，".join(f"{k} {v}px" for k, v in r["protected"].items()))
         if r["unmapped_colors"]:
             print(f"  ⚠️  未對應的來源色（維持原色）：{', '.join(r['unmapped_colors'])}")
         print(f"  {r['preview']}")

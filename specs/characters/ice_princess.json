@@ -1,0 +1,147 @@
+{
+  "character_id": "ice_princess",
+  "display_name_zh": "冰雪公主",
+  "spec_version": 2,
+  "status": "APPROVED",
+  "ip_boundary": {
+    "rule": "**程式碼、檔名、提示詞中不得出現任何商業作品的角色名稱或專有名詞。**",
+    "scope": "本專案為自用單件，設計靈感來自商業動畫角色，這樣沒有問題。若日後有販售、公開展示、開源發布的打算，必須先改成原創設計。",
+    "audit": "specs/anim_prompt/ice_princess.json 全部用通用描述：「a small cute cartoon ice princess」「pale platinum-blonde side braid」「ice-blue gown」。沒有任何專有名詞。",
+    "forced_redesign": "**這個角色被迫提前改成原創設計，不是選擇而是工具擋下來的。** 原始設計是「及地冰藍禮服 + 單側白金長辮 + 半透明披肩 + 頭冠」，影像模型的輸出審核連續四次拒絕（moderation_blocked / category: other / stage: output）。診斷：只換頭髮→仍被擋；拿掉全部身體輪廓語彙→仍被擋；改成成人比例→仍被擋；把冰雪主題整組換成森林→一次通過。結論是擋的是那一整組指向某商業角色的組合。\n現行設計在剪影層就走開：雙丸子頭、及膝連帽斗篷加靴子、莓紅圍巾與手套。規則 7 說的「日後對外發表前必須改成原創設計」因此已經做掉了。"
+  },
+  "reference_photos": [],
+  "reference_coverage": {
+    "note": "**沒有參考照片。** 三隻狗是真實存在的狗（鐵律 5），這一位是設計出來的。所以她的 identity_features 不是「不可協商的辨識特徵」而是「設計決定」——可以調整，但調整後三頻道要重新量（見 docs/09 附錄）。"
+  },
+  "proportions": {
+    "note": "以 512 母版座標系測量，站立姿態。公主全高 = 420 為 100% 基準。",
+    "total_height": 420,
+    "ratio_to_princess": 1.0,
+    "head_to_body": 4.5,
+    "build": "幼兒向的可愛比例。頭大、身體短、裙襬寬。",
+    "vs_dogs": "420 / 265 / 250 / 160。她是最高的，狗只到她的六成或更低。",
+    "render_note": "實測 sprite 高 90 px，是 brown_mixed（54）的 1.67 倍——設計比例是 420/250 = 1.68，對得剛好。"
+  },
+  "identity_features": {
+    "silhouette": {
+      "value": "人形直立。頭頂兩個大丸子頭、及膝連帽斗篷、帽子放下掛在肩後、靴子。",
+      "priority": "HIGHEST",
+      "note": "**這條是免費的。** 她和三隻狗不同物種，剪影層完全不會混。docs/09 擔心的「同種個體剪影分不開」在她身上不存在。丸子頭是頭部剪影最好認的一筆——三隻狗的耳朵是垂／尖／蓬鬆，她是兩個圓球。"
+    },
+    "hair": {
+      "value": "銀灰色（近白、冷調），在頭頂紮成左右兩個圓丸子頭，臉側垂幾綹短髮。",
+      "priority": "HIGHEST",
+      "note": "刻意做成**中性灰銀**（飽和度只有 7%）而不是藍銀——不然丸子頭會和斗篷在 64px 上糊成一塊。"
+    },
+    "hair_ornament": {
+      "value": "其中一個丸子頭上別一個淡藍雪花飾品"
+    },
+    "eyes": {
+      "value": "大、藍色、佔頭寬 20%，帶白色高光。",
+      "render_note": "**眼睛必須用 eye_* 三格，不能讓量化把它對到 cloak_*。** 她的虹膜藍和斗篷藍是同一個色系，實測量化後整顆眼睛被歸成斗篷色——畫面上看起來對，但服裝置換只換 cloak_* 五格，換一套衣服眼珠就會跟著變色。master 用 patch.json 逐像素改回正確角色（見那個檔的 _note）。"
+    },
+    "skin": {
+      "value": "很淺的暖膚色",
+      "render_note": "膚色 #F8F0E4 和白洋裝在量化後是同一群，用 remap 的 bbox 分開：頭部框內給 skin，其餘給 white_snow。"
+    },
+    "outfit_default": {
+      "value": "冰藍色及膝連帽斗篷（敞開、帽子放下）+ 近白短洋裝 + 深藍靴子。帽緣與袖口有淡藍絨毛滾邊。",
+      "note": "這是 outfit_id 0。"
+    },
+    "scarf": {
+      "value": "莓紅色圍巾繞頸、一端垂下，配同色手套。",
+      "priority": "HIGH",
+      "note": "**全身唯一的暖色。** 三隻狗的配件是藍項圈／粉背帶／黃項圈，她的深莓紅 #802444 在飽和度與明度上和那三個都差很遠。"
+    },
+    "personality_read": {
+      "value": "溫柔、照顧者的姿態。她是照顧三隻狗的人。"
+    }
+  },
+  "personality": {
+    "traits": [
+      "溫柔",
+      "照顧者",
+      "安靜"
+    ],
+    "motion_tempo": "calm_human",
+    "note": "節奏最慢最穩。呼吸 16 次/分——比三隻狗（20 / 24 / 30）都慢，人類本來就比犬隻慢，順序也剛好延續「體型越大越慢」。"
+  },
+  "anim_mapping": {
+    "_why": "21 個 anim_id_t 是照狗設計的，韌體用同一個 enum 索引全部角色（firmware/src/game.c 的 game_is_dog() 只分流**需求**，不分流閒置池）。所以她一定會播到 ear_twitch 與 tail_wag，那兩個必須有人形的對應動作。",
+    "idle_ear_twitch": "撥開臉頰的髮絲，辮子跟著晃",
+    "tail_wag": "裙襬與辮子輕輕搖晃（開心的表現）",
+    "play_bow": "屈膝禮 —— 邀請一起玩",
+    "chase_ball": "把球丟出去給狗撿",
+    "toilet": "蹲下（撿東西／和狗平視）。實際上永遠不會被播到——firmware/src/game.c:487 的 ACT_TOILET 對非狗直接回 false，而 NEED_BLADDER 也只給狗。做出來只是為了讓 21 個影格齊備、不必在 validate.py 開特例。",
+    "pet_react": "被小孩摸頭的反應"
+  },
+  "outfits": {
+    "_design": "五套服裝由 affection 里程碑解鎖（docs/02 第六節），存檔的 unlocked_outfits 是 bitmask，預設服裝 0x01 一開始就有。",
+    "list": [
+      {
+        "id": 0,
+        "name": "冰藍長裙",
+        "unlock": "預設"
+      },
+      {
+        "id": 1,
+        "name": "睡衣",
+        "unlock": "affection 100"
+      },
+      {
+        "id": 2,
+        "name": "粉紅裙",
+        "unlock": "affection 300"
+      },
+      {
+        "id": 3,
+        "name": "冬季裝",
+        "unlock": "affection 1000"
+      },
+      {
+        "id": 4,
+        "name": "守護者裝",
+        "unlock": "affection 2500"
+      }
+    ],
+    "_plan": "**用調色盤置換實作，不重生圖。** 服裝色集中在 dress_dark / dress_mid / dress_light / trim_pale / cape_white 這五格，換一套服裝 = 換一份specs/palettes/ice_princess_outfit<N>.json，remap 對照表與全部影格完全共用。代價說清楚：剪影不會變（裙型固定）。在 64px 上，睡衣與長裙的剪影差異本來就讀不出來，換色反而是最有效的表現方式。本輪只做 outfit 0，其餘留待里程碑系統接上時再加。"
+  },
+  "expression_limit": {
+    "rule": "**不做哭泣、不做生氣、不做害怕。**",
+    "why": "同 CLAUDE.md 規則 1。她是照顧者，sad_wait 的上限是「安靜地等」——眼神向下、動作變慢，不做掩面或啜泣。"
+  },
+  "palette": "specs/palettes/ice_princess.json",
+  "mirror_policy": {
+    "default": "mirror_unsafe",
+    "note": "側辮與頭冠不對稱。但動畫走 frames 路線，turn 是 AI 直接畫兩個方向，不是程式翻轉，所以這個政策實際上不影響產出。"
+  },
+  "render": {
+    "sprite_cell": [
+      64,
+      96
+    ],
+    "master": "art/approved/ice_princess/master_stand_r_64px.png",
+    "note": "實測 38×90、2298 個不透明像素、15 色。四角色的面積：1809 / 1253 / 986 / 2298。",
+    "_cell_why": "docs/03 原本寫 64×112，那是在狗的格還是 64×64 的年代訂的（比例 1.75）。狗的格後來定為 64×56，等比例的公主格是 56×1.75 ≈ 98，取整到 96。她的 sprite 約 92 px 高，上下各留 2 列給 screen_offset，和狗的規則一致。flash：64×96 是狗的 1.71 倍，83 格約 87 KB，四角色合計約 240 KB。"
+  },
+  "three_channel_identity": {
+    "_ref": "docs/09 附錄。三隻狗已佔掉明度 61 / 96 / 121，她要挑不重疊的位置。",
+    "one_word": "銀丸子",
+    "silhouette": "**人形** —— 唯一直立的，最高，頭頂兩個圓球",
+    "value": "實測平均亮度 163.0。三隻狗是 61.3 / 95.7 / 120.7，她接在最亮那一端",
+    "hue": "**藍（204-214°）** —— 三隻狗全部落在 0-30° 的暖褐帶，藍色完全沒人用；連描邊都是冷色"
+  },
+  "open_questions": [],
+  "reproducibility": {
+    "rebuild": "art/approved/ice_princess/REBUILD.sh",
+    "inputs": [
+      "art/approved/ice_princess/master_stand_r_source.png",
+      "art/approved/ice_princess/master_stand_r.remap.json",
+      "art/approved/ice_princess/master_stand_r.patch.json",
+      "specs/palettes/ice_princess.json"
+    ],
+    "note": "重跑 REBUILD.sh 必須逐位元產出同一張圖。"
+  },
+  "palette_night": "specs/palettes/ice_princess_night.json",
+  "_night_note": "夜間用同一批影格 + 夜間調色盤（tools/nightpal.py 從日間推出來的）。game.c 已經有夜間模式，這裡補上視覺。仿射變換保序，所以 docs/09 的明度分離在夜間仍然成立。"
+}

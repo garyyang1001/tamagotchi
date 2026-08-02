@@ -1,0 +1,410 @@
+{
+  "character_id": "chihuahua",
+  "format_version": 2,
+  "note": "17 個 frames 型 + 4 個程序式（idle_breathe / turn / happy / sad_wait，只對 master 做整數位移與水平翻轉）。只允許整數像素平移、水平翻轉、z 排序。",
+  "defaults": {
+    "fps": 6,
+    "loop": false,
+    "type": "transform"
+  },
+  "transform_fields": {
+    "x": "水平位移，整數像素",
+    "y": "垂直位移，整數像素，負值向上",
+    "flip": "1 = 水平翻轉"
+  },
+  "tier0_whitelist": [
+    "happy",
+    "idle_breathe",
+    "sad_wait",
+    "turn",
+    "walk"
+  ],
+  "timing_note": "frame_ms 是權威欄位。三隻狗的節奏是刻意分開的（motion_tempo）：呼吸 20 / 24 / 30 次每分、走路 140 / 130 / 110ms、奔跑 90 / 80 / 70ms。體型越小越快，這是真實的犬隻生理，而且不用多畫任何一張圖就多一條識別頻道（docs/09 第六節）。",
+  "screen_offset_note": "screen_offset 是繪製時的偏移，不烘進影格。",
+  "asset_note": "這隻的調色盤有三件事和另外兩隻不同，都寫在 specs/palettes/chihuahua.json：(1) automap_bands.bright_bands —— 亮部有五階（金褐/亮金/奶油金/奶油/純白），預設的「一刀飽和度」切不開，而且會把整片白圍脖判成 eye_highlight，白色標記在畫面上整個消失。(2) protect 只保護黃項圈。眼睛是暗色（靠金褐眼圈襯出來）、鼻子和巧克力毛色相只差 14°，兩者都抓不出來，改在 master 手工畫。(3) --match-area 對齊 986 px。三隻狗的面積是 1809 / 1253 / 986。",
+  "animations": [
+    {
+      "id": "idle_breathe",
+      "tier": 0,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 500,
+      "fps": 2.0,
+      "status": "IMPLEMENTED",
+      "desc": "呼吸。小型犬節奏最快。",
+      "_timing": "4 格 × 500ms = 2.0 秒 = 30 次/分。三隻狗是 20 / 24 / 30——體型越小呼吸越快，這是真實的，而且免費換到第四條識別頻道。",
+      "track": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "turn",
+      "tier": 0,
+      "fps": 8,
+      "frames": 2,
+      "status": "IMPLEMENTED",
+      "desc": "轉身。純水平翻轉。白斑與金褐斑左右大致對稱，翻轉不會露餡。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1,
+          "flip": 1
+        }
+      ]
+    },
+    {
+      "id": "happy",
+      "tier": 0,
+      "fps": 12,
+      "frames": 6,
+      "status": "IMPLEMENTED",
+      "desc": "開心。小型犬跳得又快又碎，幅度小但頻率高。",
+      "_clip_limit": "master 是 44×36、畫布 64×56，上下都有 20 列餘裕——三隻裡最寬鬆的。但彈跳仍然全部放在 screen_offset，理由和另外兩隻一樣：繪製層偏移不受畫布限制，而且不必為了跳躍重烘影格。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1
+        },
+        {
+          "f": 2
+        },
+        {
+          "f": 3
+        },
+        {
+          "f": 4
+        },
+        {
+          "f": 5
+        }
+      ],
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -4
+        },
+        {
+          "f": 2,
+          "y": -7
+        },
+        {
+          "f": 3,
+          "y": -7
+        },
+        {
+          "f": 4,
+          "y": -3
+        },
+        {
+          "f": 5,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "sad_wait",
+      "tier": 0,
+      "loop": true,
+      "fps": 2.5,
+      "frames": 4,
+      "frame_ms": 400,
+      "status": "IMPLEMENTED",
+      "desc": "等待關心。整體下沉、動作變小。**不做發抖、不做蜷縮、不做夾尾**——小型犬最容易被畫成膽小可憐的樣子，那正好踩到 CLAUDE.md 規則 1 的線。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1
+        },
+        {
+          "f": 2
+        },
+        {
+          "f": 3
+        }
+      ],
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 1
+        },
+        {
+          "f": 1,
+          "y": 2
+        },
+        {
+          "f": 2,
+          "y": 2
+        },
+        {
+          "f": 3,
+          "y": 1
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/walk_px",
+      "source_sheet": "art/generated/B4_chihuahua_walk.png",
+      "desc": "走路。腿短步頻高，三隻裡最快（110 vs 130 vs 140ms）。",
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": 0
+        },
+        {
+          "f": 3,
+          "y": -1
+        }
+      ]
+    },
+    {
+      "id": "idle_blink",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 3,
+      "frame_ms": 90,
+      "fps": 11.11,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/idle_blink_px",
+      "source_sheet": "art/generated/B4_chihuahua_idle_blink.png",
+      "desc": "眨眼。"
+    },
+    {
+      "id": "idle_look",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 200,
+      "fps": 5.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/idle_look_px",
+      "source_sheet": "art/generated/B4_chihuahua_idle_look.png",
+      "desc": "環顧。"
+    },
+    {
+      "id": "idle_ear_twitch",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 95,
+      "fps": 10.53,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/idle_ear_twitch_px",
+      "source_sheet": "art/generated/B4_chihuahua_idle_ear_twitch.png",
+      "desc": "耳朵轉向。巨大的飾毛立耳轉動，是這隻剪影上最明顯的動作。"
+    },
+    {
+      "id": "tail_wag",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/tail_wag_px",
+      "source_sheet": "art/generated/B4_chihuahua_tail_wag.png",
+      "desc": "搖尾。羽狀捲尾，擺得又快又碎。"
+    },
+    {
+      "id": "sit_down",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/sit_down_px",
+      "source_sheet": "art/generated/B4_chihuahua_sit_down.png",
+      "desc": "坐下。"
+    },
+    {
+      "id": "stand_up",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "desc": "站起。反向播放 sit_down。",
+      "frames_dir": "build/strip/chihuahua/sit_down_px",
+      "reverse": true
+    },
+    {
+      "id": "lie_down",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/lie_down_px",
+      "source_sheet": "art/generated/B4_chihuahua_lie_down.png",
+      "desc": "趴下。"
+    },
+    {
+      "id": "wake_up",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 150,
+      "fps": 6.67,
+      "status": "IMPLEMENTED",
+      "desc": "醒來。反向播放 lie_down。",
+      "frames_dir": "build/strip/chihuahua/lie_down_px",
+      "reverse": true
+    },
+    {
+      "id": "eat",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 140,
+      "fps": 7.14,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/eat_px",
+      "source_sheet": "art/generated/B4_chihuahua_eat.png",
+      "desc": "吃飯。"
+    },
+    {
+      "id": "eat_happy",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 100,
+      "fps": 10.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/eat_happy_px",
+      "source_sheet": "art/generated/B4_chihuahua_eat_happy.png",
+      "desc": "吃飽的滿足。"
+    },
+    {
+      "id": "sleep_breathe",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 700,
+      "fps": 1.43,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/sleep_breathe_px",
+      "source_sheet": "art/generated/B4_chihuahua_sleep_breathe.png",
+      "desc": "睡覺。",
+      "_timing": "4 格 × 700ms = 2.8 秒 = 21 次/分。睡眠呼吸比清醒的 30 次慢。"
+    },
+    {
+      "id": "yawn",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 160,
+      "fps": 6.25,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/yawn_px",
+      "source_sheet": "art/generated/B4_chihuahua_yawn.png",
+      "desc": "打呵欠。"
+    },
+    {
+      "id": "play_bow",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 100,
+      "fps": 10.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/play_bow_px",
+      "source_sheet": "art/generated/B4_chihuahua_play_bow.png",
+      "desc": "邀玩鞠躬。"
+    },
+    {
+      "id": "chase_ball",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 70,
+      "fps": 14.29,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/chase_ball_px",
+      "source_sheet": "art/generated/B4_chihuahua_chase_ball.png",
+      "desc": "奔跑。短腿快步，三隻裡最快（70 vs 80 vs 90ms）。"
+    },
+    {
+      "id": "pet_react",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 140,
+      "fps": 7.14,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/pet_react_px",
+      "source_sheet": "art/generated/B4_chihuahua_pet_react.png",
+      "desc": "被摸的反應。"
+    },
+    {
+      "id": "toilet",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 160,
+      "fps": 6.25,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/chihuahua/toilet_px",
+      "source_sheet": "art/generated/B4_chihuahua_toilet.png",
+      "desc": "上廁所。只畫姿勢，地上什麼都不畫。"
+    }
+  ]
+}

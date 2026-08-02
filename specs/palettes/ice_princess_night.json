@@ -1,0 +1,100 @@
+{
+  "palette_id": "ice_princess_night",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "derived_from": "specs/palettes/ice_princess.json",
+  "generator": "tools/nightpal.py",
+  "transform": {
+    "formula": "out = day * k + tint * (1 - k)",
+    "k": 0.45,
+    "tint": [
+      28,
+      36,
+      70
+    ]
+  },
+  "note": "夜間置換。**角色編號逐一對應日間調色盤**，換調色盤就換夜間，不換圖。\n用仿射變換而不是手挑：它保序，所以 docs/09 的明度分離在夜間仍然成立（任意兩色的亮度差被壓縮同一個比例）。\n改「夜要多暗」只要改 tools/nightpal.py 的 K 再重跑，四個角色一起變。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#232E48"
+    },
+    {
+      "index": 2,
+      "role": "cloak_dark",
+      "hex": "#203F71"
+    },
+    {
+      "index": 3,
+      "role": "cloak_mid",
+      "hex": "#2E5488"
+    },
+    {
+      "index": 4,
+      "role": "cloak_light",
+      "hex": "#406392"
+    },
+    {
+      "index": 5,
+      "role": "trim_pale",
+      "hex": "#677B98"
+    },
+    {
+      "index": 6,
+      "role": "trim_light",
+      "hex": "#768299"
+    },
+    {
+      "index": 7,
+      "role": "hair_dark",
+      "hex": "#485270"
+    },
+    {
+      "index": 8,
+      "role": "hair_mid",
+      "hex": "#60647D"
+    },
+    {
+      "index": 9,
+      "role": "hair_light",
+      "hex": "#70768B"
+    },
+    {
+      "index": 10,
+      "role": "skin_shade",
+      "hex": "#78747F"
+    },
+    {
+      "index": 11,
+      "role": "skin",
+      "hex": "#7F808D"
+    },
+    {
+      "index": 12,
+      "role": "eye_iris",
+      "hex": "#2B4D78"
+    },
+    {
+      "index": 13,
+      "role": "eye_dark",
+      "hex": "#1F2D4A"
+    },
+    {
+      "index": 14,
+      "role": "eye_highlight",
+      "hex": "#828799"
+    },
+    {
+      "index": 15,
+      "role": "accent_red",
+      "hex": "#492445"
+    }
+  ]
+}

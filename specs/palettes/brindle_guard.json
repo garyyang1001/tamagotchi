@@ -1,0 +1,129 @@
+{
+  "character_id": "brindle_guard",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "手工制定。與 brown_mixed 的配色關係是刻意設計的：那隻是深巧克力單色，這隻是金褐底 + 近黑條紋——底色更亮、內部對比更高。灰階下兩隻明度分得開（docs/09 的第二條頻道）。",
+  "automap_bands": {
+    "_note": "automap.py 的亮度分界。預設值是照 brown_mixed 的深巧克力毛校準的，這隻底色亮得多，分界要整體上移。　bright_low_sat_role：「亮而不飽和」那一格給 tan_mid，不給 muzzle_grey_light——這隻幾乎沒有灰白嘴毛，那一格實際上是受光的褐毛。曾經試過指到 collar_accent，結果 idle_ear_twitch 的四條腿全變成粉紅色：腿上的亮褐和背帶落在同一個亮度／飽和度格子裡，分不開。背帶改由 protect 單獨負責——它是按**原圖色相**比對的，不可能命中褐色的腿。",
+    "outline": 26,
+    "coat_dark": 62,
+    "coat_mid": 100,
+    "coat_light": 135,
+    "sat_split": 55,
+    "bright_low_sat_role": "tan_mid"
+  },
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#17120F",
+      "note": "不用純黑。這隻的條紋已經很深，描邊要再深一階才分得出來"
+    },
+    {
+      "index": 2,
+      "role": "coat_dark",
+      "hex": "#241C15",
+      "note": "虎斑的深色條紋與背部鞍狀區。這是這隻狗的招牌圖案"
+    },
+    {
+      "index": 3,
+      "role": "coat_mid",
+      "hex": "#6B5330",
+      "note": "條紋之間的過渡"
+    },
+    {
+      "index": 4,
+      "role": "coat_light",
+      "hex": "#9C7A44",
+      "note": "金褐底色，佔畫面最大面積"
+    },
+    {
+      "index": 5,
+      "role": "tan_dark",
+      "hex": "#7A5E33"
+    },
+    {
+      "index": 6,
+      "role": "tan_mid",
+      "hex": "#BC9758",
+      "note": "受光的金褐。這隻整體比 brown_mixed 亮，是灰階測試裡的中間位置"
+    },
+    {
+      "index": 7,
+      "role": "muzzle_grey_dark",
+      "hex": "#7E756C",
+      "note": "老犬嘴周的灰白毛。範圍比 brown_mixed 小很多——這隻的臉主要是深色口罩"
+    },
+    {
+      "index": 8,
+      "role": "muzzle_grey_light",
+      "hex": "#B5ACA2"
+    },
+    {
+      "index": 9,
+      "role": "nose_liver",
+      "hex": "#14100E",
+      "note": "實際是黑鼻（brown_mixed 是肝棕）。角色名沿用 nose_liver 只是為了讓 automap 的角色表通用"
+    },
+    {
+      "index": 10,
+      "role": "eye_iris",
+      "hex": "#A6BAC6",
+      "note": "淡藍灰的混濁老眼。這是最強的單一辨識特徵——brown_mixed 是琥珀色，即使眼睛只有 3 個像素，色相差這麼遠也分得開。視覺上是漂亮的淺藍，不會讀成病態"
+    },
+    {
+      "index": 11,
+      "role": "eye_dark",
+      "hex": "#241B14"
+    },
+    {
+      "index": 12,
+      "role": "eye_highlight",
+      "hex": "#F0EFEA"
+    },
+    {
+      "index": 13,
+      "role": "tongue_pink",
+      "hex": "#C4707A"
+    },
+    {
+      "index": 14,
+      "role": "contact_shadow",
+      "hex": "#1B1510"
+    },
+    {
+      "index": 15,
+      "role": "collar_accent",
+      "hex": "#E3A3A0",
+      "note": "淡粉／鮭魚色胸背帶——照片裡的真實顏色。docs/09 第四節把「真實線索與遊戲線索完全同一個」列為槓桿最大的一件事。而且胸背帶比項圈好：項圈在 64px 只有 2px 寬，胸背帶有 30-50 個像素的純色塊。brown_mixed 的藍是設計指定，這隻是實據；chihuahua 因此改配黃或綠，避開粉紅"
+    }
+  ],
+  "protect": [
+    {
+      "_note": "量化會吃掉的極小特徵。k-means 照面積分群，眼睛在原圖只佔 0.06%，永遠拿不到自己的一群。這裡繞過量化，直接從原圖用色相抓出來蓋回去。"
+    },
+    {
+      "role": "eye_iris",
+      "src_hex": "#B8D8F7",
+      "tol": 45,
+      "coverage": 0.1,
+      "highlight_role": "eye_highlight",
+      "why": "淡藍眼是這隻狗最強的單一辨識特徵（docs/09）。實測原圖的眼睛藍是 B 主導、#ADCFEF～#C0E7FF，和粉背帶（R 主導 #FBC1B1）、金褐毛、灰白嘴毛都分得開——tol 45 涵蓋整群，離最近的非目標色（eye_highlight #F0EFEA，距離 62）還有餘裕。　coverage 0.10 讓四格都穩定給出每眼 2 px 純虹膜色。highlight_min_blob 設 6 等於在動畫尺度關掉高光：實測區塊大小逐格是 3/3/2/2，開著的話眼睛會一閃一閃。",
+      "highlight_min_blob": 6
+    },
+    {
+      "role": "collar_accent",
+      "src_hex": "#FBC1B1",
+      "tol": 50,
+      "coverage": 0.35,
+      "why": "粉背帶是 docs/09 裡槓桿最大的辨識線索（現實與遊戲用同一個線索），色相絕對不能漂。實測 tol 50 涵蓋背帶 92%、全圖誤傷 8 px；tol 60 誤傷跳到 712，所以停在 50。　min_thickness 2：模型常沿著腿的輪廓補一條 1 px 寬的粉線，64px 下讀起來是狗穿粉襪。提示詞明確禁止過一輪仍然有一半的圖會畫，所以改在管線擋。實測乾淨的圖只掉 5-13%（外緣），畫壞的掉 48-53%（就是腿線）。",
+      "min_thickness": 2
+    }
+  ]
+}

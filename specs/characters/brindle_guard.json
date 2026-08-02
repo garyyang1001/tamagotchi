@@ -1,0 +1,158 @@
+{
+  "character_id": "brindle_guard",
+  "display_name_zh": "虎斑護衛犬米克斯",
+  "spec_version": 2,
+  "status": "APPROVED",
+  "reference_photos": [
+    "art/reference/brindle_guard/upright_01.jpg",
+    "art/reference/brindle_guard/upright_02.jpg",
+    "art/reference/brindle_guard/upright_03.jpg",
+    "art/reference/brindle_guard/upright_04.jpg",
+    "art/reference/brindle_guard/upright_05.jpg",
+    "art/reference/brindle_guard/upright_06.jpg",
+    "art/reference/brindle_guard/upright_07.jpg"
+  ],
+  "reference_coverage": {
+    "front": "OK（多張）",
+    "three_quarter": "OK",
+    "side_standing": "OK（第 2、5 張）",
+    "note": "七張涵蓋正面、3/4、側身站姿。比 brown_mixed 的兩張正面坐姿完整得多——側面體型不需要推測。"
+  },
+  "proportions": {
+    "note": "以 512 母版座標系測量，站立姿態。公主全高 = 420 為 100% 基準。",
+    "total_height": 265,
+    "ratio_to_princess": 0.631,
+    "body_length": 300,
+    "shoulder_height": 215,
+    "head_to_body": 4.0,
+    "build": "精瘦結實，腿長，胸深但不寬",
+    "vs_brown_mixed": "比 brown_mixed 高一截（265 vs 250）但明顯更瘦。brown_mixed 是厚實桶狀，這隻是運動員身材。"
+  },
+  "identity_features": {
+    "ears": {
+      "value": "大、尖、完全直立的三角耳，耳位高。偶爾一隻耳尖微倒。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "note": "**這是本專案最重要的一個特徵。** docs/09 論證過「剪影分不出同種個體」——但這一對耳朵推翻了那個限制：brown_mixed 是長垂耳，這隻是大尖立耳，**在剪影層就完全不同**，填黑之後也分得出來。64px 上耳朵佔 6-8 像素，讀得到。"
+    },
+    "coat_pattern": {
+      "value": "虎斑（brindle）：金褐底色上有深色的不規則縱向條紋，主要分佈在身側、肩、後腿。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "render_rule": "**絕對不要照畫真實虎斑。** 在 64px 上會變成雜訊。改成側腹 3–5 條粗直的深色帶，每條 2px 寬，中間留清楚空隙；後腿再 2 條。當成「大貓條紋」處理——少而粗。見 docs/09 第三節。"
+    },
+    "saddle": {
+      "value": "背部與肩部有明顯的深色鞍狀區，接近黑色，從頸背延伸到腰。",
+      "confirmed": true,
+      "source": "photo",
+      "note": "這是大色塊的明度分區，比條紋更早被讀到。docs/09 的第二頻道就靠它。"
+    },
+    "face_mask": {
+      "value": "口鼻周圍有深色面具，明顯比臉頰暗。額頭與臉頰是虎斑。",
+      "confirmed": true,
+      "source": "photo",
+      "note": "與 brown_mixed 相反——那隻是**淺色**吻部，這隻是**深色**口罩。同一個部位、相反的明度，是很強的區分。"
+    },
+    "eyes": {
+      "value": "淡藍灰色、略混濁（老犬的核硬化）。眼形偏杏仁，眼神專注。",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "note": "**最強的單一辨識特徵。** brown_mixed 是琥珀色，這隻是淺藍——即使眼睛只有 3 個像素，色相差這麼遠也分得開。視覺上是漂亮的淺藍，不會讀成病態。"
+    },
+    "nose": {
+      "value": "黑色",
+      "confirmed": true,
+      "source": "photo",
+      "note": "與 brown_mixed 的肝棕鼻相反。"
+    },
+    "muzzle_grizzle": {
+      "value": "嘴周有少量灰白老毛，範圍比 brown_mixed 小很多。",
+      "confirmed": true,
+      "source": "photo"
+    },
+    "tail": {
+      "value": "中長，微上揚帶弧度，末端偏細。",
+      "confirmed": true,
+      "source": "photo",
+      "note": "docs/09 指出尾巴被低估——它在剪影邊緣、面積大、而且會動。brown_mixed 的尾巴是低垂粗短，這隻是上揚細長。"
+    },
+    "harness": {
+      "value": "淡粉／鮭魚色的胸背帶（不是項圈）",
+      "confirmed": true,
+      "source": "photo",
+      "priority": "HIGHEST",
+      "note": "**真實顏色，直接使用。** docs/09 第四節把這列為整份研究裡槓桿最大的一件事——讓遊戲裡的線索和現實裡的線索完全是同一個。而且胸背帶比項圈好：項圈在 64px 只有 2px 寬，胸背帶有 30-50 個像素的純色塊。"
+    },
+    "personality_read": {
+      "value": "警戒但親人。照片裡多次抬頭對視、吐舌、耳朵前傾——是期待互動不是威嚇。",
+      "confirmed": true,
+      "source": "photo"
+    }
+  },
+  "personality": {
+    "traits": [
+      "警戒",
+      "忠誠",
+      "聰明",
+      "喜歡巡邏"
+    ],
+    "motion_tempo": "medium_alert",
+    "note": "動作幅度最大、節奏中等。頭部會左右掃視、耳朵定期轉向——這是 docs/09 第六節的第四條識別頻道。"
+  },
+  "signature_behaviors": [
+    {
+      "id": "check_room",
+      "desc": "定時巡邏，走到畫面邊緣再回來"
+    },
+    {
+      "id": "guard_princess",
+      "desc": "有動靜時擋在公主前面"
+    },
+    {
+      "id": "ears_scan",
+      "desc": "耳朵獨立轉向聲音來源"
+    }
+  ],
+  "expression_limit": {
+    "rule": "**不露牙、不皺鼻、不做撲咬姿態、不畫豎起的背毛。**",
+    "why": "這是給 3 歲小孩的產品。守護感來自站姿的穩定與視線的專注，不是威嚇。",
+    "note": "照片裡有張嘴吐舌的畫面，那是開心不是威嚇——可以用，但要配合眼睛彎起與耳朵放鬆。"
+  },
+  "palette": "specs/palettes/brindle_guard.json",
+  "mirror_policy": {
+    "default": "mirror_unsafe",
+    "note": "虎斑紋路全身不對稱。但改用 frames 路線之後鏡射政策不再重要——轉身動畫是 AI 直接畫兩個方向，不是程式翻轉。"
+  },
+  "render": {
+    "sprite_cell": [
+      64,
+      56
+    ],
+    "master": "art/approved/brindle_guard/master_stand_r_64px.png",
+    "note": "實測 50×55、1,253 個不透明像素、7 色。刻意比 brown_mixed（64×54、1,809 像素）小——這隻更高但精瘦得多，面積小是對的。動畫用 cutstrip 的面積正規化保持同一尺度。"
+  },
+  "three_channel_identity": {
+    "_ref": "docs/09 第三節。每隻狗一個「一個詞的身分」，三條頻道指向同一答案。",
+    "silhouette": "最高 + 大尖立耳 + 精瘦",
+    "value": "金褐底 + 近黑鞍背與條紋 = 內部對比最高",
+    "hue": "金褐 + 淡藍眼 + 粉色胸背帶",
+    "vs_brown_mixed": "垂耳↔立耳、厚實↔精瘦、淺吻部↔深口罩、琥珀眼↔淡藍眼、藍項圈↔粉背帶。五條全部相反。",
+    "one_word": "虎斑立耳"
+  },
+  "open_questions": [],
+  "reproducibility": {
+    "rebuild": "art/approved/brindle_guard/REBUILD.sh",
+    "inputs": [
+      "art/approved/brindle_guard/master_stand_r_source.png",
+      "art/approved/brindle_guard/master_stand_r.remap.json",
+      "art/approved/brindle_guard/master_stand_r.patch.json",
+      "specs/palettes/brindle_guard.json"
+    ],
+    "note": "重跑 REBUILD.sh 必須逐位元產出同一張圖。validate.py --rebuild 會驗。"
+  },
+  "palette_night": "specs/palettes/brindle_guard_night.json",
+  "_night_note": "夜間用同一批影格 + 夜間調色盤（tools/nightpal.py 從日間推出來的）。game.c 已經有夜間模式，這裡補上視覺。仿射變換保序，所以 docs/09 的明度分離在夜間仍然成立。"
+}

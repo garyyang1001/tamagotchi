@@ -125,9 +125,10 @@
   "render": {
     "sprite_cell": [
       64,
-      64
+      56
     ],
-    "note": "實測 64px 寬的 sprite，狗身約佔 64×53，1,785 個不透明像素，讀得出所有辨識特徵。"
+    "note": "實測 64px 寬的 sprite，狗身約佔 64×53，1,785 個不透明像素，讀得出所有辨識特徵。",
+    "_cell_fix": "原本寫 [64, 64]，但管線從頭到尾都是用 64×56 跑的——這個欄位以前沒有任何程式讀它，所以錯了很久沒被發現。tools/cell.py 把它變成真相來源之後立刻爆掉（測試抓到 17 個動畫被畫布切邊）。另外兩隻狗本來就寫對。"
   },
   "prototype_history": [
     {
@@ -169,5 +170,11 @@
     "pipeline": "AI 一次生成含全部影格的圖 → cutstrip → automap → pixelate → bake",
     "rebuild": "art/approved/brown_mixed/REBUILD_ANIM.sh",
     "note": "stand_up 與 wake_up 是反向播放 sit_down / lie_down，不另外生成。"
-  }
+  },
+  "three_channel_identity": {
+    "one_word": "大垂耳",
+    "_ref": "docs/09 第三節。每隻狗一個「一個詞的身分」，三條頻道指向同一答案。"
+  },
+  "palette_night": "specs/palettes/brown_mixed_night.json",
+  "_night_note": "夜間用同一批影格 + 夜間調色盤（tools/nightpal.py 從日間推出來的）。game.c 已經有夜間模式，這裡補上視覺。仿射變換保序，所以 docs/09 的明度分離在夜間仍然成立。"
 }

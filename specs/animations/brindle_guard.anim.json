@@ -1,0 +1,411 @@
+{
+  "character_id": "brindle_guard",
+  "format_version": 2,
+  "note": "兩種型別：type=frames 的 17 個由 AI 一次生成的連續影格圖經管線產出；其餘 4 個（idle_breathe / turn / happy / sad_wait）是程序式的，只對 master sprite 做整數位移與水平翻轉。兩者都只允許整數像素平移、水平翻轉、z 排序（docs/05 鐵律 3），絕不重新採樣、旋轉或縮放。",
+  "defaults": {
+    "fps": 6,
+    "loop": false,
+    "type": "transform"
+  },
+  "transform_fields": {
+    "x": "水平位移，整數像素",
+    "y": "垂直位移，整數像素，負值向上",
+    "flip": "1 = 水平翻轉"
+  },
+  "tier0_whitelist": [
+    "happy",
+    "idle_breathe",
+    "sad_wait",
+    "turn",
+    "walk"
+  ],
+  "timing_note": "frame_ms 是權威欄位，fps 僅供參考。這隻的節奏整體比 brown_mixed 快一階（motion_tempo = medium_alert）：呼吸 24 vs 20 次/分、走路 130 vs 140ms、搖尾 150 vs 200ms、奔跑 80 vs 90ms。同一套動作、不同的節奏，是 docs/09 第六節的第四條識別頻道——不用多畫一張圖就能分出是哪隻狗。",
+  "screen_offset_note": "screen_offset 是繪製時的偏移，不烘進影格。這隻的 master 是 50×55、畫布 64×56，頭上只剩 1 列，所以 happy 的彈跳一格都不能烘進影格。",
+  "asset_note": "這隻狗有兩件 brown_mixed 沒有的事，都寫在 specs/palettes/brindle_guard.json：(1) protect 段——k-means 照面積分群，淡藍眼在原圖只佔 0.06%，不保護的話 15 個動畫全部沒有眼睛（brown_mixed 現在就是這樣，只有 master 有眼睛）。(2) --match-area——預設的 1800 會讓動畫比它的 master（1253）大 40%。",
+  "animations": [
+    {
+      "id": "idle_breathe",
+      "tier": 0,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 625,
+      "fps": 1.6,
+      "status": "IMPLEMENTED",
+      "desc": "呼吸。精瘦的中型犬、警戒型，比 brown_mixed 快一階。",
+      "_timing": "4 格 × 625ms = 2.5 秒 = 24 次/分。brown_mixed 是 20 次/分——體型越大呼吸越慢，這一格差異免費換到個性差異。",
+      "track": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "turn",
+      "tier": 0,
+      "fps": 8,
+      "frames": 2,
+      "status": "IMPLEMENTED",
+      "desc": "轉身。純水平翻轉。虎斑紋左右不對稱，但翻轉的是同一隻狗的同一面，讀起來仍然對。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1,
+          "flip": 1
+        }
+      ]
+    },
+    {
+      "id": "happy",
+      "tier": 0,
+      "fps": 10,
+      "frames": 6,
+      "status": "IMPLEMENTED",
+      "desc": "開心。彈跳全部由 screen_offset 承擔，一格都不烘進影格。",
+      "_clip_limit": "這隻的 master 是 50×55、畫布 64×56，頭上只剩 **1 列**——比 brown_mixed 的 2 列更緊。所以 track 的 y 一律 0，跳躍完全放在繪製層。這樣幅度就不再受畫布限制，-10 的彈跳也不會削掉耳尖。長腿犬跳得比 brown_mixed 高，是對的。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1
+        },
+        {
+          "f": 2
+        },
+        {
+          "f": 3
+        },
+        {
+          "f": 4
+        },
+        {
+          "f": 5
+        }
+      ],
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -6
+        },
+        {
+          "f": 2,
+          "y": -10
+        },
+        {
+          "f": 3,
+          "y": -5
+        },
+        {
+          "f": 4,
+          "y": 0
+        },
+        {
+          "f": 5,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "sad_wait",
+      "tier": 0,
+      "loop": true,
+      "fps": 2.0,
+      "frames": 4,
+      "frame_ms": 500,
+      "status": "IMPLEMENTED",
+      "desc": "等待關心。整體下沉、節奏更慢。不做哭泣、不做發抖、不做蜷縮躲藏（CLAUDE.md 規則 1）。",
+      "_timing": "4 格 × 500ms = 2.0 秒。比正常呼吸稍快，但幅度更小。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1
+        },
+        {
+          "f": 2
+        },
+        {
+          "f": 3
+        }
+      ],
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 1
+        },
+        {
+          "f": 1,
+          "y": 2
+        },
+        {
+          "f": 2,
+          "y": 2
+        },
+        {
+          "f": 3,
+          "y": 1
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 130,
+      "fps": 7.69,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/walk_px",
+      "source_sheet": "art/generated/B4_brindle_guard_walk.png",
+      "desc": "走路。長腿、步幅大，比 brown_mixed 快一階（130 vs 140ms）。",
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": 0
+        },
+        {
+          "f": 3,
+          "y": -1
+        }
+      ]
+    },
+    {
+      "id": "idle_blink",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 3,
+      "frame_ms": 100,
+      "fps": 10.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/idle_blink_px",
+      "source_sheet": "art/generated/B4_brindle_guard_idle_blink.png",
+      "desc": "眨眼。實測逐格虹膜 4→3→0，閉合是真的畫出來的。"
+    },
+    {
+      "id": "idle_look",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 220,
+      "fps": 4.55,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/idle_look_px",
+      "source_sheet": "art/generated/B4_brindle_guard_idle_look.png",
+      "desc": "環顧。護衛犬會定期掃視——這是 docs/09 第六節的第四條識別頻道。"
+    },
+    {
+      "id": "idle_ear_twitch",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/idle_ear_twitch_px",
+      "source_sheet": "art/generated/B4_brindle_guard_idle_ear_twitch.png",
+      "desc": "耳朵轉向。立耳是**旋轉**不是垂落，和 brown_mixed 的垂耳擺動剛好相反。"
+    },
+    {
+      "id": "tail_wag",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 150,
+      "fps": 6.67,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/tail_wag_px",
+      "source_sheet": "art/generated/B4_brindle_guard_tail_wag.png",
+      "desc": "搖尾。上揚細長的尾巴，擺得比 brown_mixed 快（150 vs 200ms）。"
+    },
+    {
+      "id": "sit_down",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 120,
+      "fps": 8.33,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/sit_down_px",
+      "source_sheet": "art/generated/B4_brindle_guard_sit_down.png",
+      "desc": "坐下。"
+    },
+    {
+      "id": "stand_up",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 120,
+      "fps": 8.33,
+      "status": "IMPLEMENTED",
+      "desc": "站起。反向播放 sit_down——Digimon V-Pet 用 12 張 sprite 撐出 8 種行為就是靠這招，省一次生成而且保證兩個方向完全對稱。",
+      "frames_dir": "build/strip/brindle_guard/sit_down_px",
+      "reverse": true
+    },
+    {
+      "id": "lie_down",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 120,
+      "fps": 8.33,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/lie_down_px",
+      "source_sheet": "art/generated/B4_brindle_guard_lie_down.png",
+      "desc": "趴下。"
+    },
+    {
+      "id": "wake_up",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 160,
+      "fps": 6.25,
+      "status": "IMPLEMENTED",
+      "desc": "醒來。反向播放 lie_down。",
+      "frames_dir": "build/strip/brindle_guard/lie_down_px",
+      "reverse": true
+    },
+    {
+      "id": "eat",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 160,
+      "fps": 6.25,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/eat_px",
+      "source_sheet": "art/generated/B4_brindle_guard_eat.png",
+      "desc": "吃飯。"
+    },
+    {
+      "id": "eat_happy",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/eat_happy_px",
+      "source_sheet": "art/generated/B4_brindle_guard_eat_happy.png",
+      "desc": "吃飽的滿足。"
+    },
+    {
+      "id": "sleep_breathe",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 800,
+      "fps": 1.25,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/sleep_breathe_px",
+      "source_sheet": "art/generated/B4_brindle_guard_sleep_breathe.png",
+      "desc": "睡覺。實測四格虹膜全 0——眼睛是真的閉著的。",
+      "_timing": "4 格 × 800ms = 3.2 秒 = 19 次/分。睡眠呼吸比清醒慢。"
+    },
+    {
+      "id": "yawn",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 180,
+      "fps": 5.56,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/yawn_px",
+      "source_sheet": "art/generated/B4_brindle_guard_yawn.png",
+      "desc": "打呵欠。逐格虹膜 7→1→0→0。"
+    },
+    {
+      "id": "play_bow",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/play_bow_px",
+      "source_sheet": "art/generated/B4_brindle_guard_play_bow.png",
+      "desc": "邀玩鞠躬。"
+    },
+    {
+      "id": "chase_ball",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 80,
+      "fps": 12.5,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/chase_ball_px",
+      "source_sheet": "art/generated/B4_brindle_guard_chase_ball.png",
+      "desc": "奔跑。長腿犬，比 brown_mixed 快（80 vs 90ms）。"
+    },
+    {
+      "id": "pet_react",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 160,
+      "fps": 6.25,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/pet_react_px",
+      "source_sheet": "art/generated/B4_brindle_guard_pet_react.png",
+      "desc": "被摸的反應。逐格虹膜 4→0→0→4，瞇眼是真的。"
+    },
+    {
+      "id": "toilet",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 180,
+      "fps": 5.56,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/brindle_guard/toilet_px",
+      "source_sheet": "art/generated/B4_brindle_guard_toilet.png",
+      "desc": "上廁所。只畫姿勢，地上什麼都不畫。"
+    }
+  ]
+}

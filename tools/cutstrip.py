@@ -47,6 +47,8 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 try:
     import numpy as np
     from PIL import Image
@@ -54,9 +56,8 @@ except ImportError:
     sys.exit("需要 numpy 與 Pillow：pip install -r tools/requirements.txt")
 
 
-CANVAS = (1344, 1176)      # 64×21, 56×21，與 assemble.py 同一組格線
-GRID = 21
-GROUND_ROW = 54            # 地面在第 54 個目標像素列
+from cell import GRID, cell_for, canvas_for, ground_row_for   # noqa: E402
+
 BG = (255, 0, 255)
 
 
@@ -83,6 +84,21 @@ def body_center_x(mask: np.ndarray, y0: int, y1: int) -> float:
     return (cols[0] + cols[-1]) / 2.0
 
 
+def hex2rgb(h: str) -> tuple:
+    h = h.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def protect_rules(palette_path) -> list:
+    """讀調色盤裡的 protect 段。沒給調色盤或沒有 protect 就回空清單。"""
+    if not palette_path:
+        return []
+    data = json.loads(Path(palette_path).read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        return []
+    return [r for r in data.get("protect", []) if r.get("role")]
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="把連續影格圖切開並對齊")
     ap.add_argument("input", type=Path)
@@ -103,9 +119,34 @@ def main() -> None:
                     help="角色在最終 sprite 上的不透明像素數（預設 1800，對齊 master 的 1809）。"
                          "**用面積不用高度**：趴著的狗很矮，用高度正規化會把它橫向拉爆畫布。"
                          "面積比高度、寬度都更不受姿勢影響。")
+    ap.add_argument("--character",
+                    help="從 specs/characters/<id>.json 讀 render.sprite_cell。"
+                         "省略就用 64×56。公主是 64×112——人形站起來是狗的兩倍高，"
+                         "寫死的話她的頭會被畫布切掉。")
+    ap.add_argument("--palette", type=Path,
+                    help="調色盤 JSON。這裡只用它的 protect 段——量化前先把那些像素"
+                         "標記起來，量化後還原成原色，色相才傳得到 pixelate。")
+    ap.add_argument("--match-area", type=Path,
+                    help="改用某張已定稿 sprite 的不透明像素數當目標面積。"
+                         "動畫必須和 master 同尺度：turn / happy / sad_wait / idle_breathe "
+                         "是直接畫 master 的，走路卻是這條管線出來的，兩者面積不一致的話"
+                         "角色會在切換動畫時忽大忽小。實測 brindle_guard 用 1800 的預設值"
+                         "會比它的 master（1253）大 40%。")
     ap.add_argument("--torso-band", default="0.10,0.55",
                     help="軀幹取樣的高度區間（相對內容高度），用來算水平對齊基準")
     args = ap.parse_args()
+
+    CELL = cell_for(args.character) if args.character else (64, 56)
+    CANVAS = canvas_for(CELL)
+    GROUND_ROW = ground_row_for(CELL)
+    if CELL != (64, 56):
+        print(f"  影格格 {CELL[0]}×{CELL[1]}，對齊畫布 {CANVAS[0]}×{CANVAS[1]}，"
+              f"地面線在第 {GROUND_ROW} 列")
+
+    if args.match_area:
+        ref = np.array(Image.open(args.match_area).convert("RGBA"))
+        args.target_area = int((ref[..., 3] > 0).sum())
+        print(f"  目標面積對齊 {args.match_area.name}：{args.target_area} 個像素")
 
     cols, rows = (int(v) for v in args.grid.lower().split("x"))
     src = Image.open(args.input).convert("RGB")
@@ -123,6 +164,18 @@ def main() -> None:
             colors=args.colors + 1, method=Image.Quantize.MEDIANCUT,
             dither=Image.Dither.NONE).convert("RGB"))
         q[~fg] = BG                        # 背景復原成乾淨的洋紅
+
+        # 保護色要在這裡就救回來。這一步是 16 色量化，眼睛的藍在原圖只佔 0.06%，
+        # 一定會被併掉——等到 pixelate 才想保護就來不及了，它看到的已經是量化後的圖。
+        # 做法是把命中的像素還原成原始 RGB，讓色相原封不動傳到下一關。
+        for rule in protect_rules(args.palette):
+            tgt = np.array(hex2rgb(rule["src_hex"]), dtype=float)
+            d = np.sqrt(((arr.astype(float) - tgt) ** 2).sum(axis=2))
+            hit = (d <= float(rule.get("tol", 45))) & fg
+            if hit.any():
+                q[hit] = arr[hit]
+                print(f"  保護 {rule['role']}：{int(hit.sum())} 個原始像素未經量化")
+
         src = Image.fromarray(q)
         n = len({tuple(c) for c in q[fg]})
         print(f"  來源先量化前景到 {n} 色，確保各格共用同一組色群")
@@ -156,6 +209,23 @@ def main() -> None:
 
     if not scan:
         raise SystemExit("整張圖都沒有前景，檢查 --grid 與 --tol")
+
+    # 有些動畫刻意留空格（idle_blink 只有 3 格，第四象限是空的洋紅；turn 只有 2 格）。
+    # 那些格子上通常有幾個去背沒清乾淨的雜點——不是「沒有前景」，所以上面的檢查放它過去。
+    # 但只要它進了 scan，就會把平均面積拉低，整批影格跟著放大：
+    # 實測 idle_blink 的第四格只有 6 個像素，其餘三格因此被放大 22%，超出畫布。
+    # 用中位數的比例判空，不用絕對值——不同角色的面積量級差很多。
+    med = sorted(int(m[y0:y1, x0:x1].sum()) for _, _, m, x0, y0, x1, y1 in scan)[len(scan) // 2]
+    keep = []
+    for item in scan:
+        _, _, m, x0, y0, x1, y1 = item
+        a = int(m[y0:y1, x0:x1].sum())
+        if a < med * 0.20:
+            print(f"  ⚠️ 第 {item[0]} 格只有 {a} px（中位數的 {a / med:.1%}），"
+                  f"判定為刻意留空的象限，不計入")
+        else:
+            keep.append(item)
+    scan = keep
 
     # 全部影格共用同一個倍率，相對大小才不會在播放時變動。
     #

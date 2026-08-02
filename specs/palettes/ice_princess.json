@@ -1,0 +1,224 @@
+{
+  "character_id": "ice_princess",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "手工制定。配額分配和三隻狗完全不同：狗把大部分格子給毛色的階數，她要同時養活斗篷（4 階）、頭髮（3 階）、膚色（2 階）。\n**色相是她最強的頻道**——三隻狗全部落在 0-30° 的暖褐帶，藍色 200-215° 完全沒人用。連描邊都刻意用冷色。\n銀髮做成中性灰（色相接近 240° 但飽和度只有 6%）而不是藍銀，否則丸子頭會和斗篷在 64px 上糊成一塊。",
+  "automap_bands": {
+    "_note": "這隻改用 automap_families（色相先分家、家內再排亮度）。亮度階梯留在這裡只是備查——實測她的銀髮 137/181/218 卡在斗篷的 129/164 之間，莓紅 67 又和斗篷最暗的 86 只差 19，一條階梯不管怎麼調都分不開。"
+  },
+  "outfit_slots": [
+    "cloak_dark",
+    "cloak_mid",
+    "cloak_light",
+    "trim_pale",
+    "trim_light"
+  ],
+  "_outfit_note": "服裝置換只換上面這五格，其餘十格（頭髮／膚色／眼睛／圍巾／描邊）不動。\n**已知限制**：master 的眼睛由 patch.json 逐像素指定 eye_* 三格，換裝不受影響；但**動畫影格裡的眼睛會落在 cloak_dark / cloak_mid**——她的虹膜藍和斗篷藍是同一族，色相分類器分不開（兩者 RGB 距離只有 41）。所以換一套服裝，動畫裡她的眼珠會跟著換色（master 不會）。做 outfit 1-4 時要嘛把虹膜當成造型的一部分接受，要嘛讓每套服裝的暗／中兩階維持藍系。眼睛只有 3-4 px，這個代價是可以接受的，但要知道它存在。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#2B3A4A",
+      "note": "**冷色描邊**。三隻狗全是暖褐黑，她用帶藍的深灰——這一格就讓剪影的色溫和狗分開"
+    },
+    {
+      "index": 2,
+      "role": "cloak_dark",
+      "hex": "#255FA6",
+      "note": "斗篷的陰影側，同時也是靴子",
+      "_was": "#3A6890"
+    },
+    {
+      "index": 3,
+      "role": "cloak_mid",
+      "hex": "#458FD9",
+      "note": "斗篷主色，佔面積最大",
+      "_was": "#5A96C4"
+    },
+    {
+      "index": 4,
+      "role": "cloak_light",
+      "hex": "#6DB1EF",
+      "note": "斗篷的受光面",
+      "_was": "#8FC3E4"
+    },
+    {
+      "index": 5,
+      "role": "trim_pale",
+      "hex": "#C2E5FC",
+      "note": "帽緣與袖口的絨毛滾邊、裙襬的雪花紋",
+      "_was": "#C3E4F5"
+    },
+    {
+      "index": 6,
+      "role": "trim_light",
+      "hex": "#E4F4FF",
+      "note": "最亮的藍白：雪花高光與絨毛滾邊的受光邊。**斗篷底下的短洋裝也用 trim_pale**，不另外給一格白——原本的 white_snow 是冷白 #EAF6FD，和銀髮的 hair_light #D7DBDF 在色相與亮度上幾乎重合（都是冷調近白、亮度 217 vs 218），任何分類器都分不開。洋裝改用淡藍反而更符合冰雪角色。"
+    },
+    {
+      "index": 7,
+      "role": "hair_dark",
+      "hex": "#7D8AA3",
+      "note": "銀髮的暗部。**刻意做成中性灰銀而不是藍銀**——不然會和斗篷糊在一起",
+      "_was": "#A9AAB8"
+    },
+    {
+      "index": 8,
+      "role": "hair_mid",
+      "hex": "#B3B3C1",
+      "note": "銀髮主調",
+      "_was": "#DCDCE4"
+    },
+    {
+      "index": 9,
+      "role": "hair_light",
+      "hex": "#D7DBDF",
+      "note": "丸子頭的受光面",
+      "_was": "#F2F2F6"
+    },
+    {
+      "index": 10,
+      "role": "skin_shade",
+      "hex": "#E8D5C4",
+      "note": "膚色陰影。**刻意做得明顯偏暖**（飽和 36、色相 28°）——原本 #DFDDDB 的飽和度只有 4，色相沒有意義，會被色相分類器歸進銀髮那一族。",
+      "_was": "#E9B79C"
+    },
+    {
+      "index": 11,
+      "role": "skin",
+      "hex": "#F8F0E4",
+      "note": "很淺的膚色",
+      "_was": "#F8DAC6"
+    },
+    {
+      "index": 12,
+      "role": "eye_iris",
+      "hex": "#3E7FB4",
+      "note": "藍眼。比 brindle_guard 的淡藍 #A6BAC6 更飽和更深，而且長在極淺的臉上"
+    },
+    {
+      "index": 13,
+      "role": "eye_dark",
+      "hex": "#22384E",
+      "note": "眼眶與睫毛"
+    },
+    {
+      "index": 14,
+      "role": "eye_highlight",
+      "hex": "#FFFFFF",
+      "note": "純白高光"
+    },
+    {
+      "index": 15,
+      "role": "accent_red",
+      "hex": "#802444",
+      "note": "莓紅圍巾與手套。**全身唯一的暖色**，而且和 brindle_guard 的淡粉 #E3A3A0 在飽和度與明度上都差很遠（那是淡粉，這是深莓紅）",
+      "_was": "#C2534E"
+    }
+  ],
+  "_measured": "斗篷、頭髮、膚色、圍巾改用 master 量到的實際色群值（原本是手工估的）。做法和 chihuahua 的巧克力一樣：模型自己選的階距最自然，硬套估計值只會讓 remap 對不準。",
+  "automap_families": [
+    {
+      "_name": "莓紅：圍巾與手套。全身唯一的暖紅，飽和度最高",
+      "hue": [
+        320,
+        15
+      ],
+      "sat_min": 50,
+      "bands": [
+        [
+          999,
+          "accent_red"
+        ]
+      ]
+    },
+    {
+      "_name": "暖色：膚色。色相 20-60° 且飽和夠，和銀髮的冷調分得開",
+      "hue": [
+        15,
+        60
+      ],
+      "sat_min": 15,
+      "bands": [
+        [
+          80,
+          "outline"
+        ],
+        [
+          215,
+          "skin_shade"
+        ],
+        [
+          999,
+          "skin"
+        ]
+      ]
+    },
+    {
+      "_name": "藍：斗篷、靴子、絨毛滾邊、洋裝。飽和度 25 以上",
+      "hue": [
+        175,
+        265
+      ],
+      "sat_min": 25,
+      "bands": [
+        [
+          75,
+          "outline"
+        ],
+        [
+          110,
+          "cloak_dark"
+        ],
+        [
+          155,
+          "cloak_mid"
+        ],
+        [
+          196,
+          "cloak_light"
+        ],
+        [
+          228,
+          "trim_pale"
+        ],
+        [
+          999,
+          "trim_light"
+        ]
+      ]
+    },
+    {
+      "_name": "中性／銀：頭髮。飽和度 25 以下，色相不看（太低時色相沒有意義）",
+      "hue": [
+        0,
+        360
+      ],
+      "sat_max": 25,
+      "bands": [
+        [
+          75,
+          "outline"
+        ],
+        [
+          160,
+          "hair_dark"
+        ],
+        [
+          200,
+          "hair_mid"
+        ],
+        [
+          999,
+          "hair_light"
+        ]
+      ]
+    }
+  ]
+}

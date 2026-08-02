@@ -1,0 +1,28 @@
+Pixel art sprite sheet, in the style of a 16-bit SNES or Game Boy Color role-playing game. Flat pure magenta #FF00FF background, completely uniform.
+
+SUBJECT: {SUBJECT}
+
+CRITICAL - RESOLUTION AND DETAIL LEVEL:
+Each frame must look like a sprite originally drawn at only {CELL_W} x {CELL_H} pixels, then enlarged with nearest-neighbor scaling so each original pixel is a large visible square block. Very low detail, large flat areas of a single solid color, aggressively simplified shapes. This is NOT a detailed illustration with a pixelation filter applied. It is a genuinely low-resolution sprite drawn pixel by pixel.
+
+LAYOUT: {LAYOUT}
+
+{FRAMES}
+
+MOTION RULES, strictly enforced:
+{MOTION_RULES}
+
+IDENTITY FEATURES, simplified into flat shapes, identical in all frames:
+{IDENTITY}
+
+STYLE, strictly enforced:
+{STYLE}
+- Large uninterrupted regions of flat solid color
+- A single dark outline, one pixel thick, around the whole silhouette
+- NO anti-aliasing, NO blur, NO gradients, NO dithering, NO noise, NO texture
+- NO individual fur strands, NO realistic shading, NO photorealism
+- Total palette: 12 colors maximum
+
+{NEGATIVE}
+
+No text, no numbers, no labels, no borders, no grid lines, no ground shadow, no scenery.

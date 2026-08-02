@@ -1,0 +1,410 @@
+{
+  "character_id": "ice_princess",
+  "format_version": 2,
+  "note": "17 個 frames 型 + 4 個程序式。只允許整數像素平移、水平翻轉、z 排序。",
+  "defaults": {
+    "fps": 6,
+    "loop": false,
+    "type": "transform"
+  },
+  "transform_fields": {
+    "x": "水平位移，整數像素",
+    "y": "垂直位移，整數像素，負值向上",
+    "flip": "1 = 水平翻轉"
+  },
+  "tier0_whitelist": [
+    "happy",
+    "idle_breathe",
+    "sad_wait",
+    "turn",
+    "walk"
+  ],
+  "timing_note": "frame_ms 是權威欄位。四個角色的節奏是刻意分開的：呼吸 30 / 24 / 20 / 16 次每分、走路 110 / 130 / 140 / 170ms。體型越大越慢，人類最慢。不用多畫任何一張圖就多一條識別頻道（docs/09 第六節）。",
+  "anim_id_note": "21 個 anim_id_t 是照狗設計的（tail_wag / idle_ear_twitch / play_bow / chase_ball / toilet），韌體用同一個 enum 索引全部角色，而 game.c 的 game_is_dog() 只分流**需求**不分流閒置池——所以她一定會播到 ear_twitch 與 tail_wag。那五個由 specs/anim_prompt/ice_princess.json 的 FRAMES_OVERRIDE 換成人形動作：撥髮／裙襬搖晃／屈膝禮／丟球／蹲下。",
+  "asset_note": "她的影格格是 64×96（狗是 64×56），來源是 specs/characters/ice_princess.json 的 render.sprite_cell，由 tools/cell.py 供給 cutstrip / bake / procanim。\n調色盤用 automap_families（色相先分家、家內再排亮度）——她有四個色系且亮度互相重疊，一條亮度階梯分不開。見那個檔的說明。",
+  "animations": [
+    {
+      "id": "idle_breathe",
+      "tier": 0,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 940,
+      "fps": 1.06,
+      "status": "IMPLEMENTED",
+      "desc": "呼吸。四個角色裡最慢。",
+      "_timing": "4 格 × 940ms = 3.76 秒 = 16 次/分。四角色是 30 / 24 / 20 / 16——體型越大越慢，人類比犬隻慢，順序一路延續下來。",
+      "track": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": -1
+        },
+        {
+          "f": 3,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "turn",
+      "tier": 0,
+      "fps": 8,
+      "frames": 2,
+      "status": "IMPLEMENTED",
+      "desc": "轉身。純水平翻轉。**master 必須是側面**才有意義——前兩版生成出來是正面朝前，翻過來看起來完全一樣，等於沒動。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1,
+          "flip": 1
+        }
+      ]
+    },
+    {
+      "id": "happy",
+      "tier": 0,
+      "fps": 10,
+      "frames": 6,
+      "status": "IMPLEMENTED",
+      "desc": "開心。人形跳躍幅度大但頻率低。",
+      "_clip_limit": "她的 master 是 38×90、畫布 64×96，上下各有 3 列餘裕——四個角色裡最寬鬆。彈跳仍然全放 screen_offset：繪製層偏移不受畫布限制。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1
+        },
+        {
+          "f": 2
+        },
+        {
+          "f": 3
+        },
+        {
+          "f": 4
+        },
+        {
+          "f": 5
+        }
+      ],
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -5
+        },
+        {
+          "f": 2,
+          "y": -9
+        },
+        {
+          "f": 3,
+          "y": -9
+        },
+        {
+          "f": 4,
+          "y": -4
+        },
+        {
+          "f": 5,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "sad_wait",
+      "tier": 0,
+      "loop": true,
+      "fps": 1.67,
+      "frames": 4,
+      "frame_ms": 600,
+      "status": "IMPLEMENTED",
+      "desc": "安靜地等。眼神向下、動作變慢。**不做掩面、不做啜泣**——她是照顧者，表現上限就是安靜（CLAUDE.md 規則 1）。",
+      "track": [
+        {
+          "f": 0
+        },
+        {
+          "f": 1
+        },
+        {
+          "f": 2
+        },
+        {
+          "f": 3
+        }
+      ],
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 1
+        },
+        {
+          "f": 1,
+          "y": 2
+        },
+        {
+          "f": 2,
+          "y": 2
+        },
+        {
+          "f": 3,
+          "y": 1
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 170,
+      "fps": 5.88,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/walk_px",
+      "source_sheet": "art/generated/B4_ice_princess_walk.png",
+      "desc": "走路。人的步頻比狗慢，四個角色裡最慢（170 vs 110/130/140ms）。",
+      "screen_offset": [
+        {
+          "f": 0,
+          "y": 0
+        },
+        {
+          "f": 1,
+          "y": -1
+        },
+        {
+          "f": 2,
+          "y": 0
+        },
+        {
+          "f": 3,
+          "y": -1
+        }
+      ]
+    },
+    {
+      "id": "idle_blink",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 3,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/idle_blink_px",
+      "source_sheet": "art/generated/B4_ice_princess_idle_blink.png",
+      "desc": "眨眼。"
+    },
+    {
+      "id": "idle_look",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 260,
+      "fps": 3.85,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/idle_look_px",
+      "source_sheet": "art/generated/B4_ice_princess_idle_look.png",
+      "desc": "環顧。"
+    },
+    {
+      "id": "idle_ear_twitch",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 190,
+      "fps": 5.26,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/idle_ear_twitch_px",
+      "source_sheet": "art/generated/B4_ice_princess_idle_ear_twitch.png",
+      "desc": "**撥開臉頰的髮絲**。她沒有耳朵可以抽動——21 個 anim_id_t 是照狗設計的，韌體用同一個 enum 索引全部角色，所以這一格要有人形的對應動作。"
+    },
+    {
+      "id": "tail_wag",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 200,
+      "fps": 5.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/tail_wag_px",
+      "source_sheet": "art/generated/B4_ice_princess_tail_wag.png",
+      "desc": "**裙襬與圍巾輕輕搖晃**（開心的表現）。她沒有尾巴，同上。"
+    },
+    {
+      "id": "sit_down",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 150,
+      "fps": 6.67,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/sit_down_px",
+      "source_sheet": "art/generated/B4_ice_princess_sit_down.png",
+      "desc": "坐下。"
+    },
+    {
+      "id": "stand_up",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 150,
+      "fps": 6.67,
+      "status": "IMPLEMENTED",
+      "desc": "站起。反向播放 sit_down。",
+      "frames_dir": "build/strip/ice_princess/sit_down_px",
+      "reverse": true
+    },
+    {
+      "id": "lie_down",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 150,
+      "fps": 6.67,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/lie_down_px",
+      "source_sheet": "art/generated/B4_ice_princess_lie_down.png",
+      "desc": "躺下睡覺。"
+    },
+    {
+      "id": "wake_up",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 190,
+      "fps": 5.26,
+      "status": "IMPLEMENTED",
+      "desc": "醒來。反向播放 lie_down。",
+      "frames_dir": "build/strip/ice_princess/lie_down_px",
+      "reverse": true
+    },
+    {
+      "id": "eat",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 200,
+      "fps": 5.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/eat_px",
+      "source_sheet": "art/generated/B4_ice_princess_eat.png",
+      "desc": "吃東西。"
+    },
+    {
+      "id": "eat_happy",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 140,
+      "fps": 7.14,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/eat_happy_px",
+      "source_sheet": "art/generated/B4_ice_princess_eat_happy.png",
+      "desc": "吃飽的滿足。"
+    },
+    {
+      "id": "sleep_breathe",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 1000,
+      "fps": 1.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/sleep_breathe_px",
+      "source_sheet": "art/generated/B4_ice_princess_sleep_breathe.png",
+      "desc": "睡覺。",
+      "_timing": "4 格 × 1000ms = 4.0 秒 = 15 次/分。睡眠呼吸比清醒的 16 次略慢。"
+    },
+    {
+      "id": "yawn",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 220,
+      "fps": 4.55,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/yawn_px",
+      "source_sheet": "art/generated/B4_ice_princess_yawn.png",
+      "desc": "打呵欠。"
+    },
+    {
+      "id": "play_bow",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 150,
+      "fps": 6.67,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/play_bow_px",
+      "source_sheet": "art/generated/B4_ice_princess_play_bow.png",
+      "desc": "**屈膝禮** —— 邀請狗一起玩。狗是 play bow，她是 curtsy，同一個「邀玩」語意。"
+    },
+    {
+      "id": "chase_ball",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 110,
+      "fps": 9.09,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/chase_ball_px",
+      "source_sheet": "art/generated/B4_ice_princess_chase_ball.png",
+      "desc": "**把球丟出去給狗撿**。狗是自己追球，她是丟球，同一個 ACT_PLAY 序列裡的角色分工。"
+    },
+    {
+      "id": "pet_react",
+      "type": "frames",
+      "tier": 1,
+      "loop": true,
+      "frames": 4,
+      "frame_ms": 200,
+      "fps": 5.0,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/pet_react_px",
+      "source_sheet": "art/generated/B4_ice_princess_pet_react.png",
+      "desc": "被小孩摸頭的反應。"
+    },
+    {
+      "id": "toilet",
+      "type": "frames",
+      "tier": 1,
+      "loop": false,
+      "frames": 4,
+      "frame_ms": 220,
+      "fps": 4.55,
+      "status": "IMPLEMENTED",
+      "frames_dir": "build/strip/ice_princess/toilet_px",
+      "source_sheet": "art/generated/B4_ice_princess_toilet.png",
+      "desc": "**蹲下和狗平視**。實際上永遠不會被播到——firmware/src/game.c:487 的 ACT_TOILET 對非狗直接回 false，NEED_BLADDER 也只給狗。做出來只是為了讓 21 格齊備，不必在 validate.py 開特例。"
+    }
+  ]
+}

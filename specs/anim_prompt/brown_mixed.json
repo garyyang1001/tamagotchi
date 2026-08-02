@@ -1,0 +1,15 @@
+{
+  "_note": "brown_mixed 的填充。這一組是實測驗證過的——B4_brown_mixed_walk.png 用它生出四格同尺度、腳掌貼地、關節彎曲的結果。不要改。",
+  "SUBJECT": "the exact same chocolate-brown mixed-breed dog shown in the attached reference image. Same build, same head size, same markings, same colors, same art style. Do not redesign it, do not make it cuter or younger or smaller.",
+  "IDENTITY": "- Dark chocolate brown coat as the main body color\n- A pale greyish-white grizzled muzzle patch around the nose and mouth, desaturated, almost silver-grey, NOT golden and NOT tan\n- Two small tan dots above the eyes acting as eyebrows\n- A tan stripe down the center of the chest\n- Tan lower legs and paws. This tan is a WARM ORANGE-BROWN, clearly more saturated and more orange than the muzzle. The paws must NOT be white, cream, grey or pale - they are the same warm tan as the eyebrow dots and the chest stripe.\n- Long floppy drop ears hanging beside the head\n- Liver brown nose, NOT black\n- Amber eyes with a single white highlight",
+  "STYLE": "- Exactly three tones for the brown coat, two for the tan markings, two for the grey muzzle",
+  "NEGATIVE": "The dog must look calm and friendly at all times.",
+  "TEMPO": "This is a heavy calm dog, so the swing is wide but slow, not a fast flutter.",
+  "TEMPO_RUN": "This is a heavy calm dog, so the run is a steady bound, not a frantic sprint.",
+  "EAR_TWITCH": "one ear flicks. Frame 1 both ears hang relaxed. Frame 2 the near ear lifts and angles outward. Frame 3 the near ear flicks further back. Frame 4 both ears relaxed again.",
+  "BOWL": "",
+  "MOTION_RULES": "- The dog's body stays at the SAME horizontal position and the SAME size in all frames. Only the parts described above change.\n- Every paw that is on the ground must stay flat on the ground line. Paws must NOT swing up into the air in an arc.\n- The legs bend at the knee and elbow. They are not stiff straight sticks rotating from the shoulder.\n- All frames share the same ground line at the same height.",
+  "SUBJECT_OVERRIDE": {
+    "master": "the exact same chocolate-brown mixed-breed dog shown in the attached reference image. Same build, same head size, same markings, same colors, same art style. Follow the proportions and markings of the reference photographs exactly."
+  }
+}
