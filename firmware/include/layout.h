@@ -49,7 +49,6 @@ typedef enum {
     OBJ_ICON_BLADDER,
     OBJ_ICON_CALL,
     OBJ_ICON_DRESS,
-    OBJ_ICON_DRESS_BIG,
     OBJ_ICON_ENERGY,
     OBJ_ICON_FEED,
     OBJ_ICON_HUNGER,
@@ -91,7 +90,6 @@ static const obj_def_t OBJ_DEF[OBJ_COUNT] = {
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_bladder */
     { OBJ_UI,     16, 16, 1,    0, 15,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_call */
     { OBJ_UI,     16, 16, 1,    0, 15,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_dress */
-    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_dress_big */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_energy */
     { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_feed */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_hunger */
@@ -120,7 +118,6 @@ static const char *const OBJ_NAME[OBJ_COUNT] = {
     "obj/icon_bladder",
     "obj/icon_call",
     "obj/icon_dress",
-    "obj/icon_dress_big",
     "obj/icon_energy",
     "obj/icon_feed",
     "obj/icon_hunger",
@@ -150,11 +147,11 @@ static const char *const OBJ_NAME[OBJ_COUNT] = {
 #define UI_ACTION_ICON_COUNT 8
 static const int8_t UI_ACTION_ICON[UI_ACTION_ICON_COUNT] = {
      -1,  /* ACT_NONE   （選單裡沒有這一項） */
-     13,  /* ACT_FEED   icon_feed */
-     17,  /* ACT_PET    icon_pet */
-     18,  /* ACT_PLAY   icon_play */
+     12,  /* ACT_FEED   icon_feed */
+     16,  /* ACT_PET    icon_pet */
+     17,  /* ACT_PLAY   icon_play */
      -1,  /* ACT_SLEEP  （選單裡沒有這一項） */
-     20,  /* ACT_TOILET icon_toilet */
+     19,  /* ACT_TOILET icon_toilet */
      -1,  /* ACT_DRESS  （選單裡沒有這一項） */
       7,  /* ACT_BATH   icon_bath */
 };
@@ -163,14 +160,34 @@ static const int8_t UI_ACTION_ICON[UI_ACTION_ICON_COUNT] = {
    hunger / energy / mood / (狗 = bladder、公主 = tidy)。
    第四條依角色換，所以兩張表——公主沒有 bladder。 */
 #define UI_BAR_ICON_COUNT 4
-static const int8_t UI_BAR_ICON_DOG[UI_BAR_ICON_COUNT] = { 14, 12, 16, 8 };
-static const int8_t UI_BAR_ICON_PRINCESS[UI_BAR_ICON_COUNT] = { 14, 12, 16, 19 };
+static const int8_t UI_BAR_ICON_DOG[UI_BAR_ICON_COUNT] = { 13, 11, 15, 8 };
+static const int8_t UI_BAR_ICON_PRINCESS[UI_BAR_ICON_COUNT] = { 13, 11, 15, 18 };
 
 /* 主畫面牆上那三格的「按下去會怎樣」。索引是 main_slot_t 的前三格：
    門 → 呼叫、衣櫃 → 換裝、開關 → 燈（那一個有兩格，見 render.c）。
    公主與狗不在這裡：它們接地，用地板箭頭。 */
 #define UI_SLOT_HINT_COUNT 3
-static const int8_t UI_SLOT_HINT[UI_SLOT_HINT_COUNT] = { 9, 10, 15 };
+static const int8_t UI_SLOT_HINT[UI_SLOT_HINT_COUNT] = { 9, 10, 14 };
+
+/* 球的逐格螢幕座標。**track 型只有球一個**——判準是「它會不會離開角色的身體」，
+   公主捧在手上的碗就不拆（它跟著手動，只能留在影格裡）。
+   座標是相對房間左上角的絕對值，不經過 anchor 也不經過 base_row。 */
+#define BALL_TRACK_COUNT 12
+#define BALL_TRACK_MS 80
+static const int16_t BALL_TRACK[BALL_TRACK_COUNT][2] = {
+    {  78, 108 },
+    { 102,  96 },
+    { 126,  92 },
+    { 150,  96 },
+    { 172, 108 },
+    { 192, 126 },
+    { 208, 141 },
+    { 222, 132 },
+    { 234, 141 },
+    { 244, 137 },
+    { 252, 141 },
+    { 256, 141 },
+};
 
 /* 動畫 → 物件。渲染層查這張表，不必在程式裡寫死動畫名稱。
    z=1 代表先畫物件再畫角色（睡墊墊在身下）。 */

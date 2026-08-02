@@ -4,8 +4,8 @@
   "generator": "tools/pack.py",
   "blob_unit": "frame",
   "dedup": true,
-  "bytes": 218597,
-  "sha256": "7840a94ccfddcaf6dc3297a256b64397db34f943e7b20348b47141365e7e5253",
+  "bytes": 218356,
+  "sha256": "ad7285407ceba5a129dca0c9eddc0424f2d474ce90911a0167205b74deaec4e3",
   "palettes": [
     {
       "id": 0,
@@ -178,17 +178,6 @@
       "loop": true,
       "palette_day": 0,
       "palette_night": 1
-    },
-    {
-      "name": "obj/icon_dress_big",
-      "name_hash": "0x0EDF2B0B",
-      "type": 2,
-      "w": 40,
-      "h": 40,
-      "frame_count": 1,
-      "loop": false,
-      "palette_day": 10,
-      "palette_night": 10
     },
     {
       "name": "ice_princess/idle_blink",

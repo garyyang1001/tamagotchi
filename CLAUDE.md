@@ -316,7 +316,12 @@ python tools/validate.py --character <id> --rebuild
 │   ├── approved/<id>/         通過 QA 的素材 + REBUILD.sh
 │   └── approved/_scene/       房間底圖（日／夜）+ 物件 sprite
 ├── tools/                     Python 資產管線
-├── firmware/                  ESP-IDF 專案（save / game 已完成並測試）
+├── firmware/
+│   ├── include/layout.h       ← **由 tools/mklayout.py 產生，不要手改**
+│   ├── src/game.c             遊戲邏輯（七個畫面、按鍵、需求、里程碑）
+│   ├── src/render.c           渲染層。**可攜**：不碰 SDL、不碰 SPI、不碰 GPIO
+│   └── src/assets.c           資產包存取（結構取自 docs/04 D.7，已三方驗證）
+├── sim/                       桌機模擬器。**只有 main.c 是桌機專屬的**
 └── data/                      assets.bin（燒進 assets 分區，spi_flash_mmap 直接映射）
 ```
 
@@ -387,11 +392,22 @@ sh art/approved/<id>/REBUILD.sh        # master，必須逐位元相同
 sh art/approved/<id>/REBUILD_ANIM.sh   # 15 張影格圖 → 21 個動畫 → 預覽
 ```
 
-**7. 打包。** 全部烘焙完之後打成一個燒進 flash 的檔（也必須逐位元相同）：
+**7. 打包並在桌機上看。** 全部烘焙完之後：
 
 ```bash
+.venv/bin/python tools/mklayout.py     # specs/*.json → firmware/include/layout.h
 .venv/bin/python tools/pack.py
 .venv/bin/python tools/test_pack.py    # 全部 blob 解回來逐像素比對，不抽樣
+make -C sim run                        # 真資產 + 真 game.c，鍵盤代替三顆鍵
+```
+
+**改了 `specs/scene.json` 一定要重跑 `mklayout.py`**，否則新東西在 layout.h
+裡還是 -1——畫面會是空框，不會壞掉，所以很容易漏。`make -C sim` 有這條相依規則。
+
+無視窗自檢（不需要顯示器、不需要人按鍵）：
+
+```bash
+./build/icepet-sim --shots build/shots
 ```
 
 **blob 的單位是「每格影格」，不是每張 spritesheet。** 每張 sheet 的原始 RLE 確實小
@@ -399,6 +415,34 @@ sh art/approved/<id>/REBUILD_ANIM.sh   # 15 張影格圖 → 21 個動畫 → �
 而不是像素裡，同一個動畫的每一格是逐位元相同的點陣圖（365 格只有 280 格是唯一的），
 而**只有 blob 等於一格時才去重得掉**。再加上 per-sheet 為了畫一格要多解 3.93 倍的
 像素、佔 3.93 倍的 PSRAM。兩個軸都輸。
+
+## 改完要跑什麼
+
+**全部跑一遍，五套加起來不到一分鐘。** 沒有任何一支是可以略過的——
+它們各自守著不同的東西，而且好幾條規則（沒有失敗狀態、可重現、資產不失真）
+只有它們在守。
+
+```bash
+.venv/bin/python tools/validate.py --all --rebuild   # 四角色的契約 + 逐位元重現
+.venv/bin/python tools/test_bake.py                  # 烘焙
+.venv/bin/python tools/test_preview.py               # 預覽與健檢（呼吸次數、影格預算）
+.venv/bin/python tools/test_pack.py                  # 資產包。**全部 blob 解回來源 PNG，不抽樣**
+cd firmware && cc -std=c11 -Wall -Wextra -Iinclude -Itest/stubs -o /tmp/g test/test_game.c src/*.c && /tmp/g
+cd firmware && cc -std=c11 -Wall -Wextra -Iinclude -Itest/stubs -o /tmp/s test/test_save.c src/*.c && /tmp/s
+```
+
+`test_pack.py` 是**第二份獨立實作**：它自己從 `specs/` 列一遍應該有哪些資產、
+自己解一次 RLE，不借用 `pack.py` 的任何程式碼。
+所以「打包時漏掉一件」「用錯調色盤」這種錯它抓得到——實測抓到過兩次。
+**不要為了讓它過而改它的斷言，要改的是它那一份的邏輯。**
+
+畫面改了還要看：
+
+```bash
+./build/icepet-sim --shots build/shots    # 18 張自檢圖，不需要顯示器
+```
+
+---
 
 ## 工作慣例
 

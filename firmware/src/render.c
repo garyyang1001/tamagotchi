@@ -247,7 +247,14 @@ static void draw_cue_obj(const game_t *g, uint16_t *fb, uint8_t c,
     uint16_t k = d->frames > 1 && d->ms ? (uint16_t)((s_obj_ms / d->ms) % d->frames) : 0;
     const uint16_t *pal = ipa_palette(game_light_on(g) ? a->palette_day : a->palette_night);
 
-    if (d->mode == OBJ_FLOAT) {
+    if (d->mode == OBJ_TRACK) {
+        /* 球走自己的逐格軌跡，**不跟任何角色**。這是把球從影格拆出來的
+           唯一理由——烘進去就永遠動不了。座標是絕對值，不經過 anchor 也不經過
+           base_row（它在空中，沒有接地）。
+           時鐘另外一支：軌跡的節奏和角色動畫不同（80 ms vs 動畫自己的 ms）。 */
+        int t = (int)((s_obj_ms / BALL_TRACK_MS) % BALL_TRACK_COUNT);
+        blit(fb, a, k, BALL_TRACK[t][0], BALL_TRACK[t][1], pal);
+    } else if (d->mode == OBJ_FLOAT) {
         /* 不接地，沒有可以推算的基準，x/y 由人填是對的 */
         int top = GROUND_Y - (frame_h - 1) - slot_dy;
         blit(fb, a, k, slot_x + d->fx[c], top + d->fy[c], pal);

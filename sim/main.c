@@ -206,6 +206,18 @@ static int headless(game_t *g, const char *dir)
     printf("  穿上第 %u 套\n", game_outfit(g));
     snap(g, dir, "08_outfit_acc");
 
+    /* 玩球：track 型物件唯一的使用者。拍一張確認球真的畫出來了。 */
+    goto_slot(g, SLOT_PRINCESS);
+    game_do_action(g, CHAR_ICE_PRINCESS, ACT_PLAY);
+    /* ACT_PLAY 的序列是 play_bow → chase_ball ×2 → happy，
+       要等到 chase_ball 那一段球才會出現。 */
+    for (int t = 0; t < 60 && game_current_anim(g, CHAR_ICE_PRINCESS) != ANIM_CHASE_BALL; t++)
+        run_ms(g, 100);
+    run_ms(g, 200);
+    printf("  玩球：動畫 = %d（CHASE_BALL 是 %d）\n",
+           (int)game_current_anim(g, CHAR_ICE_PRINCESS), (int)ANIM_CHASE_BALL);
+    snap(g, dir, "06c_ball");
+
     /* 訪客。room_is_quiet 要求離最後一次按鍵超過 POST_INPUT_QUIET_MS，
        所以先空轉過安靜期，再把倒數歸零。 */
     for (int t = 0; t < 40 && game_visitor(g) == VISITOR_NONE; t++) {

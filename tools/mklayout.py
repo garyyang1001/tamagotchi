@@ -244,6 +244,18 @@ def main():
     p("static const int8_t UI_SLOT_HINT[UI_SLOT_HINT_COUNT] = { %s };"
       % ", ".join("%d" % oi(n) for n in SLOT_HINT))
     p("")
+    p("/* 球的逐格螢幕座標。**track 型只有球一個**——判準是「它會不會離開角色的身體」，")
+    p("   公主捧在手上的碗就不拆（它跟著手動，只能留在影格裡）。")
+    p("   座標是相對房間左上角的絕對值，不經過 anchor 也不經過 base_row。 */")
+    tr = (objs.get("ball") or {}).get("track") or {}
+    pts = tr.get("frames", [])
+    p("#define BALL_TRACK_COUNT %d" % len(pts))
+    p("#define BALL_TRACK_MS %d" % tr.get("frame_ms", 80))
+    p("static const int16_t BALL_TRACK[BALL_TRACK_COUNT][2] = {")
+    for q in pts:
+        p("    { %3d, %3d }," % (q["x"], q["y"]))
+    p("};")
+    p("")
     p("/* 動畫 → 物件。渲染層查這張表，不必在程式裡寫死動畫名稱。")
     p("   z=1 代表先畫物件再畫角色（睡墊墊在身下）。 */")
     p("typedef struct {")

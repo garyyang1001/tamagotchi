@@ -1748,16 +1748,6 @@
         "o": "outline",
         ".": null
       }
-    },
-    "icon_dress_big": {
-      "mode": "ui",
-      "size": [
-        40,
-        40
-      ],
-      "source": "art/approved/_icons/act_dress.png",
-      "palette": "specs/palettes/icons.json",
-      "_note": "ACT_DRESS 的 40×40 圖示。目前選單裡不會出現（換裝只從衣櫃進），留著備用。"
     }
   },
   "object_cues": {
