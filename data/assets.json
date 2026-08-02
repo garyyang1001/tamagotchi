@@ -4,8 +4,8 @@
   "generator": "tools/pack.py",
   "blob_unit": "frame",
   "dedup": true,
-  "bytes": 216031,
-  "sha256": "9b04e1a830e07aff9c6a05fad9cba2c39d37287e2dbbcd2a0c4f8277c737f742",
+  "bytes": 216396,
+  "sha256": "915692edcbbf775de9c71dbb8cade1b566d436a6cff5fbbf2343153c13e321ad",
   "palettes": [
     {
       "id": 0,
@@ -994,7 +994,7 @@
       "name_hash": "0xC33A61EF",
       "type": 1,
       "w": 320,
-      "h": 176,
+      "h": 240,
       "frame_count": 1,
       "loop": false,
       "palette_day": 8,

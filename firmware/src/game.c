@@ -45,10 +45,6 @@ static const uint8_t DECAY_HOURLY[NEED_COUNT] = { 4, 3, 3, 5, 2 };
 /* 走動時每移動一像素要多久。48 px 走到底約 5.8 秒。 */
 #define WALK_STEP_MS 120u
 
-/* 狗從哪一側進出房間。+1 = 門在站位的右邊。
-   實際的門畫在哪由 specs/scene.json 決定，這裡只決定走進來的方向。 */
-#define DOOR_SIDE (+1)
-
 static const uint16_t MILESTONES[MILESTONE_COUNT] = { 100, 300, 600, 1000, 1500, 2500 };
 
 /* ------------------------------------------------------------------ */
@@ -765,7 +761,7 @@ static void tick_transition(game_t *g, uint32_t dt_ms)
             /* 0 → 門口。線性推，計時歸零時剛好到位。 */
             uint32_t gone = LEAVE_MS - g->leave_ms;
             g->rt[g->leaving].x_ofs =
-                (int8_t)(DOOR_SIDE * (int)((CHAR_X_RANGE * gone) / LEAVE_MS));
+                (int8_t)(DOOR_SIDE * (int)((EXIT_X_RANGE * gone) / LEAVE_MS));
         }
     }
 
@@ -776,7 +772,7 @@ static void tick_transition(game_t *g, uint32_t dt_ms)
         } else if (g->present < CHAR_COUNT) {
             /* 門口 → 0 */
             g->rt[g->present].x_ofs =
-                (int8_t)(DOOR_SIDE * (int)((CHAR_X_RANGE * g->arrive_ms) / ARRIVE_MS));
+                (int8_t)(DOOR_SIDE * (int)((EXIT_X_RANGE * g->arrive_ms) / ARRIVE_MS));
         }
     }
 }
@@ -804,7 +800,7 @@ void game_call_pet(game_t *g, uint8_t dog)
 
     if (game_is_dog(dog)) {
         g->arrive_ms = ARRIVE_MS;
-        g->rt[dog].x_ofs = (int8_t)(DOOR_SIDE * CHAR_X_RANGE);
+        g->rt[dog].x_ofs = (int8_t)(DOOR_SIDE * EXIT_X_RANGE);
         start_walk(g, dog);
     }
 

@@ -10,18 +10,19 @@
 #include <stdint.h>
 
 #define ROOM_W 320
-#define ROOM_H 176   /* 房間底圖的高度，不含 UI 條 */
+#define ROOM_H 240
 #define SCR_W 320
-#define SCR_H 240   /* 房間 176 + UI 條 64 */
+#define SCR_H 240   /* 房間就是滿版，UI 條是浮層不佔高度 */
 #define FLOOR_Y 132
-#define GROUND_Y 150   /* 角色腳底的基準線 */
+#define GROUND_Y 170   /* 角色腳底的基準線 */
 #define UI_BAR_Y 176
 #define UI_BAR_H 64
 #define UI_ICON_SIZE 48
 #define UI_ICON_Y 184
 #define UI_BOX_PAD 6
 #define UI_BOX_THICK 3
-static const int16_t UI_ICON_X[3] = { 29, 135, 241 };
+#define UI_ICON_COUNT 5   /* game.h 的 MENU_MAX。原本寫死 3，後兩個動作根本畫不出來 */
+static const int16_t UI_ICON_X[UI_ICON_COUNT] = { 8, 72, 136, 200, 264 };
 
 /* 站位。狗那一格三隻共用，由 game_t.present 決定畫誰。 */
 #define SLOT_DOG_X 40

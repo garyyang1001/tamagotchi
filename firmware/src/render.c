@@ -21,6 +21,11 @@
 
 #define FB_PX (SCR_W * SCR_H)
 
+/* 遊戲層的離場距離必須足以把狗推出畫面，否則換狗時兩隻會疊在一起。
+   遊戲層不認得版面（它沒有 include layout.h），所以這條耦合用編譯期斷言釘住。 */
+_Static_assert(EXIT_X_RANGE >= SLOT_DOG_X + 64,
+               "EXIT_X_RANGE 不足以讓離場的狗走出畫面，換狗時兩隻會重疊");
+
 /* 一格最大的像素數：房間 320×176。角色最大 64×96。 */
 static uint8_t s_px[ROOM_W * ROOM_H];
 
@@ -310,7 +315,7 @@ static void draw_cursor(const game_t *g, uint16_t *fb)
     if (x0 < 0) x0 = 0;
     if (y0 < 0) y0 = 0;
     if (x1 > SCR_W) x1 = SCR_W;
-    if (y1 > UI_BAR_Y) y1 = UI_BAR_Y;
+    if (y1 > SCR_H) y1 = SCR_H;
     box(fb, x0, y0, x1 - x0, y1 - y0, UI_BOX_THICK, C_SELECT);
 }
 
@@ -340,23 +345,42 @@ static void draw_bars(const game_t *g, uint16_t *fb)
     }
 }
 
-static void draw_ui_bar(const game_t *g, uint16_t *fb)
+/* 動作選單。**這是浮層，不是常駐的 UI 條。**
+ *
+ * 原本它永遠畫在畫面下方 64 px，主畫面時是三個空框。那是錯的：
+ *   - 實機的三顆按鍵在螢幕**下方的外殼上**，畫面裡再放框等於把實體按鍵畫兩次
+ *   - 主畫面時那些框沒有任何意義，卻吃掉 240 裡的 64——27% 的螢幕永遠是黑的
+ * 現在房間是滿版的，這一層只在 UI_MENU / UI_CALL / UI_DRESS 疊上來。
+ *
+ * 格數是 UI_ICON_COUNT（= game.h 的 MENU_MAX = 5）。**原本寫死 3**，
+ * 所以「洗澡」和「上廁所」選得到卻畫不出來——游標移過去畫面上什麼都沒動。
+ */
+static void draw_menu_overlay(const game_t *g, uint16_t *fb)
 {
-    fill(fb, 0, UI_BAR_Y, SCR_W, UI_BAR_H, C_UI_BG);
-    _Bool menu = (g->ui == UI_MENU || g->ui == UI_CALL || g->ui == UI_DRESS);
-    for (int i = 0; i < 3; i++) {
-        int x = UI_ICON_X[i];
-        fill(fb, x, UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE,
-             menu ? C_ICON_HI : C_ICON_BG);
+    if (g->ui != UI_MENU && g->ui != UI_CALL && g->ui != UI_DRESS) return;
+
+    uint8_t n = g->menu_n ? g->menu_n : UI_ICON_COUNT;
+    if (n > UI_ICON_COUNT) n = UI_ICON_COUNT;
+
+    fill(fb, 0, UI_BAR_Y, SCR_W, SCR_H - UI_BAR_Y, C_UI_BG);
+    fill(fb, 0, UI_BAR_Y, SCR_W, 1, C_LINE);          /* 一條分隔線，和房間分開 */
+
+    /* **格子置中在實際的個數上。** 公主只有 4 個動作，用五格的座標會左邊擠一堆、
+       右邊空一格。中心對齊之後不管幾個都在畫面正中。 */
+    int pitch = SCR_W / UI_ICON_COUNT;
+    int x0 = (SCR_W - n * pitch) / 2;
+    for (uint8_t i = 0; i < n; i++) {
+        int x = x0 + i * pitch + (pitch - UI_ICON_SIZE) / 2;
+        fill(fb, x, UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE, C_ICON_HI);
         box(fb, x, UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE, 1, C_LINE);
+        if (i == g->cursor) {
+            /* 選中的加一圈紅框。**框是幾何不是 sprite**——四個 fill 比存一張
+               60×60 的 4bpp 圖（1.8 KB）便宜，而且改粗細不必重烘焙。 */
+            box(fb, x - UI_BOX_PAD, UI_ICON_Y - UI_BOX_PAD,
+                UI_ICON_SIZE + UI_BOX_PAD * 2, UI_ICON_SIZE + UI_BOX_PAD * 2,
+                UI_BOX_THICK, C_SELECT);
+        }
     }
-    if (!menu) return;
-    /* 選中的那一格加一圈紅框。**框是幾何不是 sprite**——四個 fill 比存一張
-       60×60 的 4bpp 圖（1.8 KB）便宜，而且改粗細不必重烘焙。 */
-    uint8_t cur = g->cursor < 3 ? g->cursor : 0;
-    box(fb, UI_ICON_X[cur] - UI_BOX_PAD, UI_ICON_Y - UI_BOX_PAD,
-        UI_ICON_SIZE + UI_BOX_PAD * 2, UI_ICON_SIZE + UI_BOX_PAD * 2,
-        UI_BOX_THICK, C_SELECT);
 }
 
 /* ---- 主流程 ------------------------------------------------------ */
@@ -451,7 +475,7 @@ void render_frame(const game_t *g, uint16_t *fb, uint32_t dt_ms)
 
     draw_cursor(g, fb);
     draw_bars(g, fb);
-    draw_ui_bar(g, fb);
+    draw_menu_overlay(g, fb);
 }
 
 void render_stats(uint32_t *px, uint32_t *sp)

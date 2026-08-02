@@ -65,11 +65,12 @@ def main():
     # scene.json 的 size 是**房間**的尺寸（320×176），不是螢幕的。
     # 螢幕 = 房間 + UI 條，兩者不能混——第一版寫成 SCR_H 176，
     # UI 條會整條畫到畫布外。
+    # 房間現在是滿版的：ROOM == SCR。UI 條是選單開著時才疊上來的浮層，
+    # 不佔房間的高度——主畫面完全不畫它。
     p("#define ROOM_W %d" % sc["size"][0])
-    p("#define ROOM_H %d   /* 房間底圖的高度，不含 UI 條 */" % sc["size"][1])
+    p("#define ROOM_H %d" % sc["size"][1])
     p("#define SCR_W %d" % sc["size"][0])
-    p("#define SCR_H %d   /* 房間 %d + UI 條 %d */"
-      % (L["ui_bar_y"] + L["ui_bar_h"], sc["size"][1], L["ui_bar_h"]))
+    p("#define SCR_H %d   /* 房間就是滿版，UI 條是浮層不佔高度 */" % sc["size"][1])
     p("#define FLOOR_Y %d" % L["floor_y"])
     p("#define GROUND_Y %d   /* 角色腳底的基準線 */" % L["ground_y"])
     p("#define UI_BAR_Y %d" % L["ui_bar_y"])
@@ -78,7 +79,9 @@ def main():
     p("#define UI_ICON_Y %d" % U["icon_y"])
     p("#define UI_BOX_PAD %d" % U["select_box"]["pad"])
     p("#define UI_BOX_THICK %d" % U["select_box"]["thickness"])
-    p("static const int16_t UI_ICON_X[3] = { %s };"
+    p("#define UI_ICON_COUNT %d   /* game.h 的 MENU_MAX。原本寫死 3，"
+      "後兩個動作根本畫不出來 */" % U["icon_count"])
+    p("static const int16_t UI_ICON_X[UI_ICON_COUNT] = { %s };"
       % ", ".join(str(x) for x in U["icon_x"]))
     p("")
     p("/* 站位。狗那一格三隻共用，由 game_t.present 決定畫誰。 */")
