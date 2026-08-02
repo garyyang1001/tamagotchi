@@ -4,8 +4,8 @@
   "generator": "tools/pack.py",
   "blob_unit": "frame",
   "dedup": true,
-  "bytes": 213156,
-  "sha256": "eb74b48f91befeb2dc23b98da54b10a6667bbaee2606c38b81336f2395768def",
+  "bytes": 214089,
+  "sha256": "37a3f1d1a91b8a0f2739275727695efd1e872fdab56013053dda47584813be89",
   "palettes": [
     {
       "id": 0,
@@ -199,6 +199,17 @@
       "w": 46,
       "h": 102,
       "frame_count": 3,
+      "loop": true,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
+      "name": "obj/bird",
+      "name_hash": "0x183B7ED4",
+      "type": 2,
+      "w": 16,
+      "h": 12,
+      "frame_count": 4,
       "loop": true,
       "palette_day": 8,
       "palette_night": 9
@@ -994,6 +1005,17 @@
       "loop": false,
       "palette_day": 6,
       "palette_night": 7
+    },
+    {
+      "name": "obj/squirrel",
+      "name_hash": "0xCD495494",
+      "type": 2,
+      "w": 40,
+      "h": 36,
+      "frame_count": 4,
+      "loop": true,
+      "palette_day": 8,
+      "palette_night": 9
     },
     {
       "name": "chihuahua/play_bow",

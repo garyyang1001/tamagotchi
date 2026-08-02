@@ -165,6 +165,28 @@ typedef enum {
 /* 閒置行為的切換間隔。實際出貨的電子雞韌體用 8–15 秒，
  * 遠短於 3A 遊戲的 30–60 秒——因為角色就是整個畫面內容。
  * 每次觸發後重新抽，不要用固定間隔。 */
+/* ---- 閒置訪客：小松鼠與小鳥 ----
+   閒置時偶爾跑進房間動一動再走掉。**純氛圍**：不可互動、不可餵、不可摸，
+   也不影響任何需求或 affection。牠們不是第五個要照顧的對象——
+   那會變成新的負擔，違反規則 1。
+
+   出現的條件刻意保守：要真的沒事做（沒有動作在跑、不在過場、不在選單、
+   而且離最後一次按鍵超過 POST_INPUT_QUIET_MS）。小孩正在玩的時候
+   跑一隻松鼠進來會搶走她的注意力。 */
+typedef enum {
+    VISITOR_NONE = 0,
+    VISITOR_SQUIRREL,
+    VISITOR_BIRD,
+    VISITOR_COUNT
+} visitor_t;
+
+#define VISITOR_GAP_MIN_MS  25000u   /* 上一隻走掉之後最少隔這麼久 */
+#define VISITOR_GAP_MAX_MS  90000u
+#define VISITOR_STAY_MIN_MS  6000u
+#define VISITOR_STAY_MAX_MS 16000u
+#define VISITOR_X_MIN  188           /* 右半的空地板。左邊是狗位、中間是公主 */
+#define VISITOR_X_MAX  292
+
 #define IDLE_MIN_MS 8000u
 #define IDLE_MAX_MS 15000u
 
@@ -274,6 +296,16 @@ typedef struct {
 
 #define MILESTONE_COUNT 6
 
+/* 六個里程碑怎麼分：前四個給服裝、後兩個給配件。
+   服裝是換調色盤的五個槽（顏色），配件是疊在頭上的 sprite（剪影）。
+   **獎勵用兩個軸給，不要把一個軸拉到它的極限**——
+   tools/outfits.py 搜過整個色相空間：七套彼此最短只有 27.3 且必然有兩組黏在一起，
+   五套是 45.0。詳見 specs/outfits/ice_princess.json 的 _count_why。 */
+#define OUTFIT_COUNT       5    /* bit 0 預設 + bit 1-4 由前四個里程碑解鎖 */
+#define OUTFIT_MILESTONES  4
+#define ACCESSORY_COUNT    5    /* specs/accessories/ice_princess.json */
+#define ACCESSORY_FREE     3    /* 前三件一開始就有；後兩件由第 5、6 個里程碑解鎖 */
+
 typedef struct {
     save_blob_t    save;
     char_runtime_t rt[CHAR_COUNT];
@@ -323,6 +355,14 @@ typedef struct {
        硬體狀態，**不進存檔**，也不影響任何遊戲數值。 */
     uint8_t  battery_pct;       /* 0..100 */
     bool     charging;
+
+    /* 閒置訪客。**不進存檔**——牠們是氛圍不是養成進度，
+       關機再開機重新出現是對的。 */
+    uint8_t  visitor;           /* visitor_t */
+    int8_t   visitor_dir;       /* +1 往右、-1 往左 */
+    int16_t  visitor_x;         /* 螢幕 x（左緣） */
+    uint32_t visitor_ms;        /* 還要待多久 / 還要等多久才來 */
+    uint32_t visitor_step;      /* 走動的累積時間 */
 
     /* 最後一次按鍵的時間。自發行為要避開它之後的 POST_INPUT_QUIET_MS，
        否則小孩會把自發行為誤認為是自己造成的。 */
@@ -518,6 +558,14 @@ anim_id_t game_current_anim(const game_t *g, uint8_t character);
    **位移不烘進動畫**——渲染層畫的時候把它加到 x 上就好，
    和 screen_dx 同一個道理。 */
 int8_t game_char_x_offset(const game_t *g, uint8_t character);
+
+/* ---- 閒置訪客 ---- */
+/* 現在有沒有訪客、是哪一隻。沒有就回 VISITOR_NONE。 */
+visitor_t game_visitor(const game_t *g);
+
+/* 訪客的螢幕 x（左緣）。VISITOR_NONE 時回 0。
+   y 由渲染層用 specs/scene.json 的 base_row 推算，和其他接地物件一樣。 */
+int16_t game_visitor_x(const game_t *g);
 
 /* 該角色是否為狗（決定有無 bladder、有無 ACT_DRESS、能不能被呼叫） */
 bool game_is_dog(uint8_t character);

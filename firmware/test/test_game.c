@@ -475,6 +475,32 @@ static void test_milestones(void)
     CHECK(g.save.chars[CHAR_ICE_PRINCESS].unlocked_outfits & 0x02, "服裝已寫入存檔");
 }
 
+/* 六個里程碑分兩個軸：前四個給服裝、後兩個給配件。
+   守的是「不要解鎖不存在的東西」——原本六個全給服裝會解到 bit 5、6，
+   而 tools/outfits.py 量出來只做得出 5 套（七套彼此最短距離只剩 27.3）。 */
+static void test_milestone_split(void)
+{
+    printf("里程碑分成服裝與配件兩個軸\n");
+
+    save_blob_t s; save_set_defaults(&s, MORNING);
+    for (uint8_t c = 0; c < CHAR_COUNT; c++) s.chars[c].affection = 1000;
+    game_t g;
+    game_init(&g, &s, MORNING);
+    game_boot_done(&g);
+    while (g.ui == UI_BOOT) game_tick(&g, 100);
+    run(&g, 8);
+
+    uint8_t o = g.save.chars[CHAR_ICE_PRINCESS].unlocked_outfits;
+    uint8_t a = game_accessory_mask(&g, CHAR_ICE_PRINCESS);
+    CHECK((o & 0x1Fu) == 0x1Fu, "五套服裝全解鎖（0x%02X）", o);
+    CHECK((o & 0xE0u) == 0u,
+          "**沒有解鎖不存在的第 6、7 套**（高位應為 0，實際 0x%02X）", o);
+    CHECK((a & 0x18u) == 0x18u,
+          "第 5、6 個里程碑解的是配件 bit 3/4（0x%02X）", a);
+    CHECK(g.save.chars[CHAR_ICE_PRINCESS].affection >= 1000,
+          "規則 1：解鎖不扣任何東西，affection 只增不減");
+}
+
 static void test_button_ui(void)
 {
     printf("按鍵 UI\n");
@@ -1170,6 +1196,56 @@ static void test_celebrate(void)
     CHECK(b.ui == UI_MAIN, "已經領過的里程碑不會在下次開機重新慶祝");
 }
 
+/* 閒置訪客。**規則 1 的重點是「牠不是第五個要照顧的對象」**——
+   出現與離開都不能動到任何需求值，也不能在小孩正在玩的時候搶注意力。 */
+static void test_visitor(void)
+{
+    printf("閒置訪客：小松鼠與小鳥\n");
+
+    game_t g; boot(&g, MORNING);
+    CHECK(game_visitor(&g) == VISITOR_NONE, "開機沒有訪客");
+
+    /* 對照組：完全相同的 tick 次數，但強制不讓訪客出現。
+       **兩邊必須 tick 同樣次數**，否則比的是「跑了多久」不是「有沒有訪客」。 */
+    game_t q; boot(&q, MORNING);
+
+    visitor_t seen = VISITOR_NONE;
+    int16_t xmin = 32767, xmax = -32768;
+    int moved = 0;
+    for (uint32_t i = 0; i < 3200; i++) {
+        game_tick(&g, 100);
+        game_tick(&q, 100);
+        q.visitor = VISITOR_NONE;
+        q.visitor_ms = 100000u;
+        if (game_visitor(&g) != VISITOR_NONE) {
+            if (seen == VISITOR_NONE) seen = game_visitor(&g);
+            int16_t x = game_visitor_x(&g);
+            if (x < xmin) xmin = x;
+            if (x > xmax) xmax = x;
+            moved = 1;
+        }
+    }
+    CHECK(seen == VISITOR_SQUIRREL || seen == VISITOR_BIRD,
+          "閒置夠久會有訪客（%d）", (int)seen);
+    CHECK(moved && xmin >= VISITOR_X_MIN && xmax <= VISITOR_X_MAX,
+          "走動範圍在 %d..%d 之內（實測 %d..%d）",
+          VISITOR_X_MIN, VISITOR_X_MAX, xmin, xmax);
+    CHECK(xmax > xmin, "真的有在動（%d → %d）", xmin, xmax);
+
+    /* 規則 1：訪客不動任何遊戲數值。PRNG 會不同（訪客會抽亂數，
+       那只影響播哪個閒置動畫），但存檔必須逐 byte 相同。 */
+    CHECK(memcmp(&g.save.chars, &q.save.chars, sizeof g.save.chars) == 0,
+          "**有訪客與沒訪客，四個角色的存檔逐 byte 相同**");
+
+    /* 剛按過鍵的安靜期內不會冒出訪客來搶注意力 */
+    game_t r; boot(&r, MORNING);
+    r.visitor_ms = 0;
+    game_button(&r, BTN_NEXT);
+    game_tick(&r, 100);
+    CHECK(game_visitor(&r) == VISITOR_NONE,
+          "剛按過鍵的安靜期內不會冒出訪客");
+}
+
 static void test_anim_coverage(void)
 {
     printf("動畫涵蓋率：狀態機實際會用到哪些\n");
@@ -1240,6 +1316,8 @@ int main(void)
     test_post_input_quiet();
     test_idle_no_repeat();
     test_milestones();
+    test_milestone_split();
+    test_visitor();
     test_anim_coverage();
 
     printf("\n%s（%d 項失敗）\n", g_fail ? "測試失敗" : "全部通過", g_fail);

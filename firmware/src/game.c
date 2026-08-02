@@ -443,6 +443,69 @@ static void apply_decay(game_t *g)
 }
 
 /* ------------------------------------------------------------------ */
+/* 閒置訪客                                                            */
+/* ------------------------------------------------------------------ */
+
+/* 現在算不算「真的沒事做」。條件比一般的閒置嚴格——
+   小孩正在玩的時候跑一隻松鼠進來會搶走她的注意力。 */
+static bool room_is_quiet(const game_t *g)
+{
+    if (g->ui != UI_MAIN) return false;
+    if (g->leaving != CHAR_COUNT) return false;
+    if (g->now_ms - g->last_input_ms < POST_INPUT_QUIET_MS) return false;
+    for (uint8_t c = 0; c < CHAR_COUNT; c++)
+        if (g->rt[c].state != CSTATE_IDLE) return false;
+    return true;
+}
+
+static void tick_visitor(game_t *g, uint32_t dt_ms)
+{
+    if (g->visitor_ms > dt_ms) g->visitor_ms -= dt_ms;
+    else                       g->visitor_ms = 0;
+    if (g->visitor_ms) {
+        if (g->visitor != VISITOR_NONE) {
+            /* 走動：每 400 ms 挪一步，撞到邊界就轉向。位移是繪製時偏移，
+               不烘進動畫——和 screen_dx 同一個道理。 */
+            g->visitor_step += dt_ms;
+            while (g->visitor_step >= 400u) {
+                g->visitor_step -= 400u;
+                int16_t nx = (int16_t)(g->visitor_x + g->visitor_dir * 3);
+                if (nx < VISITOR_X_MIN || nx > VISITOR_X_MAX)
+                    g->visitor_dir = (int8_t)-g->visitor_dir;
+                else
+                    g->visitor_x = nx;
+            }
+        }
+        return;
+    }
+
+    if (g->visitor != VISITOR_NONE) {            /* 待夠了，走掉 */
+        g->visitor = VISITOR_NONE;
+        g->visitor_ms = rnd_range(g, VISITOR_GAP_MIN_MS, VISITOR_GAP_MAX_MS);
+        return;
+    }
+    if (!room_is_quiet(g)) {                     /* 還在玩，等下一輪再說 */
+        g->visitor_ms = 3000u;
+        return;
+    }
+    g->visitor = (visitor_t)(VISITOR_SQUIRREL + (rnd(g) & 1u));
+    g->visitor_x = (int16_t)rnd_range(g, VISITOR_X_MIN, VISITOR_X_MAX);
+    g->visitor_dir = (rnd(g) & 1u) ? 1 : -1;
+    g->visitor_step = 0;
+    g->visitor_ms = rnd_range(g, VISITOR_STAY_MIN_MS, VISITOR_STAY_MAX_MS);
+}
+
+visitor_t game_visitor(const game_t *g)
+{
+    return g ? (visitor_t)g->visitor : VISITOR_NONE;
+}
+
+int16_t game_visitor_x(const game_t *g)
+{
+    return (g && g->visitor != VISITOR_NONE) ? g->visitor_x : 0;
+}
+
+/* ------------------------------------------------------------------ */
 /* 里程碑                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -459,14 +522,31 @@ static uint16_t check_milestones(game_t *g)
         if (g->unlocked_mask & bit) continue;
         if (total < MILESTONES[m]) continue;
 
-        /* bit 0 是一開始就有的預設服裝，所以第 m 個里程碑解鎖 bit m+1。
-           寫成 1<<m 的話第一個里程碑等於什麼都沒給。 */
-        uint8_t bit_idx = (uint8_t)((m + 1 < 8) ? m + 1 : 7);
-        uint8_t already = g->save.chars[CHAR_ICE_PRINCESS].unlocked_outfits;
-        uint8_t want    = (uint8_t)(already | (1u << bit_idx));
-        if (want != already) {
-            g->save.chars[CHAR_ICE_PRINCESS].unlocked_outfits = want;
-            g->save_dirty = true;
+        /* 前四個里程碑給服裝、後兩個給配件。
+           **獎勵刻意分兩個軸。** 服裝是換調色盤的五個槽（顏色），
+           配件是疊在頭上的 sprite（剪影），對小孩來說是兩種不同的變化。
+           原本六個里程碑全部給服裝（第 m 個給 bit m+1），但 tools/outfits.py
+           搜過整個色相空間之後發現**七套塞不下**：亮度階梯固定、飽和度又要和
+           房間合群的前提下，七套彼此的最短距離只剩 27.3，必然有兩組黏在一起。
+             4 套 54.0 ／ 5 套 45.0 ／ 6 套 33.6 ／ 7 套 27.3
+           與其硬塞七件分不清的衣服，不如把後兩個里程碑改成給配件。
+           **不要把一個軸拉到它的極限。** */
+        character_save_t *pr = &g->save.chars[CHAR_ICE_PRINCESS];
+        if (m < OUTFIT_MILESTONES) {
+            uint8_t want = (uint8_t)(pr->unlocked_outfits | (1u << (m + 1)));
+            if (want != pr->unlocked_outfits) {
+                pr->unlocked_outfits = want;
+                g->save_dirty = true;
+            }
+        } else {
+            /* 配件 bit：前三件一開始就有，後兩件由第 5、6 個里程碑解鎖。
+               這裡解的是 bit 3 與 bit 4。 */
+            uint8_t idx  = (uint8_t)(ACCESSORY_FREE + (m - OUTFIT_MILESTONES));
+            uint8_t want = (uint8_t)(pr->reserved[CHAR_RSV_ACCESSORY] | (1u << idx));
+            if (want != pr->reserved[CHAR_RSV_ACCESSORY]) {
+                pr->reserved[CHAR_RSV_ACCESSORY] = want;
+                g->save_dirty = true;
+            }
         }
         g->unlocked_mask |= bit;
         newly |= bit;
@@ -900,6 +980,8 @@ void game_tick(game_t *g, uint32_t dt_ms)
     if (g->ui != UI_BOOT && g->ui != UI_POWEROFF) {
         tick_transition(g, dt_ms);
     }
+
+    tick_visitor(g, dt_ms);
 
     /* 夜間切換（含小孩自己關燈）。關機中不理會——
        關機畫面已經是全部睡著了，再切一次只會把序列打斷。 */

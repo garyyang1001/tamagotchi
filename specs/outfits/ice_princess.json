@@ -1,0 +1,83 @@
+{
+  "character_id": "ice_princess",
+  "format_version": 1,
+  "_note": "服裝只換 outfit_slots 的五個槽，其餘十格不動。一套 10 個 byte，83 個影格自動跟著換，零張新圖。",
+  "_lum_why": "五個槽的亮度**固定**在現行冰藍那套量到的實際值。那是模型自己畫出來的明暗關係，斗篷的立體感建立在它們的間距上；只換色相與飽和度就不會把衣服弄平，也不會讓陰影翻面。",
+  "_hue_why": "避開 0–30°（三隻狗的暖褐帶，docs/09 說色相是她最強的辨識頻道）與 337° 附近（accent_red 圍巾手套不換色，撞上去會糊）。",
+  "_iris_note": "**已知限制**：動畫影格裡她的虹膜落在 cloak_dark / cloak_mid，所以換服裝時動畫中的眼珠會跟著換色（master 不會，它的眼睛由 patch.json 逐像素指定）。眼睛只有 3–4 px，這個代價可以接受，但要知道它存在。詳見 specs/palettes/ice_princess.json 的 _outfit_note。",
+  "_count_why": "5 套不是 7 套。搜過整個色相空間：4 套彼此最短 54.0、5 套 45.0、6 套 33.6、7 套只剩 27.3（和冰藍對銀髮的邊際一樣勉強，而且必然有兩組黏在一起）。第 5、6 個里程碑改成解鎖配件——換剪影和換色是兩種不同的變化，**獎勵用兩個軸給，不要把一個軸拉到它的極限**。",
+  "_threshold_why": "驗算的門檻不是隨便訂的，是拿**現行冰藍那套**當基準：它的 trim_pale 對 hair_light 只有 27.5，但那套已經上機看過、讀得出來（描邊幫了忙）。所以 27.0 就是可接受的下限。",
+  "generator": "tools/outfits.py",
+  "outfits": [
+    {
+      "id": 0,
+      "name": "冰藍",
+      "hue": 210,
+      "saturation": 0.72,
+      "unlocked_by": "一開始就有",
+      "colors": {
+        "cloak_dark": "#1C63AB",
+        "cloak_mid": "#3F90E0",
+        "cloak_light": "#75AFE9",
+        "trim_pale": "#CBE1F7",
+        "trim_light": "#E8F2FB"
+      }
+    },
+    {
+      "id": 1,
+      "name": "陽光黃",
+      "hue": 45,
+      "saturation": 0.78,
+      "unlocked_by": "第 1 個 affection 里程碑",
+      "colors": {
+        "cloak_dark": "#6F570E",
+        "cloak_mid": "#A78315",
+        "cloak_light": "#D5A61A",
+        "trim_pale": "#F3DE9E",
+        "trim_light": "#FAF0D4"
+      }
+    },
+    {
+      "id": 2,
+      "name": "嫩芽綠",
+      "hue": 90,
+      "saturation": 0.78,
+      "unlocked_by": "第 2 個 affection 里程碑",
+      "colors": {
+        "cloak_dark": "#3F700E",
+        "cloak_mid": "#5EA815",
+        "cloak_light": "#78D51A",
+        "trim_pale": "#C9F3A0",
+        "trim_light": "#E7FAD4"
+      }
+    },
+    {
+      "id": 3,
+      "name": "森綠",
+      "hue": 135,
+      "saturation": 0.66,
+      "unlocked_by": "第 3 個 affection 里程碑",
+      "colors": {
+        "cloak_dark": "#197C32",
+        "cloak_mid": "#26BA4B",
+        "cloak_light": "#4DDA70",
+        "trim_pale": "#BDF1CA",
+        "trim_light": "#E2F9E8"
+      }
+    },
+    {
+      "id": 4,
+      "name": "莓果粉",
+      "hue": 315,
+      "saturation": 0.78,
+      "unlocked_by": "第 4 個 affection 里程碑",
+      "colors": {
+        "cloak_dark": "#BB1792",
+        "cloak_mid": "#E741BE",
+        "cloak_light": "#EE76D0",
+        "trim_pale": "#F9CCED",
+        "trim_light": "#FCE9F7"
+      }
+    }
+  ]
+}
