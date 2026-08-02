@@ -1,9 +1,9 @@
+*.pyc
+.DS_Store
+.venv/
+__pycache__/
+art/reference/
 build/
 data/*.bin
 firmware/.pio/
 firmware/build/
-.venv/
-__pycache__/
-*.pyc
-art/reference/
-.DS_Store
