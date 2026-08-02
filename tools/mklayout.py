@@ -20,10 +20,41 @@
 """
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "firmware/include/layout.h"
+
+# --------------------------------------------------------------------------
+# UI 圖示的「意義 → 圖示」對照
+# --------------------------------------------------------------------------
+# 這三張表是這個對應關係的**唯一定義**。放這裡而不是 render.c，理由和 layout.h
+# 存在的理由一樣：同一個對應關係不能有兩個地方定義。
+#
+# 值是 `specs/scene.json` 裡 `mode: "ui"` 的物件 id——**圖示就是 scene 物件**，
+# 尺寸與影格數跟著 scene.json 走，渲染層不必知道任何一張圖多大。
+# 產生出來的表存的是 OBJ_* 的索引；scene.json 裡還沒有那個 id 就填 -1，
+# 渲染層畫退回版（空框、沒有提示圖示），**不會因此開不起來**。
+
+ACTION_ICON = {                     # game.h 的 action_t → 圖示
+    "ACT_FEED":   "icon_feed",
+    "ACT_PLAY":   "icon_play",
+    "ACT_PET":    "icon_pet",
+    "ACT_BATH":   "icon_bath",
+    "ACT_TOILET": "icon_toilet",
+    # ACT_SLEEP 沒有圖示：休息不是動作，是牆上那個開關（見 game.h 的 SLOT_LIGHT）。
+    # ACT_DRESS 也沒有：它只從衣櫃進來，選單裡不會出現。
+}
+
+# 進度條的圖示。**順序必須和 game_need_bars() 一致**，
+# 那邊是 hunger / energy / mood / (狗 = bladder、公主 = tidy)。
+BAR_ICON_DOG = ["icon_hunger", "icon_energy", "icon_mood", "icon_bladder"]
+BAR_ICON_PRINCESS = ["icon_hunger", "icon_energy", "icon_mood", "icon_tidy"]
+
+# 主畫面牆上那三格的「按下去會怎樣」。索引是 game.h 的 main_slot_t 前三格。
+# 公主與狗那兩格不在這裡：它們接地，用地板箭頭，不用提示圖示。
+SLOT_HINT = ["icon_call", "icon_dress", "icon_light"]
 
 
 def load(p):
@@ -32,6 +63,27 @@ def load(p):
 
 def cname(s):
     return s.upper().replace("/", "_").replace("-", "_")
+
+
+def enum_names(header, tag):
+    """從 C 標頭抓 `typedef enum { ... } <tag>;` 的成員名，照原順序。
+
+    為什麼用讀的而不是抄一份：enum 的順序是韌體定義的，抄過來就變成
+    第二個定義。`brown_mixed` 的 sprite_cell 就是這樣錯了很久沒被發現。
+    """
+    src = (ROOT / header).read_text(encoding="utf-8")
+    src = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+    src = re.sub(r"//[^\n]*", "", src)
+    # 內文不含大括號，否則 `.*?` 會從檔案裡第一個 enum 一路吃到這一個
+    m = re.search(r"typedef\s+enum\s*\{([^{}]*)\}\s*%s\s*;" % tag, src, re.S)
+    if not m:
+        raise SystemExit("在 %s 裡找不到 enum %s" % (header, tag))
+    out = []
+    for item in m.group(1).split(","):
+        item = item.split("=")[0].strip()
+        if item:
+            out.append(item.split()[0])
+    return out
 
 
 def main():
@@ -90,8 +142,11 @@ def main():
         p("#define SLOT_%s_DY %d" % (cname(s["id"]), s["dy"]))
     p("")
     p("/* 物件。mode 決定 x/y 怎麼算——判準是「有沒有接地」：")
-    p("   ground 的 y 推算得出來（ground_y - dy - base_row），float 的沒有基準只能填。 */")
-    p("typedef enum { OBJ_GROUND = 0, OBJ_FLOAT, OBJ_FIXED, OBJ_TRACK } obj_mode_t;")
+    p("   ground 的 y 推算得出來（ground_y - dy - base_row），float 的沒有基準只能填。")
+    p("   ui 是介面圖示，不是房間裡的東西：位置由 UI 版面決定，")
+    p("   **draw_fixed_objects 必須跳過它們**，render_init 也不把它們算成必要資產。 */")
+    p("typedef enum { OBJ_GROUND = 0, OBJ_FLOAT, OBJ_FIXED, OBJ_TRACK,")
+    p("               OBJ_UI } obj_mode_t;")
     p("")
     p("typedef enum {")
     for n in o_names:
@@ -116,7 +171,8 @@ def main():
     for n in o_names:
         o = objs[n]
         mode = {"ground": "OBJ_GROUND", "float": "OBJ_FLOAT",
-                "fixed": "OBJ_FIXED", "track": "OBJ_TRACK"}[o.get("mode", "ground")]
+                "fixed": "OBJ_FIXED", "track": "OBJ_TRACK",
+                "ui": "OBJ_UI"}[o.get("mode", "ground")]
         at = o.get("at") or [0, 0]
         axs = o.get("anchor_x") or {}
         anc = o.get("anchor") or {}
@@ -142,6 +198,51 @@ def main():
     for n in o_names:
         p('    "obj/%s",' % n)
     p("};")
+    p("")
+
+    # ---- UI 圖示 --------------------------------------------------------
+    # 紅框只說「選到了」，說不出「這是什麼」。三張表把意義接到圖示上。
+    # 值是 OBJ_* 的索引，-1 = scene.json 裡還沒有這個圖示（渲染層畫退回版）。
+    def oi(name):
+        return o_names.index(name) if name in o_names else -1
+
+    acts = enum_names("firmware/include/game.h", "action_t")
+    acts = [a for a in acts if a != "ACT_COUNT"]
+    have = sum(1 for a in acts if oi(ACTION_ICON.get(a, "")) >= 0)
+
+    p("/* ---- UI 圖示 ----")
+    p("   紅框只說「選到了」，說不出「這是什麼」：四歲半看五個一樣的灰框，")
+    p("   分不出哪個是吃飯哪個是洗澡。圖示是**唯一**能表達語意的東西——")
+    p("   這個年齡不讀字，也不會去記「左邊數來第三個」。")
+    p("")
+    p("   值是 OBJ_* 的索引，**-1 = 資產包裡還沒有那張圖**，")
+    p("   渲染層畫退回版（空框／只有紅框），不是致命錯誤。 */")
+    p("")
+    p("/* 動作 → 圖示。索引是 game.h 的 action_t，順序是**讀 game.h 讀來的**，")
+    p("   不是抄的——抄一份就多一個定義。render.c 有 _Static_assert 在對齊兩邊。 */")
+    p("#define UI_ACTION_ICON_COUNT %d" % len(acts))
+    p("static const int8_t UI_ACTION_ICON[UI_ACTION_ICON_COUNT] = {")
+    for a in acts:
+        icon = ACTION_ICON.get(a)
+        p("    %3d,  /* %-10s %s */"
+          % (oi(icon) if icon else -1, a, icon if icon else "（選單裡沒有這一項）"))
+    p("};")
+    p("")
+    p("/* 進度條的圖示。**順序必須和 game_need_bars() 一致**：")
+    p("   hunger / energy / mood / (狗 = bladder、公主 = tidy)。")
+    p("   第四條依角色換，所以兩張表——公主沒有 bladder。 */")
+    p("#define UI_BAR_ICON_COUNT %d" % len(BAR_ICON_DOG))
+    p("static const int8_t UI_BAR_ICON_DOG[UI_BAR_ICON_COUNT] = { %s };"
+      % ", ".join("%d" % oi(n) for n in BAR_ICON_DOG))
+    p("static const int8_t UI_BAR_ICON_PRINCESS[UI_BAR_ICON_COUNT] = { %s };"
+      % ", ".join("%d" % oi(n) for n in BAR_ICON_PRINCESS))
+    p("")
+    p("/* 主畫面牆上那三格的「按下去會怎樣」。索引是 main_slot_t 的前三格：")
+    p("   門 → 呼叫、衣櫃 → 換裝、開關 → 燈（那一個有兩格，見 render.c）。")
+    p("   公主與狗不在這裡：它們接地，用地板箭頭。 */")
+    p("#define UI_SLOT_HINT_COUNT %d" % len(SLOT_HINT))
+    p("static const int8_t UI_SLOT_HINT[UI_SLOT_HINT_COUNT] = { %s };"
+      % ", ".join("%d" % oi(n) for n in SLOT_HINT))
     p("")
     p("/* 動畫 → 物件。渲染層查這張表，不必在程式裡寫死動畫名稱。")
     p("   z=1 代表先畫物件再畫角色（睡墊墊在身下）。 */")
@@ -247,6 +348,14 @@ def main():
     print("  物件 %d、訪客 %d、配件 %d、服裝 %d、cue %d"
           % (len(o_names), len(vis), len(a_names), len(outfits),
              sum(1 for a in cues if a in order)))
+    ui_all = sorted(set(list(ACTION_ICON.values()) + BAR_ICON_DOG
+                        + BAR_ICON_PRINCESS + SLOT_HINT))
+    miss = [n for n in ui_all if n not in o_names]
+    print("  UI 圖示 %d/%d（動作 %d/5）%s"
+          % (len(ui_all) - len(miss), len(ui_all), have,
+             "" if not miss else "；scene.json 還沒有：" + " ".join(miss)))
+    if miss:
+        print("  → 缺的那幾格渲染層會畫退回版（空框／只有紅框），不會開不起來")
 
 
 if __name__ == "__main__":

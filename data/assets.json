@@ -4,8 +4,8 @@
   "generator": "tools/pack.py",
   "blob_unit": "frame",
   "dedup": true,
-  "bytes": 216396,
-  "sha256": "915692edcbbf775de9c71dbb8cade1b566d436a6cff5fbbf2343153c13e321ad",
+  "bytes": 217907,
+  "sha256": "0d4ee23df4c08390e6af2ddbd973bf87790087a690cd20f1dd2b186bd1e8bdb9",
   "palettes": [
     {
       "id": 0,
@@ -220,6 +220,17 @@
       "palette_night": 9
     },
     {
+      "name": "obj/icon_bladder",
+      "name_hash": "0x17D20EEB",
+      "type": 2,
+      "w": 10,
+      "h": 10,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
       "name": "brown_mixed/stand_up",
       "name_hash": "0x1A4F9A20",
       "type": 0,
@@ -253,6 +264,17 @@
       "palette_night": 1
     },
     {
+      "name": "obj/icon_play",
+      "name_hash": "0x23E049E9",
+      "type": 2,
+      "w": 32,
+      "h": 32,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
       "name": "ice_princess/sad_wait",
       "name_hash": "0x2573BE23",
       "type": 0,
@@ -262,6 +284,17 @@
       "loop": true,
       "palette_day": 6,
       "palette_night": 7
+    },
+    {
+      "name": "obj/icon_light",
+      "name_hash": "0x2AF8B09D",
+      "type": 2,
+      "w": 16,
+      "h": 16,
+      "frame_count": 2,
+      "loop": true,
+      "palette_day": 8,
+      "palette_night": 9
     },
     {
       "name": "obj/star",
@@ -295,6 +328,17 @@
       "loop": false,
       "palette_day": 0,
       "palette_night": 1
+    },
+    {
+      "name": "obj/icon_toilet",
+      "name_hash": "0x31A9D5CA",
+      "type": 2,
+      "w": 32,
+      "h": 32,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
     },
     {
       "name": "brown_mixed/happy",
@@ -363,6 +407,17 @@
       "palette_night": 7
     },
     {
+      "name": "obj/icon_mood",
+      "name_hash": "0x408183CC",
+      "type": 2,
+      "w": 10,
+      "h": 10,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
       "name": "ice_princess/lie_down",
       "name_hash": "0x43E77F38",
       "type": 0,
@@ -383,6 +438,17 @@
       "loop": true,
       "palette_day": 2,
       "palette_night": 3
+    },
+    {
+      "name": "obj/icon_energy",
+      "name_hash": "0x4BB3B65F",
+      "type": 2,
+      "w": 10,
+      "h": 10,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
     },
     {
       "name": "brindle_guard/play_bow",
@@ -572,6 +638,17 @@
       "palette_night": 1
     },
     {
+      "name": "obj/icon_bath",
+      "name_hash": "0x77B06E3A",
+      "type": 2,
+      "w": 32,
+      "h": 32,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
       "name": "ice_princess/happy",
       "name_hash": "0x7994006B",
       "type": 0,
@@ -625,6 +702,17 @@
       "loop": true,
       "palette_day": 0,
       "palette_night": 1
+    },
+    {
+      "name": "obj/icon_pet",
+      "name_hash": "0x8A7BDF60",
+      "type": 2,
+      "w": 32,
+      "h": 32,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
     },
     {
       "name": "obj/ball",
@@ -957,6 +1045,17 @@
       "palette_night": 9
     },
     {
+      "name": "obj/icon_hunger",
+      "name_hash": "0xC29D5360",
+      "type": 2,
+      "w": 10,
+      "h": 10,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
       "name": "chihuahua/lie_down",
       "name_hash": "0xC2AEF815",
       "type": 0,
@@ -1032,6 +1131,17 @@
       "loop": false,
       "palette_day": 6,
       "palette_night": 7
+    },
+    {
+      "name": "obj/icon_call",
+      "name_hash": "0xCAFF1283",
+      "type": 2,
+      "w": 16,
+      "h": 16,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
     },
     {
       "name": "chihuahua/play_bow",
@@ -1133,6 +1243,28 @@
       "palette_night": 5
     },
     {
+      "name": "obj/icon_feed",
+      "name_hash": "0xF0BDDBDF",
+      "type": 2,
+      "w": 32,
+      "h": 32,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
+      "name": "obj/icon_tidy",
+      "name_hash": "0xF15E751B",
+      "type": 2,
+      "w": 10,
+      "h": 10,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
       "name": "brown_mixed/lie_down",
       "name_hash": "0xF1F9643F",
       "type": 0,
@@ -1149,6 +1281,17 @@
       "type": 2,
       "w": 70,
       "h": 30,
+      "frame_count": 1,
+      "loop": false,
+      "palette_day": 8,
+      "palette_night": 9
+    },
+    {
+      "name": "obj/icon_dress",
+      "name_hash": "0xF7E8FCEE",
+      "type": 2,
+      "w": 16,
+      "h": 16,
       "frame_count": 1,
       "loop": false,
       "palette_day": 8,

@@ -125,11 +125,19 @@ static int headless(game_t *g, const char *dir)
     run_ms(g, 300);
     snap(g, dir, "01_main");
 
+    /* 牆上那三格各拍一張：紅框之外還要看得到「按下去會怎樣」的提示圖示。
+       衣櫃那張是**夾在畫面內**的證據——它貼著右緣（x262-318）。 */
+    goto_slot(g, SLOT_DOOR);
+    snap(g, dir, "01b_cursor_door");
+    goto_slot(g, SLOT_WARDROBE);
+    snap(g, dir, "01c_cursor_wardrobe");
+
     goto_slot(g, SLOT_LIGHT);
     snap(g, dir, "02_cursor_light");
 
     game_button(g, BTN_OK);                /* 關燈 */
     run_ms(g, 400);
+    /* 燈關著時提示要換成第 1 格（「按下去會開燈」），和牆上的開關相反 */
     snap(g, dir, "03_light_off");
     game_button(g, BTN_OK);                /* 開燈 */
     run_ms(g, 400);
@@ -150,10 +158,23 @@ static int headless(game_t *g, const char *dir)
     goto_slot(g, SLOT_DOOR);
     game_button(g, BTN_OK);
     printf("  呼叫選單：ui=%u\n", g->ui);
+    snap(g, dir, "06b_call");              /* 三格＝三隻狗的 idle_breathe 第 0 格 */
     game_button(g, BTN_OK);                /* 選第一隻 */
     printf("  在場 = %u\n", g->present);
     run_ms(g, 1400);
+    /* 游標停在狗身上：進度條的第四條要是 bladder，不是公主那條 tidy。
+       圖示不一樣，這是**唯一**看得到那張圖的畫面。 */
+    goto_slot(g, SLOT_DOG);
     snap(g, dir, "07_pet_called");
+
+    /* 狗的動作選單是 5 個（公主 4 個，她沒有 bladder）。
+       兩張都要拍——五個圖示是不是真的都畫得出來，只有這張看得到。 */
+    game_button(g, BTN_OK);
+    printf("  狗的選單：%u 個動作\n", g->menu_n);
+    snap(g, dir, "07a_menu_dog");
+    /* 不按確認，讓它自己逾時回主畫面——順便驗 MENU_TIMEOUT_MS 這條路還通 */
+    run_ms(g, MENU_TIMEOUT_MS + 200);
+    printf("  選單逾時 → ui=%u（應該回 0 主畫面）\n", g->ui);
 
     /* 換狗：直接叫下一隻，舊的自己走回去 */
     goto_slot(g, SLOT_DOOR);
@@ -168,11 +189,21 @@ static int headless(game_t *g, const char *dir)
     snap(g, dir, "07b_swap");
     run_ms(g, 1400);
 
-    /* 換裝：直接解鎖 + 換第 3 套 + 全部配件 */
+    /* 換裝。**走衣櫃那條路**不要直接改欄位——換裝畫面的每一格是一張色票，
+       那是零資產的表示法（一套服裝本來就只是調色盤的五個顏色），
+       只有真的進 UI_DRESS 才畫得出來。先全部解鎖，五格才都在。 */
     g->save.chars[CHAR_ICE_PRINCESS].unlocked_outfits = 0x1F;
-    game_set_outfit(g, 3);
+    goto_slot(g, SLOT_WARDROBE);
+    game_button(g, BTN_OK);
+    printf("  換裝畫面：ui=%u，游標停在現在穿的第 %u 套\n", g->ui, g->cursor);
+    snap(g, dir, "08a_dress");
+    game_button(g, BTN_NEXT);
+    game_button(g, BTN_NEXT);
+    game_button(g, BTN_NEXT);
+    game_button(g, BTN_OK);                /* 換上第 3 套 */
     game_set_accessory_mask(g, CHAR_ICE_PRINCESS, 0x1F);
     run_ms(g, 300);
+    printf("  穿上第 %u 套\n", game_outfit(g));
     snap(g, dir, "08_outfit_acc");
 
     /* 訪客。room_is_quiet 要求離最後一次按鍵超過 POST_INPUT_QUIET_MS，

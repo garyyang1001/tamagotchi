@@ -294,7 +294,7 @@ def mock(spec, bg_day, objs, out_dir, scale, night_bg=None, night_objs=None):
 
         # 固定座標的物件（窗外的雪之類）
         for oname, od in spec["objects"].items():
-            if oname.startswith("_") or od.get("mode") != "fixed":
+            if oname.startswith("_") or od.get("mode") != "fixed":  # ui 型不入房間模擬圖
                 continue
             o = (night_objs or objs).get(oname) if night else objs.get(oname)
             if o is None:

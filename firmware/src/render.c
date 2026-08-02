@@ -26,6 +26,15 @@
 _Static_assert(EXIT_X_RANGE >= SLOT_DOG_X + 64,
                "EXIT_X_RANGE 不足以讓離場的狗走出畫面，換狗時兩隻會重疊");
 
+/* layout.h 的圖示對照表是 tools/mklayout.py **讀 game.h** 產生的。
+   長度一旦對不上，整張表就錯位——那種錯在畫面上是「吃飯格畫著洗澡的圖」，
+   看得到卻很難查出原因，所以在編譯期擋。改了 game.h 的 enum 要重跑 mklayout.py。 */
+_Static_assert(UI_ACTION_ICON_COUNT == ACT_COUNT,
+               "UI_ACTION_ICON 和 game.h 的 action_t 對不上，重跑 tools/mklayout.py");
+_Static_assert(UI_SLOT_HINT_COUNT == SLOT_LIGHT + 1 &&
+               SLOT_DOOR == 0 && SLOT_WARDROBE == 1,
+               "UI_SLOT_HINT 的順序必須是 main_slot_t 的前三格");
+
 /* 一格最大的像素數：房間 320×176。角色最大 64×96。 */
 static uint8_t s_px[ROOM_W * ROOM_H];
 
@@ -94,6 +103,47 @@ static void blit(uint16_t *fb, const ipa_asset_t *a, uint16_t k,
     }
 }
 
+/* 資產名字是 "<前綴>/<名字>"。三個地方要組它（動畫時鐘、開機檢查、呼叫選單的
+   狗頭像），所以只寫一次。名字用 layout.h 的表組出來，不在程式裡寫死字串。 */
+static void asset_name(char *out, const char *a, const char *b)
+{
+    size_t n = 0;
+    for (const char *p = a; *p; p++) out[n++] = *p;
+    out[n++] = '/';
+    for (const char *p = b; *p; p++) out[n++] = *p;
+    out[n] = 0;
+}
+
+/* ---- UI 圖示 -----------------------------------------------------
+ *
+ * 紅框只說「選到了」，說不出「這是什麼」。四歲半不讀字，也不會去記
+ * 「左邊數來第三個是洗澡」——圖示是唯一能表達語意的東西。
+ *
+ * 三條規則貫穿以下全部的圖示：
+ *
+ * 1. **查不到就退回，不是致命錯誤。** 圖示是介面的說明，房間和角色才是內容。
+ *    少一張圖示畫成空框仍然玩得下去，而 render_init() 因此回 false 是整台開不起來。
+ * 2. **一律用日間調色盤。** 它們是介面不是房間裡的東西，關燈不該讓說明跟著變暗，
+ *    而且它們都畫在自己的深色底板上，本來就不吃房間的光。
+ * 3. **不縮放。** 像素風的 1 px 特徵（眼睛）撐不住非整數倍縮放，
+ *    這件事在 CLAUDE.md 規則 2 已經付過學費了。
+ */
+static const ipa_asset_t *ui_icon(int obj)
+{
+    if (obj < 0 || obj >= OBJ_COUNT) return 0;   /* -1 = scene.json 還沒有這張圖 */
+    return ipa_asset(OBJ_NAME[obj]);
+}
+
+/* 把圖示畫在某個矩形的正中。置中用**資產自己的**寬高算，不寫死 8 px 內縮——
+   換一張大小不同的圖示不必回來改程式。a 為 NULL 就什麼都不畫。 */
+static void blit_center(uint16_t *fb, const ipa_asset_t *a, uint16_t k,
+                        int x, int y, int w, int h)
+{
+    if (!a) return;
+    blit(fb, a, k, x + (w - a->w) / 2, y + (h - a->h) / 2,
+         ipa_palette(a->palette_day));
+}
+
 /* ---- 調色盤 ------------------------------------------------------ */
 
 /* 角色的調色盤。夜間換一份，公主再覆寫服裝那五格。
@@ -136,11 +186,7 @@ static const ipa_asset_t *char_anim(const game_t *g, uint8_t c, uint16_t *out_fr
     uint8_t aid = (uint8_t)game_current_anim(g, c);
     if (aid >= 21) aid = 0;
     /* 名字用 CHAR_ID/ANIM_ID 組出來，不寫死——layout.h 保證順序和 enum 一致 */
-    size_t n = 0;
-    for (const char *p = CHAR_ID[c]; *p; p++) name[n++] = *p;
-    name[n++] = '/';
-    for (const char *p = ANIM_ID[aid]; *p; p++) name[n++] = *p;
-    name[n] = 0;
+    asset_name(name, CHAR_ID[c], ANIM_ID[aid]);
 
     const ipa_asset_t *a = ipa_asset(name);
     if (!a) return 0;
@@ -281,6 +327,37 @@ static void draw_character(const game_t *g, uint16_t *fb, uint8_t c,
 #define C_BAR_BG  0x39C7
 #define C_BAR     0xAE95
 
+/* 「按下去會怎樣」的提示圖示。
+ *
+ * **畫在紅框的正下方，而且夾在畫面內。** 三個目標各自貼著一邊：門在最左（x6）、
+ * 衣櫃在最右（x262-318）、開關在牆上。畫在框旁邊一定有一個會出界——
+ * 紅框右緣 324 > 320 那次就是這樣讓整條框線不見的。
+ * 下方對三個都在畫面內（最低的門框底 138 + 22 = 160，離地面線 170 還有距離），
+ * 而且「東西在上、它會做什麼在下」的閱讀順序對這個年齡是自然的。
+ *
+ * 底板是必要的：牆是淺色、地毯是粉色，16 px 的圖示直接壓上去會糊掉。
+ * 順帶讓提示和紅框看起來是同一組東西。 */
+static void draw_hint(uint16_t *fb, const ipa_asset_t *a, uint16_t k,
+                      int cx, int top)
+{
+    if (!a) return;
+    /* **不加底板。** 第一版墊了一塊 C_UI_BG 的深色底，理由是「牆是淺色、
+       地毯是粉色，圖示壓上去會糊」——但那個推理是反的：
+       提示圖示本來就是**為了畫在淺色牆上而設計成深色的**（outline 對牆 305），
+       墊一塊深色底反而變成深色圖示壓在深色底上。實測 outline (58,50,41)
+       對 C_UI_BG (24,28,24) 只有 44，腳印幾乎看不見。
+
+       這是兩邊各自量對、合起來錯的例子：畫圖示的那一輪量的是「對牆」，
+       接渲染的那一輪量的是「對地毯」，**沒有人量最終真正疊在一起的那兩層**。
+       直接畫在地板上：對 floor_light 233、對 rug_light 213，兩個都遠超門檻。 */
+    int x = cx - a->w / 2, y = top;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x + a->w > SCR_W) x = SCR_W - a->w;
+    if (y + a->h > SCR_H) y = SCR_H - a->h;
+    blit(fb, a, k, x, y, ipa_palette(a->palette_day));
+}
+
 static void draw_cursor(const game_t *g, uint16_t *fb)
 {
     if (g->ui != UI_MAIN) return;
@@ -317,6 +394,13 @@ static void draw_cursor(const game_t *g, uint16_t *fb)
     if (x1 > SCR_W) x1 = SCR_W;
     if (y1 > SCR_H) y1 = SCR_H;
     box(fb, x0, y0, x1 - x0, y1 - y0, UI_BOX_THICK, C_SELECT);
+
+    /* 電燈的提示有兩格，而且**和牆上那個開關相反**：開關第 1 格是撥桿在上
+       ＝現在燈開著，提示第 0 格是「按下去會關燈」。
+       提示講的是**按下去之後**會怎樣，不是現在是什麼狀態。 */
+    uint16_t hk = (cur == SLOT_LIGHT && !game_light_on(g)) ? 1 : 0;
+    int hint = (cur < UI_SLOT_HINT_COUNT) ? UI_SLOT_HINT[cur] : -1;
+    draw_hint(fb, ui_icon(hint), hk, (x0 + x1) / 2, y1 + 2);
 }
 
 /* 游標停在角色身上就直接顯示進度條，不必再按一次。
@@ -332,17 +416,79 @@ static void draw_bars(const game_t *g, uint16_t *fb)
 
     uint8_t v[8];
     uint8_t k = game_need_bars(g, c, v, 8);
+
+    /* 四條一樣長的條子說不出哪條是肚子餓，所以每條左邊放一個 10×10 的圖示。
+       **順序跟著 game_need_bars 走**：hunger / energy / mood /（狗 bladder、
+       公主 tidy）。第四條依角色換，表因此有兩張。 */
+    const int8_t *ico = game_is_dog(c) ? UI_BAR_ICON_DOG : UI_BAR_ICON_PRINCESS;
+    const ipa_asset_t *ia[UI_BAR_ICON_COUNT];
+    int iw = 0, ih = 0;
+    for (uint8_t i = 0; i < UI_BAR_ICON_COUNT; i++) {
+        ia[i] = (i < k) ? ui_icon(ico[i]) : 0;
+        if (!ia[i]) continue;
+        if (ia[i]->w > iw) iw = ia[i]->w;
+        if (ia[i]->h > ih) ih = ia[i]->h;
+    }
+
     /* **位置固定在左上角，不跟著角色跑。** 第一版畫在角色正上方，
        公主站中間時整排條子壓在窗戶上，看起來像畫面壞掉。
        對這個年齡「每次都在同一個地方」比「靠近它講的那個角色」重要。
-       底下墊一塊深色，否則淺色的牆會讓條子讀不出來。 */
-    int bw = 48, bh = 5, gap = 3, x = 5, y = 5;
-    fill(fb, x - 3, y - 3, bw + 6, k * (bh + gap) + 3, C_UI_BG);
+       底下墊一塊深色，否則淺色的牆會讓條子讀不出來。
+
+       欄寬由**量到的圖示**決定：一張都查不到時 iw = 0，整塊退回成沒有圖示的版面，
+       不會留一條空欄看起來像畫壞了。 */
+    int bw = 48, bh = 5, x = 5, y = 5;
+    int gapx = iw ? 3 : 0;
+    int row = ih > bh ? ih : bh;      /* 列高取圖示與條子的較大者 */
+    /* **列距要讓整塊面板停在 y45 之前**：門的框從 y46 開始（specs/scene.json
+       的 background），面板壓過去會把門的上緣蓋掉，看起來像門缺一角。
+       4 列 × 10 px 的圖示 + 3 px 的邊，底緣落在 y44，剛好停在門上面；
+       每列再多留 3 px 的話底緣是 y56，會蓋掉門框整整 11 列。
+       沒有圖示時列高只有條子的 5 px，留 3 px 才不會擠成一塊。 */
+    int pitch = row + (row > bh ? 0 : 3);
+    fill(fb, x - 3, y - 3, iw + gapx + bw + 6, k * pitch + 3, C_UI_BG);
     for (uint8_t i = 0; i < k; i++) {
-        int yy = y + i * (bh + gap);
-        fill(fb, x, yy, bw, bh, C_BAR_BG);
-        fill(fb, x, yy, bw * v[i] / 100, bh, C_BAR);
+        int yy = y + i * pitch;
+        if (i < UI_BAR_ICON_COUNT) blit_center(fb, ia[i], 0, x, yy, iw, row);
+        /* **規則 1：條子短的時候不變紅、不閃、不倒數**，只是短一點。
+           顏色兩條都是中性的，和值無關——這一行沒有任何分支是刻意的。 */
+        int bx = x + iw + gapx, by = yy + (row - bh) / 2;
+        fill(fb, bx, by, bw, bh, C_BAR_BG);
+        fill(fb, bx, by, bw * v[i] / 100, bh, C_BAR);
     }
+}
+
+/* 呼叫選單的一格：那隻狗的 idle_breathe 第 0 格。**不另做頭像資產。**
+ *
+ * **整張影格置中，不裁切也不縮放。** 裁到 48×48 會切掉 brown_mixed 的吻部與尾巴、
+ * brindle_guard 的耳朵（三張的實際內容是 44 / 64 / 50 px 寬）——
+ * 那些正是 docs/09 用來分辨三隻狗的特徵，裁掉就等於三格長得一樣。
+ * 縮成 3/4 更糟：非整數倍縮放會吃掉 1-2 px 的眼睛（CLAUDE.md 規則 2）。
+ * 所以讓 64×56 的影格溢出格子，紅框照樣只框 48×48 的格子。
+ * 三格間距 64，實際內容之間仍有 8-11 px 的空隙，不會黏成一團。 */
+static void draw_dog_portrait(uint16_t *fb, uint8_t c, int x)
+{
+    if (c >= CHAR_COUNT) return;
+    char name[48];
+    asset_name(name, CHAR_ID[c], ANIM_ID[ANIM_IDLE_BREATHE]);
+    blit_center(fb, ipa_asset(name), 0, x, UI_ICON_Y,
+                UI_ICON_SIZE, UI_ICON_SIZE);
+}
+
+/* 換裝選單的一格：那套服裝的五個顏色。**零新資產。**
+ * 一套服裝本來就只是調色盤的五格（見 char_palette），所以色票是最誠實的表示法——
+ * 小孩看到的方塊就是公主等一下身上的顏色。由深到淺排（cloak_dark → trim_light），
+ * 和衣服本身的明暗順序一致。邊長取 32，和動作圖示同一個內框大小。 */
+static void draw_outfit_swatch(uint16_t *fb, uint8_t id, int x)
+{
+    if (id >= OUTFIT_COUNT_GEN) return;
+    const int s = 32;
+    int sx = x + (UI_ICON_SIZE - s) / 2, sy = UI_ICON_Y + (UI_ICON_SIZE - s) / 2;
+    for (int i = 0; i < OUTFIT_SLOTS; i++) {
+        int a = sy + i * s / OUTFIT_SLOTS, b = sy + (i + 1) * s / OUTFIT_SLOTS;
+        fill(fb, sx, a, s, b - a, OUTFIT_RGB565[id][i]);
+    }
+    box(fb, sx, sy, s, s, 1, C_LINE);
 }
 
 /* 動作選單。**這是浮層，不是常駐的 UI 條。**
@@ -359,7 +505,14 @@ static void draw_menu_overlay(const game_t *g, uint16_t *fb)
 {
     if (g->ui != UI_MENU && g->ui != UI_CALL && g->ui != UI_DRESS) return;
 
-    uint8_t n = g->menu_n ? g->menu_n : UI_ICON_COUNT;
+    /* 格數要問各自的來源。**呼叫與換裝不能用 menu_n**——那是進動作選單時抓的
+       快照，換到別的畫面它還留著上一次的值：先摸過公主（4 個動作）再去門口，
+       呼叫選單就會畫成 4 格，但狗只有 3 隻，多出來的那一格是空的。 */
+    uint8_t list[8];
+    uint8_t n;
+    if (g->ui == UI_CALL)       n = game_call_list(g, list, (uint8_t)sizeof list);
+    else if (g->ui == UI_DRESS) n = game_outfit_list(g, list, (uint8_t)sizeof list);
+    else                        n = g->menu_n ? g->menu_n : UI_ICON_COUNT;
     if (n > UI_ICON_COUNT) n = UI_ICON_COUNT;
 
     fill(fb, 0, UI_BAR_Y, SCR_W, SCR_H - UI_BAR_Y, C_UI_BG);
@@ -369,17 +522,39 @@ static void draw_menu_overlay(const game_t *g, uint16_t *fb)
        右邊空一格。中心對齊之後不管幾個都在畫面正中。 */
     int pitch = SCR_W / UI_ICON_COUNT;
     int x0 = (SCR_W - n * pitch) / 2;
+    int cx[UI_ICON_COUNT];
+    for (uint8_t i = 0; i < n; i++)
+        cx[i] = x0 + i * pitch + (pitch - UI_ICON_SIZE) / 2;
+
+    /* **分三趟畫：先全部的底格、再全部的內容、最後才紅框。**
+       呼叫選單的狗頭像比格子寬（64 > 48），一格一格畫的話後一格的底色會把
+       前一格溢出來的部分削掉。三隻狗現在剛好不會撞到，但那是巧合不是保證。 */
     for (uint8_t i = 0; i < n; i++) {
-        int x = x0 + i * pitch + (pitch - UI_ICON_SIZE) / 2;
-        fill(fb, x, UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE, C_ICON_HI);
-        box(fb, x, UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE, 1, C_LINE);
-        if (i == g->cursor) {
-            /* 選中的加一圈紅框。**框是幾何不是 sprite**——四個 fill 比存一張
-               60×60 的 4bpp 圖（1.8 KB）便宜，而且改粗細不必重烘焙。 */
-            box(fb, x - UI_BOX_PAD, UI_ICON_Y - UI_BOX_PAD,
-                UI_ICON_SIZE + UI_BOX_PAD * 2, UI_ICON_SIZE + UI_BOX_PAD * 2,
-                UI_BOX_THICK, C_SELECT);
+        /* 底格永遠畫得出來。查不到圖示就停在這裡：畫面上是一個空框（今天的樣子），
+           不是破圖，也不會讓整台開不起來。 */
+        fill(fb, cx[i], UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE, C_ICON_HI);
+        box(fb, cx[i], UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE, 1, C_LINE);
+    }
+    for (uint8_t i = 0; i < n; i++) {
+        if (g->ui == UI_MENU) {
+            /* 動作 → 圖示的對照在 layout.h（tools/mklayout.py 讀 game.h 產生），
+               不在這裡寫死字串陣列——同一個對應關係不能有兩個定義。 */
+            int act = (int)g->menu[i];
+            if (act > 0 && act < UI_ACTION_ICON_COUNT)
+                blit_center(fb, ui_icon(UI_ACTION_ICON[act]), 0,
+                            cx[i], UI_ICON_Y, UI_ICON_SIZE, UI_ICON_SIZE);
+        } else if (g->ui == UI_CALL) {
+            draw_dog_portrait(fb, list[i], cx[i]);
+        } else {
+            draw_outfit_swatch(fb, list[i], cx[i]);
         }
+    }
+    if (g->cursor < n) {
+        /* 選中的加一圈紅框。**框是幾何不是 sprite**——四個 fill 比存一張
+           60×60 的 4bpp 圖（1.8 KB）便宜，而且改粗細不必重烘焙。 */
+        box(fb, cx[g->cursor] - UI_BOX_PAD, UI_ICON_Y - UI_BOX_PAD,
+            UI_ICON_SIZE + UI_BOX_PAD * 2, UI_ICON_SIZE + UI_BOX_PAD * 2,
+            UI_BOX_THICK, C_SELECT);
     }
 }
 
@@ -391,16 +566,17 @@ _Bool render_init(void)
     s_obj_ms = s_vis_ms = 0;
     s_room = ipa_asset("scene/room");
     if (!s_room) return 0;
-    for (int i = 0; i < OBJ_COUNT; i++)
+    for (int i = 0; i < OBJ_COUNT; i++) {
+        /* **UI 圖示缺了不算致命。** 它是介面的說明，缺了畫成空框仍然玩得下去；
+           在這裡回 false 是整台開不起來。房間裡的物件缺了才是致命的——
+           那會變成畫面上一塊莫名其妙的空白。 */
+        if (OBJ_DEF[i].mode == OBJ_UI) continue;
         if (!ipa_asset(OBJ_NAME[i])) return 0;
+    }
     for (int c = 0; c < CHAR_COUNT; c++)
         for (int a = 0; a < 21; a++) {
             char n[48];
-            size_t k = 0;
-            for (const char *p = CHAR_ID[c]; *p; p++) n[k++] = *p;
-            n[k++] = '/';
-            for (const char *p = ANIM_ID[a]; *p; p++) n[k++] = *p;
-            n[k] = 0;
+            asset_name(n, CHAR_ID[c], ANIM_ID[a]);
             if (!ipa_asset(n)) return 0;
         }
     return 1;
