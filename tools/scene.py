@@ -86,6 +86,29 @@ def _grid(art, key, roles, where):
     return arr
 
 
+def load_object(name, obj):
+    """`source` 型物件：圖是別的管線做好的，這裡只讀進來、驗尺寸。
+
+    為什麼要有這條：動作圖示走的是 AI 管線（生成 → cutstrip → pixelate），
+    不是 `art` 那種逐列明寫的幾何。但它們仍然要留在 scene.json 的 objects 裡——
+    那樣 pack.py 的資產命名（obj/icon_*）、mklayout.py 的索引、render.c 的查表
+    全部不必動。**只有「圖從哪來」不同，「它是什麼」沒有變。**
+
+    這一類**不做 scene 調色盤檢查**：它們有自己的 16 色（specs/palettes/icons.json），
+    理由是圖示畫在很暗的介面底色上，而 scene 的配額全給了房間的奶油／土黃／灰玫瑰。
+    """
+    p = ROOT / obj["source"]
+    if not p.exists():
+        raise SystemExit("%s 的 source %s 不存在——先跑它自己的 REBUILD.sh" % (name, p))
+    im = Image.open(p).convert("RGBA")
+    w, h = obj["size"]
+    n = obj.get("frame_count", 1)
+    if (im.width, im.height) != (w * n, h):
+        raise SystemExit("%s 的 source 是 %dx%d，size %s × %d 格應為 %dx%d"
+                         % (name, im.width, im.height, obj["size"], n, w * n, h))
+    return im
+
+
 def draw_object(name, obj, roles):
     """row 字串 + key 對照表 → RGBA。和 pixedit.py 的 patch 同一種寫法。
 
@@ -170,6 +193,15 @@ def main():
     objs = {}
     for name, obj in spec["objects"].items():
         if name.startswith("_"):
+            continue
+        if "source" in obj:
+            im = load_object(name, obj)
+            im.save(args.out_dir / ("obj_%s.png" % name))
+            im.resize((im.width * 6, im.height * 6), Image.NEAREST).save(
+                args.out_dir / ("obj_%s_x6.png" % name))
+            objs[name] = im
+            print("  物件 %-6s %dx%d  ← %s（外部管線）"
+                  % (name, obj["size"][0], obj["size"][1], obj["source"]))
             continue
         im, n = draw_object(name, obj, day)
         check_palette_only(im, day, "物件 %s" % name)

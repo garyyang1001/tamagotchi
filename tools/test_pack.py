@@ -537,7 +537,10 @@ def expected_planes():
         if not isinstance(v, dict) or "size" not in v:
             continue
         png = SCENE_DIR / ("obj_%s.png" % k)
-        sheet = png_to_plane(png, spal)
+        # **逐物件的調色盤。** 動作圖示走 AI 管線、有自己的 16 色。
+        # 這一份清單刻意獨立於 pack.py——兩邊各自從 specs 讀，
+        # 「打包時用錯調色盤」這種錯才擋得住。
+        sheet = png_to_plane(png, ROOT / v["palette"] if v.get("palette") else spal)
         w = int(v["size"][0])
         n = int(v.get("frame_count", 1))
         want["obj/%s" % k] = ([sheet[:, i * w:(i + 1) * w] for i in range(n)],

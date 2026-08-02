@@ -434,11 +434,21 @@ def collect_scene(palettes, log):
         w, h = int(o["size"][0]), int(o["size"][1])
         n = int(o.get("frame_count", 1))
         ms = int(o.get("frame_ms", 0))
-        sheet = index_plane(png, day)
+        # **逐物件的調色盤。** 動作圖示走 AI 管線、有自己的 16 色——
+        # 它們畫在很暗的介面底色上，而 scene 的配額全給了房間的奶油／土黃／灰玫瑰。
+        opal_path = o.get("palette")
+        if opal_path:
+            o_day = palettes.add(Path(opal_path).stem, ROOT / opal_path)
+            o_night = o_day          # 圖示不換日夜：UI 的底色本來就不隨房間變
+            pal_for = palettes.get(o_day)
+            cat = "UI 圖示"
+        else:
+            o_day, o_night, pal_for, cat = pal_day, pal_night, day, "場景物件"
+        sheet = index_plane(png, pal_for)
         planes = split_frames(sheet, w, h, n, "obj/%s" % key)
         frames = [Frame(p, ms, 0, 0, 0) for p in planes]
-        assets.append(Asset("obj/%s" % key, "場景物件", TYPE_OBJECT, w, h,
-                            n > 1, pal_day, pal_night, frames, sheet, png))
+        assets.append(Asset("obj/%s" % key, cat, TYPE_OBJECT, w, h,
+                            n > 1, o_day, o_night, frames, sheet, png))
     log("  objects        %d 個（%d 格）"
         % (len(assets) - 1, sum(len(a.frames) for a in assets[1:])))
     return assets

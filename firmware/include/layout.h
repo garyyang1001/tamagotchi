@@ -49,6 +49,7 @@ typedef enum {
     OBJ_ICON_BLADDER,
     OBJ_ICON_CALL,
     OBJ_ICON_DRESS,
+    OBJ_ICON_DRESS_BIG,
     OBJ_ICON_ENERGY,
     OBJ_ICON_FEED,
     OBJ_ICON_HUNGER,
@@ -86,19 +87,20 @@ static const obj_def_t OBJ_DEF[OBJ_COUNT] = {
     { OBJ_GROUND, 15,  9, 1,    0,  8,   0,   0, { -1, 42, 50, 47}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* bowl */
     { OBJ_GROUND, 32, 13, 1,    0,  0,   0,   0, { 16, 16, 16, 16}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* cursor */
     { OBJ_FLOAT,  10,  8, 4,  180,  7,   0,   0, { -1, -1, -1, -1}, { 24, 33, 39, 39}, { -5,  5,-11,-11} },  /* heart */
-    { OBJ_UI,     32, 32, 1,    0, 31,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_bath */
+    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_bath */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_bladder */
     { OBJ_UI,     16, 16, 1,    0, 15,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_call */
     { OBJ_UI,     16, 16, 1,    0, 15,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_dress */
+    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_dress_big */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_energy */
-    { OBJ_UI,     32, 32, 1,    0, 31,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_feed */
+    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_feed */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_hunger */
     { OBJ_UI,     16, 16, 2,    0, 15,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_light */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_mood */
-    { OBJ_UI,     32, 32, 1,    0, 31,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_pet */
-    { OBJ_UI,     32, 32, 1,    0, 31,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_play */
+    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_pet */
+    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_play */
     { OBJ_UI,     10, 10, 1,    0,  9,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_tidy */
-    { OBJ_UI,     32, 32, 1,    0, 31,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_toilet */
+    { OBJ_UI,     40, 40, 1,    0, 39,   0,   0, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* icon_toilet */
     { OBJ_FIXED,  16, 16, 2,    0, 15, 210,  70, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* lamp_switch */
     { OBJ_GROUND, 46, 102, 3,  260, 101,   0,   0, {  9, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* shower */
     { OBJ_FIXED,  52, 36, 3,  420, 35, 135,  21, { -1, -1, -1, -1}, {  0,  0,  0,  0}, {  0,  0,  0,  0} },  /* snow */
@@ -118,6 +120,7 @@ static const char *const OBJ_NAME[OBJ_COUNT] = {
     "obj/icon_bladder",
     "obj/icon_call",
     "obj/icon_dress",
+    "obj/icon_dress_big",
     "obj/icon_energy",
     "obj/icon_feed",
     "obj/icon_hunger",
@@ -147,11 +150,11 @@ static const char *const OBJ_NAME[OBJ_COUNT] = {
 #define UI_ACTION_ICON_COUNT 8
 static const int8_t UI_ACTION_ICON[UI_ACTION_ICON_COUNT] = {
      -1,  /* ACT_NONE   （選單裡沒有這一項） */
-     12,  /* ACT_FEED   icon_feed */
-     16,  /* ACT_PET    icon_pet */
-     17,  /* ACT_PLAY   icon_play */
+     13,  /* ACT_FEED   icon_feed */
+     17,  /* ACT_PET    icon_pet */
+     18,  /* ACT_PLAY   icon_play */
      -1,  /* ACT_SLEEP  （選單裡沒有這一項） */
-     19,  /* ACT_TOILET icon_toilet */
+     20,  /* ACT_TOILET icon_toilet */
      -1,  /* ACT_DRESS  （選單裡沒有這一項） */
       7,  /* ACT_BATH   icon_bath */
 };
@@ -160,14 +163,14 @@ static const int8_t UI_ACTION_ICON[UI_ACTION_ICON_COUNT] = {
    hunger / energy / mood / (狗 = bladder、公主 = tidy)。
    第四條依角色換，所以兩張表——公主沒有 bladder。 */
 #define UI_BAR_ICON_COUNT 4
-static const int8_t UI_BAR_ICON_DOG[UI_BAR_ICON_COUNT] = { 13, 11, 15, 8 };
-static const int8_t UI_BAR_ICON_PRINCESS[UI_BAR_ICON_COUNT] = { 13, 11, 15, 18 };
+static const int8_t UI_BAR_ICON_DOG[UI_BAR_ICON_COUNT] = { 14, 12, 16, 8 };
+static const int8_t UI_BAR_ICON_PRINCESS[UI_BAR_ICON_COUNT] = { 14, 12, 16, 19 };
 
 /* 主畫面牆上那三格的「按下去會怎樣」。索引是 main_slot_t 的前三格：
    門 → 呼叫、衣櫃 → 換裝、開關 → 燈（那一個有兩格，見 render.c）。
    公主與狗不在這裡：它們接地，用地板箭頭。 */
 #define UI_SLOT_HINT_COUNT 3
-static const int8_t UI_SLOT_HINT[UI_SLOT_HINT_COUNT] = { 9, 10, 14 };
+static const int8_t UI_SLOT_HINT[UI_SLOT_HINT_COUNT] = { 9, 10, 15 };
 
 /* 動畫 → 物件。渲染層查這張表，不必在程式裡寫死動畫名稱。
    z=1 代表先畫物件再畫角色（睡墊墊在身下）。 */

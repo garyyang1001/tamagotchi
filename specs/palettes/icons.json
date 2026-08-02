@@ -1,0 +1,131 @@
+{
+  "palette_id": "icons",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "動作選單的圖示。**色值全部是 gpt-image-2 實際輸出的中位色**，不是手挑的——cutstrip 切開之前已經先量化到 16 色，所以這裡直接把那 16 色收進來就是最忠實的表示。\n為什麼不用 scene 那 16 色：圖示畫在**很暗的介面底色**上（#1A1A1A 附近），而 scene 的配額全部給了房間的奶油／土黃／灰玫瑰，沒有夠亮夠飽和的紅與藍。",
+  "_remap_note": "這一組**可以用最近色對應**，而其他角色不行。理由是調色盤就是原圖的顏色本身，最近色等於恆等對應；公主那次不能用是因為她的銀髮和斗篷藍在 RGB 上很近，最近色會把頭髮吸成藍的——那是把不同語意的色硬吸過去，和這裡不是同一件事。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#1B1617"
+    },
+    {
+      "index": 2,
+      "role": "white",
+      "hex": "#FDFAF0"
+    },
+    {
+      "index": 3,
+      "role": "white_shade",
+      "hex": "#ECE7DE"
+    },
+    {
+      "index": 4,
+      "role": "warm_mid",
+      "hex": "#CEBDA6"
+    },
+    {
+      "index": 5,
+      "role": "skin",
+      "hex": "#FDDAB1"
+    },
+    {
+      "index": 6,
+      "role": "kibble",
+      "hex": "#B77133"
+    },
+    {
+      "index": 7,
+      "role": "red",
+      "hex": "#DF3130"
+    },
+    {
+      "index": 8,
+      "role": "red_dark",
+      "hex": "#B92435"
+    },
+    {
+      "index": 9,
+      "role": "blue_pale",
+      "hex": "#A5D6EF"
+    },
+    {
+      "index": 10,
+      "role": "blue",
+      "hex": "#2B98EC"
+    },
+    {
+      "index": 11,
+      "role": "navy",
+      "hex": "#1F2937"
+    },
+    {
+      "index": 12,
+      "role": "kibble_dark",
+      "hex": "#663C1B"
+    },
+    {
+      "index": 13,
+      "role": "spare_13",
+      "hex": "#020202"
+    },
+    {
+      "index": 14,
+      "role": "spare_14",
+      "hex": "#030303"
+    },
+    {
+      "index": 15,
+      "role": "spare_15",
+      "hex": "#040404"
+    }
+  ],
+  "protect": [
+    {
+      "_note": "量化會吃掉的小特徵。tol 掃描表見 _tol_sweep。"
+    },
+    {
+      "role": "kibble",
+      "src_hex": "#B77133",
+      "tol": 50,
+      "coverage": 0.3,
+      "why": "飯碗裡飼料的**主體**。整張圖有球、愛心、腰帶三處紅，飼料只佔 5.4%，k-means 照面積分群吃掉它——實測**一半的飼料被併進紅色**，飯碗看起來像一碗草莓。tol 50 命中 3.84%（預期 4.03%），tol 75 才開始誤傷。"
+    },
+    {
+      "role": "kibble_dark",
+      "src_hex": "#663C1B",
+      "tol": 50,
+      "coverage": 0.3,
+      "why": "飼料的**深色顆粒**。第一版只保護了這一個，以為它就是飼料——實測它只佔食物的 25%，主體是 #B77133 的淺褐。**保護之前要先量哪個顏色佔多數，不要憑印象挑。** tol 50 命中 1.70%（預期 1.34%）。"
+    }
+  ],
+  "_tol_sweep": {
+    "kibble #B77133": {
+      "20": 3.73,
+      "30": 3.8,
+      "40": 3.83,
+      "50": 3.84,
+      "60": 3.92,
+      "75": 4.64,
+      "_expect": 4.03,
+      "_pick": 50
+    },
+    "kibble_dark #663C1B": {
+      "20": 1.24,
+      "30": 1.32,
+      "40": 1.49,
+      "50": 1.7,
+      "60": 4.45,
+      "75": 5.89,
+      "_expect": 1.34,
+      "_pick": 50
+    }
+  }
+}
