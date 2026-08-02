@@ -123,6 +123,10 @@ def main() -> None:
                     help="從 specs/characters/<id>.json 讀 render.sprite_cell。"
                          "省略就用 64×56。公主是 64×112——人形站起來是狗的兩倍高，"
                          "寫死的話她的頭會被畫布切掉。")
+    ap.add_argument("--cell", metavar="WxH",
+                    help="直接指定影格尺寸，給不是角色的東西用（閒置訪客的松鼠與小鳥）。"
+                         "牠們沒有 specs/characters/ 檔案——放進去的話 validate.py --all "
+                         "會拿角色契約（21 個動畫、REBUILD.sh）去驗牠們然後失敗。")
     ap.add_argument("--palette", type=Path,
                     help="調色盤 JSON。這裡只用它的 protect 段——量化前先把那些像素"
                          "標記起來，量化後還原成原色，色相才傳得到 pixelate。")
@@ -136,7 +140,11 @@ def main() -> None:
                     help="軀幹取樣的高度區間（相對內容高度），用來算水平對齊基準")
     args = ap.parse_args()
 
-    CELL = cell_for(args.character) if args.character else (64, 56)
+    if args.cell:
+        w, h = args.cell.lower().split("x")
+        CELL = (int(w), int(h))
+    else:
+        CELL = cell_for(args.character) if args.character else (64, 56)
     CANVAS = canvas_for(CELL)
     GROUND_ROW = ground_row_for(CELL)
     if CELL != (64, 56):

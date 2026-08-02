@@ -1,0 +1,100 @@
+{
+  "palette_id": "squirrel_night",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "derived_from": "specs/palettes/squirrel.json",
+  "generator": "tools/nightpal.py",
+  "transform": {
+    "formula": "out = day * k + tint * (1 - k)",
+    "k": 0.45,
+    "tint": [
+      28,
+      36,
+      70
+    ]
+  },
+  "note": "夜間置換。**角色編號逐一對應日間調色盤**，換調色盤就換夜間，不換圖。\n用仿射變換而不是手挑：它保序，所以 docs/09 的明度分離在夜間仍然成立（任意兩色的亮度差被壓縮同一個比例）。\n改「夜要多暗」只要改 tools/nightpal.py 的 K 再重跑，四個角色一起變。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#221E2A"
+    },
+    {
+      "index": 2,
+      "role": "coat_dark",
+      "hex": "#3C202E"
+    },
+    {
+      "index": 3,
+      "role": "coat_mid",
+      "hex": "#642F30"
+    },
+    {
+      "index": 4,
+      "role": "coat_light",
+      "hex": "#714438"
+    },
+    {
+      "index": 5,
+      "role": "tail_light",
+      "hex": "#7A5E50"
+    },
+    {
+      "index": 6,
+      "role": "belly",
+      "hex": "#81766A"
+    },
+    {
+      "index": 7,
+      "role": "eye_dark",
+      "hex": "#191E31"
+    },
+    {
+      "index": 8,
+      "role": "eye_highlight",
+      "hex": "#828799"
+    },
+    {
+      "index": 9,
+      "role": "spare_9",
+      "hex": "#101427"
+    },
+    {
+      "index": 10,
+      "role": "spare_10",
+      "hex": "#101527"
+    },
+    {
+      "index": 11,
+      "role": "spare_11",
+      "hex": "#111528"
+    },
+    {
+      "index": 12,
+      "role": "spare_12",
+      "hex": "#111628"
+    },
+    {
+      "index": 13,
+      "role": "spare_13",
+      "hex": "#121629"
+    },
+    {
+      "index": 14,
+      "role": "spare_14",
+      "hex": "#121629"
+    },
+    {
+      "index": 15,
+      "role": "spare_15",
+      "hex": "#13172A"
+    }
+  ]
+}

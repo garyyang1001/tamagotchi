@@ -1,0 +1,33 @@
+{
+  "format_version": 1,
+  "_note": "閒置訪客。**牠們不是 scene.py 畫的幾何物件，是走完整條 AI 管線的產物**（生成 → cutstrip → pixelate → automap → protect），所以有自己的調色盤，不受 scene 那 16 色的限制。\n為什麼要走 AI：CLAUDE.md 規則 2 的分工——造型、體型、剪影歸影像模型，幾何（牆、地板、碗、床）歸工具。松鼠是生物，牠屬於前者。手繪版本試了八次都不行，原因記在 _handdrawn_note。",
+  "_handdrawn_note": "2026-08-02 先用手繪像素試了八次全部失敗。前七次共同的原因不是造型是**尺寸**：20–25 px 沒有空間讓松鼠的尾巴離開身體，弧線一繞回來就被描邊封成一個圈，實心又和身體融成一坨。第八次放大到 40×40 才成立。\n但即使那一版也只是「看得出是松鼠」，和模型畫的比起來剪影粗糙很多。**規則 2 的分工是對的，我不該用幾何硬幹生物。**",
+  "visitors": [
+    {
+      "id": "squirrel",
+      "size": [
+        40,
+        40
+      ],
+      "frame_count": 4,
+      "frame_ms": 200,
+      "palette": "specs/palettes/squirrel.json",
+      "sheet": "art/approved/_visitors/squirrel.png",
+      "base_row": 39,
+      "_base_row_why": "最底下有不透明像素的那一列，量出來的不是填的。和場景物件同一條規則。"
+    },
+    {
+      "id": "bird",
+      "size": [
+        28,
+        26
+      ],
+      "frame_count": 4,
+      "frame_ms": 240,
+      "palette": "specs/palettes/bird.json",
+      "sheet": "art/approved/_visitors/bird.png",
+      "base_row": 25,
+      "_base_row_why": "最底下有不透明像素的那一列，量出來的不是填的。和場景物件同一條規則。"
+    }
+  ]
+}

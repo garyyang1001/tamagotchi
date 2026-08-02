@@ -84,6 +84,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SHEET_DIR = ROOT / "build/sheets"
 SCENE_DIR = ROOT / "art/approved/_scene"
 DRESS_DIR = ROOT / "art/approved/_dressup"
+VISITOR_DIR = ROOT / "art/approved/_visitors"
 PALETTE_DIR = ROOT / "specs/palettes"
 
 MAGIC = b"IPA1"
@@ -443,6 +444,40 @@ def collect_scene(palettes, log):
     return assets
 
 
+def collect_visitors(palettes, log):
+    """閒置訪客（松鼠、小鳥）。**用自己的調色盤不是 scene 的**——
+    牠們是走 AI 管線的生物，不是 scene.py 畫的幾何，色彩需求也不同
+    （松鼠是暖 russet、小鳥是藍 + 橘，兩者都不在房間那 16 色裡）。"""
+    spec_path = ROOT / "specs/visitors.json"
+    if not spec_path.exists():
+        return []
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    assets = []
+    for v in spec["visitors"]:
+        cid = v["id"]
+        pal_path = ROOT / v["palette"]
+        pal_day = palettes.add(cid, pal_path)
+        pal = palettes.get(pal_day)
+        night_path = ROOT / ("specs/palettes/%s_night.json" % cid)
+        pal_night = (palettes.add("%s_night" % cid, night_path)
+                     if night_path.exists() else pal_day)
+        png = ROOT / v["sheet"]
+        if not png.exists():
+            raise PackError("找不到 %s——先跑 art/approved/_visitors/REBUILD.sh" % png)
+        w, h = int(v["size"][0]), int(v["size"][1])
+        n = int(v["frame_count"])
+        ms = int(v.get("frame_ms", 200))
+        sheet = index_plane(png, pal)
+        planes = split_frames(sheet, w, h, n, "visitor/%s" % cid)
+        frames = [Frame(p, ms, 0, 0, 0) for p in planes]
+        assets.append(Asset("visitor/%s" % cid, "閒置訪客", TYPE_OBJECT, w, h,
+                            True, pal_day, pal_night, frames, sheet, png))
+    if assets:
+        log("  visitors       %d 隻（%d 格）"
+            % (len(assets), sum(len(a.frames) for a in assets)))
+    return assets
+
+
 def collect_accessories(palettes, log):
     """公主的配件。**用角色的調色盤不是場景的**——它們畫在她身上，
     共用同一份 16 色，所以換服裝（outfit_slots）時配件的顏色也跟著一致。
@@ -782,6 +817,7 @@ def run(out_path=None, per_frame=True, dedup=True, quiet=False,
     palettes = PaletteTable()
     assets = collect_characters(palettes, log)
     assets += collect_scene(palettes, log)
+    assets += collect_visitors(palettes, log)
     assets += collect_accessories(palettes, log)
 
     m = measure(assets)

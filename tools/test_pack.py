@@ -440,6 +440,11 @@ def test_每個名字都查得到(tmp):
     spec = json.loads((ROOT / "specs/scene.json").read_text(encoding="utf-8"))
     want += ["obj/%s" % k for k, v in spec["objects"].items()
              if isinstance(v, dict) and "size" in v]
+    # 閒置訪客。同樣獨立列一次。
+    vp = ROOT / "specs/visitors.json"
+    if vp.exists():
+        want += ["visitor/%s" % v["id"]
+                 for v in json.loads(vp.read_text(encoding="utf-8"))["visitors"]]
     # 公主的配件。**這份清單刻意獨立列一次**，不從 pack.py 借——
     # 兩份實作各自從 specs/ 讀，才擋得住「打包時漏掉一件」這種錯。
     for ap in sorted((ROOT / "specs/accessories").glob("*.json")):
@@ -450,7 +455,7 @@ def test_每個名字都查得到(tmp):
         assert pack.fnv1a_32(n) in by_hash, "查不到資產 %r" % n
     assert len(want) == b.asset_count, \
         "預期 %d 個資產，bin 裡有 %d 個" % (len(want), b.asset_count)
-    return "%d 個名字全部查得到（含 84 個角色動畫、5 件配件）" % len(want)
+    return "%d 個名字全部查得到（含 84 個角色動畫、2 隻訪客、5 件配件）" % len(want)
 
 
 @case
@@ -537,6 +542,15 @@ def expected_planes():
         n = int(v.get("frame_count", 1))
         want["obj/%s" % k] = ([sheet[:, i * w:(i + 1) * w] for i in range(n)],
                               png)
+    vp = ROOT / "specs/visitors.json"
+    if vp.exists():
+        for v in json.loads(vp.read_text(encoding="utf-8"))["visitors"]:
+            png = ROOT / v["sheet"]
+            w = int(v["size"][0])
+            n = int(v["frame_count"])
+            sheet = png_to_plane(png, ROOT / v["palette"])
+            want["visitor/%s" % v["id"]] = (
+                [sheet[:, i * w:(i + 1) * w] for i in range(n)], png)
     for ap in sorted((ROOT / "specs/accessories").glob("*.json")):
         cid = ap.stem
         acc = json.loads(ap.read_text(encoding="utf-8"))

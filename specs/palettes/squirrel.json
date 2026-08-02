@@ -1,0 +1,151 @@
+{
+  "palette_id": "squirrel",
+  "bit_depth": 4,
+  "max_colors": 16,
+  "note": "閒置訪客的小松鼠。**單一暖色系**（色相 8–40°），所以 automap 用預設的亮度階梯就夠（見 automap_bands），不必像公主那樣分色相族群。\n色值全部取自 gpt-image-2 的實際輸出中位數，不是手工估的——模型自己選的階距最自然，硬套估計值只會讓 remap 對不準（和 chihuahua 的巧克力同一個做法）。\n**色相和三隻狗重疊是可接受的**：訪客只有 40×40、而且只在閒置時出現，docs/09 的四角色辨識約束不適用於牠。",
+  "colors": [
+    {
+      "index": 0,
+      "role": "transparent",
+      "hex": "#000000",
+      "transparent": true
+    },
+    {
+      "index": 1,
+      "role": "outline",
+      "hex": "#2A1608"
+    },
+    {
+      "index": 2,
+      "role": "coat_dark",
+      "hex": "#641B10"
+    },
+    {
+      "index": 3,
+      "role": "coat_mid",
+      "hex": "#BD3D15"
+    },
+    {
+      "index": 4,
+      "role": "coat_light",
+      "hex": "#D96C28"
+    },
+    {
+      "index": 5,
+      "role": "tail_light",
+      "hex": "#EDA55D"
+    },
+    {
+      "index": 6,
+      "role": "belly",
+      "hex": "#FCDB96"
+    },
+    {
+      "index": 7,
+      "role": "eye_dark",
+      "hex": "#151618"
+    },
+    {
+      "index": 8,
+      "role": "eye_highlight",
+      "hex": "#FFFFFF"
+    },
+    {
+      "index": 9,
+      "role": "spare_9",
+      "hex": "#010101",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    },
+    {
+      "index": 10,
+      "role": "spare_10",
+      "hex": "#020202",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    },
+    {
+      "index": 11,
+      "role": "spare_11",
+      "hex": "#030303",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    },
+    {
+      "index": 12,
+      "role": "spare_12",
+      "hex": "#040404",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    },
+    {
+      "index": 13,
+      "role": "spare_13",
+      "hex": "#050505",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    },
+    {
+      "index": 14,
+      "role": "spare_14",
+      "hex": "#060606",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    },
+    {
+      "index": 15,
+      "role": "spare_15",
+      "hex": "#070707",
+      "_spare": "未使用。4bpp 要求剛好 16 色，補到滿。"
+    }
+  ],
+  "protect": [
+    {
+      "_note": "tol 掃描表見下方 _tol_sweep。只保護奶油腹——橡實保護不了，理由同下。"
+    },
+    {
+      "role": "belly",
+      "src_hex": "#FCDB96",
+      "tol": 40,
+      "coverage": 0.25,
+      "why": "奶油色肚子在原圖佔 3.25%，但 k-means 照面積分群，16 色量化時整組被吃掉（實測 16 色的分群裡一個低飽和色都沒有）。tol 40 命中 3.29%，和預期的 3.25% 幾乎完全吻合；tol 70 才開始誤傷（4.03%）。"
+    }
+  ],
+  "_tol_sweep": {
+    "belly #FCDB96": {
+      "20": 3.01,
+      "30": 3.19,
+      "40": 3.29,
+      "50": 3.41,
+      "60": 3.69,
+      "70": 4.03,
+      "85": 4.27,
+      "_expect": 3.25,
+      "_pick": 40
+    },
+    "acorn #6C421F": {
+      "20": 0.53,
+      "30": 0.8,
+      "40": 1.2,
+      "50": 2.61,
+      "60": 7.18,
+      "70": 12.05,
+      "85": 38.19,
+      "_expect": 0.18,
+      "_pick": null
+    }
+  },
+  "_acorn_note": "**橡實保護不了，這是量出來的。** 它的深褐 #6C421F 和身體的暗 russet 分不開——tol 20 就已經命中 0.53%，是預期 0.18% 的三倍。這和 chihuahua 的鼻子是同一種情況（鼻子和巧克力毛色相只差 14°，tol 25 誤傷近兩萬像素）。\n**接受它糊進暗色。** 40×40 下前腳捧著一團深色仍然讀得出來是「捧著東西」，而硬要保護會把整片身體陰影一起染成橡實色。",
+  "automap_bands": {
+    "_note": "單一暖色系，用預設的亮度階梯就夠。角色名必須叫 coat_* —— automap.py 的 LUM_BANDS 把前四段的名字寫死了。\n**原本還有 body_light 133 和 tail_mid 143 兩階，合併掉了**：只差 10 個亮度，分界會落在 138，任何一格的量化抖動都會讓像素在兩者之間跳。\n**acorn 也從調色盤拿掉了**：它 74.6 卡在 coat_dark 48 和 coat_mid 95 中間，而且 tol 掃描證明它保護不了（見 _acorn_note）。讓它併進暗色。",
+    "outline": 35,
+    "coat_dark": 70,
+    "coat_mid": 115,
+    "coat_light": 155,
+    "bright_bands": [
+      [
+        200,
+        "tail_light"
+      ],
+      [
+        999,
+        "belly"
+      ]
+    ]
+  },
+  "_pad_note": "實際只用到 9 色，其餘補成 spare_*。**補的值必須互不重複**——pack.py 是靠顏色反推索引的，兩個索引同色就沒辦法反推，test_pack.py 有一條專門在擋這件事。所以用 #010101 這種絕不會出現在 sprite 裡的值。"
+}

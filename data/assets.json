@@ -4,8 +4,8 @@
   "generator": "tools/pack.py",
   "blob_unit": "frame",
   "dedup": true,
-  "bytes": 214089,
-  "sha256": "37a3f1d1a91b8a0f2739275727695efd1e872fdab56013053dda47584813be89",
+  "bytes": 216031,
+  "sha256": "9b04e1a830e07aff9c6a05fad9cba2c39d37287e2dbbcd2a0c4f8277c737f742",
   "palettes": [
     {
       "id": 0,
@@ -46,6 +46,22 @@
     {
       "id": 9,
       "name": "scene_night"
+    },
+    {
+      "id": 10,
+      "name": "squirrel"
+    },
+    {
+      "id": 11,
+      "name": "squirrel_night"
+    },
+    {
+      "id": 12,
+      "name": "bird"
+    },
+    {
+      "id": 13,
+      "name": "bird_night"
     }
   ],
   "assets": [
@@ -199,17 +215,6 @@
       "w": 46,
       "h": 102,
       "frame_count": 3,
-      "loop": true,
-      "palette_day": 8,
-      "palette_night": 9
-    },
-    {
-      "name": "obj/bird",
-      "name_hash": "0x183B7ED4",
-      "type": 2,
-      "w": 16,
-      "h": 12,
-      "frame_count": 4,
       "loop": true,
       "palette_day": 8,
       "palette_night": 9
@@ -501,6 +506,17 @@
       "palette_night": 1
     },
     {
+      "name": "visitor/squirrel",
+      "name_hash": "0x6834509D",
+      "type": 2,
+      "w": 40,
+      "h": 40,
+      "frame_count": 4,
+      "loop": true,
+      "palette_day": 10,
+      "palette_night": 11
+    },
+    {
       "name": "ice_princess/idle_ear_twitch",
       "name_hash": "0x6FB68614",
       "type": 0,
@@ -631,6 +647,17 @@
       "loop": false,
       "palette_day": 4,
       "palette_night": 5
+    },
+    {
+      "name": "visitor/bird",
+      "name_hash": "0x8F30D885",
+      "type": 2,
+      "w": 28,
+      "h": 26,
+      "frame_count": 4,
+      "loop": true,
+      "palette_day": 12,
+      "palette_night": 13
     },
     {
       "name": "acc/ice_princess/beanie",
@@ -1005,17 +1032,6 @@
       "loop": false,
       "palette_day": 6,
       "palette_night": 7
-    },
-    {
-      "name": "obj/squirrel",
-      "name_hash": "0xCD495494",
-      "type": 2,
-      "w": 40,
-      "h": 36,
-      "frame_count": 4,
-      "loop": true,
-      "palette_day": 8,
-      "palette_night": 9
     },
     {
       "name": "chihuahua/play_bow",
