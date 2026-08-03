@@ -24,13 +24,13 @@
   但**放寬的只有認知負荷，「沒有失敗狀態」不跟著放寬**。
   進度條可以出現，但低的時候不變紅、不閃、不倒數。
 - **低電量、關機、待機都不是失敗狀態。** 電量圖示不影響任何遊戲數值；
-  關機畫成「大家睡著了」而且按任何鍵都取消得掉（3 歲很容易誤觸電源鍵）；
+  關機畫成「大家睡著了」而且按任何鍵都取消得掉（這個年紀很容易誤觸電源鍵）；
   關燈只是變暗 + 動畫放慢，不扣分、可逆。
   `test_game.c` 用 `memcmp` 逐 byte 守著這三件事，不是靠註解。
 - **輸入是三顆實體按鍵**（上一個／確認／下一個），不是觸控。
   按下的當下註冊、一次按壓只呼叫一次、**不做長按自動重複**——
   3–6 歲按住可以到 5.1 秒，對她那只是按了一下，自動重複會讓游標飛過去。
-  沒有取消鍵：選單 8 秒沒動作自己回主畫面，3 歲不該被要求學會「返回」。
+  沒有取消鍵：選單 8 秒沒動作自己回主畫面，這個年紀不該被要求學會「返回」這個抽象概念。
 - **主畫面是公主常駐 + 最多一隻被呼叫出來的狗**，不是四隻並排。
   游標停在「房間裡真的看得見的實體」上：門／衣櫃／電燈開關／公主／狗（狗那格只在有狗時存在）。
   **換狗不必先送回去**——直接呼叫新的，舊的自己走回門裡，而且播 `walk` 不是 `sad_wait`。
@@ -63,6 +63,12 @@
 | 影格尺寸 | 每角色一組，單一真相來源 | `tools/cell.py` |
 | 房間底圖與物件 | 幾何 + 逐像素 art，**不用 AI** | `tools/scene.py` |
 | 夜間版 | 同一張圖換調色盤，仿射變換保序 | `tools/nightpal.py` |
+| 公主的配件 | 逐格頭部錨點（**量出來的**） | `tools/anchors.py` + `dressup.py` |
+| 公主的服裝 | 只換調色盤五格，固定亮度只改色相 | `tools/outfits.py` |
+| 閒置訪客（松鼠／小鳥） | 走 AI，和角色同一條管線 | `art/approved/_visitors/REBUILD.sh` |
+| 動作選單的圖示 | 走 AI（造型），需求／提示圖示手繪 | `art/approved/_icons/REBUILD.sh` |
+| 資產包 | 4bpp + 自訂 RLE，逐格去重 | `tools/pack.py` |
+| 版面表 → C 標頭 | specs 是唯一真相，韌體讀不了 JSON | `tools/mklayout.py` |
 
 **不要用重生圖去解決顏色不準或眼睛太小。** 那兩件事模型控制不了，在下游修。
 
@@ -228,7 +234,7 @@ AI 一次生成含全部影格的圖
 
 ### 6. 開工前先查有沒有現成的
 
-專案做到一半才發現：當時 `tools/` 底下七支工具有四支重疊了 Aseprite 的功能。
+專案做到一半才發現：當時 `tools/` 底下七支工具有四支重疊了 Aseprite 的功能（現在有 23 支）。
 評估結果見 `docs/10_開源工具評估.md`——結論是**保留現有管線**，
 因為免費的替代品實測都不合用（LibreSprite 缺 `--batch`／`--data`／Lua，
 只能當 GUI 編輯器；Pixelorama 無 CLI）。
@@ -268,6 +274,31 @@ npm 版沒有 `--palette`，對任何索引格式都無條件重新量化——�
 
 ---
 
+### 8. 渲染層必須維持可攜
+
+`firmware/src/render.c` 只認得三樣東西：`assets.h`（資產包）、`layout.h`（版面）、
+`game.h`（狀態）。**不碰 SDL、不碰 SPI、不碰 GPIO、不做檔案 I/O。**
+
+桌機模擬器和 ESP32 韌體共用它——`sim/main.c` 是整個專案裡**唯一**桌機專屬的檔，
+差別只在誰提供畫布、誰把畫布推到螢幕上。板子到手之後要寫的只有
+SPI LCD 驅動和按鍵 GPIO，遊戲和畫面都不必再動。
+
+**`firmware/include/layout.h` 是 `tools/mklayout.py` 從 `specs/` 產生的，不要手改。**
+韌體讀不了 JSON，但同一個數字不能有兩個定義——`brown_mixed` 的 `sprite_cell`
+寫錯很久沒被發現，就是因為當時沒有任何程式讀它。
+**改了 `specs/scene.json` 一定要重跑 `mklayout.py`**：漏了的話新東西在 layout.h 裡是 -1，
+畫面會是空框而不是崩掉，所以很容易沒發現。
+
+遊戲層和版面之間的耦合用**編譯期斷言**釘住，不要靠註解。
+目前有三條：`UI_ACTION_ICON_COUNT == ACT_COUNT`、`UI_SLOT_HINT` 的順序、
+`EXIT_X_RANGE >= SLOT_DOG_X + 64`（離場的狗要走得出畫面）。
+
+**測試驗資產和邏輯，但沒有人驗「畫面上該有的東西有沒有出現」。**
+球從來沒被畫出來（`draw_cue_obj` 缺 `OBJ_TRACK` 分支）躲過了全部五套測試，
+是靠 `--shots` 的自檢圖才看到的。**畫面改了就跑一次自檢圖，然後真的看。**
+
+---
+
 ## 角色何時算做完
 
 判準不是主觀的，是這行跑得過：
@@ -280,9 +311,11 @@ python tools/validate.py --character <id> --rebuild
 
 1. **可重現**：重跑 `art/approved/<id>/REBUILD.sh` 產出必須**逐位元相同**。
    代表沒有任何一步是手工在影像編輯器裡做的——所有修改都存在版控的 JSON 裡。
-2. **分層**：Tier 0（只需 master sprite）→ Tier 1（加部件）→ Tier 2（加姿態），
-   每一層都是可跑的，不是全有全無。
-3. **影格預算**：電子雞不需要精細動畫。每角色 86 格封頂，超過會被 validator 擋下。
+2. **分層**：Tier 0（規格檔 + 調色盤 + master sprite，可跑）→ Tier 1（21 個動畫全到齊，有表情）。
+   **Tier 2「加姿態」那一層在 2026-08-01 隨部件旋轉路線一起刪掉了**，見規則 4。
+3. **影格預算**：電子雞不需要精細動畫。`tools/validate.py` 的 `FRAME_BUDGET`
+   是**逐動畫**的上限（多數 4 格，`eat_happy` 與 `happy` 6 格、`idle_blink` 與 `turn` 3 格），
+   超過會被擋下。四個角色目前都是 83 格。
 
 ---
 
@@ -304,12 +337,18 @@ python tools/validate.py --character <id> --rebuild
 │   ├── 09_角色辨識設計.md       ← 四個角色怎麼分開，附實測數據
 │   ├── 10_開源工具評估.md
 │   └── 11_動畫格式.md
-├── specs/
+├── specs/                     ← **所有數字的唯一真相來源**
 │   ├── style_lock.md          生成提示詞的固定區塊，一字不改
 │   ├── anim_prompt/           提示詞的骨架 + 角色填充 + 動作段落
 │   ├── characters/*.json      身份特徵、比例、render.sprite_cell
-│   ├── palettes/*.json        16 色手工制定，含 protect 與 automap 設定
-│   └── animations/*.anim.json 動畫定義
+│   ├── palettes/*.json        16 色，含 protect 與 automap 設定
+│   ├── animations/*.anim.json 動畫定義
+│   ├── scene.json             房間幾何、站位、物件、UI 版面、七個畫面
+│   ├── anchors/*.json         逐格頭部錨點（tools/anchors.py **量**出來的）
+│   ├── accessories/*.json     公主的配件（換剪影）
+│   ├── outfits/*.json         公主的服裝（換顏色）
+│   ├── visitors.json          閒置訪客
+│   └── icons.json             動作選單的圖示
 ├── art/
 │   ├── reference/             使用者提供的真實照片，不進版控
 │   ├── generated/             AI 原始輸出
